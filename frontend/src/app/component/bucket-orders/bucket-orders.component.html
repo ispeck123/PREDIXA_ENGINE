@@ -1,0 +1,520 @@
+<div class="content-wrapper">
+  <div class="premium-topbar">
+    <div class="topbar-tabs">
+      <button type="button" class="topbar-tab" [class.active]="activeTab === 'Stocks'"
+        (click)="SwitchMasterMenu('Stocks')">
+        Stocks
+      </button>
+
+      <button type="button" class="topbar-tab" [class.active]="activeTab === 'Commodity'"
+        (click)="SwitchMasterMenu('Commodity')">
+        MCX
+      </button>
+
+      <button type="button" class="topbar-tab" [class.active]="activeTab === 'Future'"
+        (click)="SwitchMasterMenu('Future')">
+        NSEFO
+      </button>
+    </div>
+
+    <div class="topbar-actions">
+      <div class="search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" placeholder="Search stocks..." class="search-input" [(ngModel)]="searchText"
+          (input)="onSearchInput(searchText)" />
+      </div>
+
+      <div class="filter-container">
+        <button class="filter-btn" (click)="openPopup()">
+          <span class="filter-t ext">Filter</span>
+          <i class="fas fa-filter filter-icon" title="Filter"></i>
+        </button>
+
+        <div class="filter-popup" *ngIf="isPopupOpen">
+          <div class="popup-header">
+            <span class="popup-title">Filter Options</span>
+            <button class="reset" title="Reset Filter" (click)="resetFilter()">Reset</button>
+            <button class="close-btn" (click)="togglePopsup()">×</button>
+          </div>
+
+          <div class="popup-body">
+            <div class="cmp-toggle-row">
+              <span class="cmp-label">Sort By Date</span>
+              <label class="switch">
+                <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+
+            <div class="cmp-toggle-row">
+              <div class="dropdown-group">
+                <label for="exchange" class="dropdown-label">Time Frame</label>
+                <select class="dropdown-select" [(ngModel)]="timeframe_forOrderList"
+                  (change)="onTimeframeChangeForSuccess()">
+                  <option value="null">All</option>
+
+                  <option *ngIf="activeTab == 'Stocks'" value="3">15 Minutes</option>
+                  <option *ngIf="activeTab == 'Stocks'" value="6">25 Minutes</option>
+                  <option *ngIf="activeTab == 'Stocks'" value="2">60 Minutes</option>
+                  <option *ngIf="activeTab == 'Stocks'" value="25">75 Minutes</option>
+                  <option *ngIf="activeTab == 'Stocks'" value="5">125 Minutes</option>
+                  <option *ngIf="activeTab == 'Stocks'" value="1">Daily</option>
+
+                  <option *ngIf="activeTab == 'Commodity'" value="1">Daily</option>
+                  <option *ngIf="activeTab == 'Commodity'" value="2">240 Minutes</option>
+                  <option *ngIf="activeTab == 'Commodity'" value="3">120 Minutes</option>
+                  <option *ngIf="activeTab == 'Commodity'" value="4">60 Minutes</option>
+
+                  <option *ngIf="activeTab == 'Future'" value="1">Daily</option>
+                  <option *ngIf="activeTab == 'Future'" value="2">60 Minutes</option>
+                  <option *ngIf="activeTab == 'Future'" value="3">15 Minutes</option>
+                  <option *ngIf="activeTab == 'Future'" value="25">75 Minutes</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="cmp-toggle-row">
+              <div class="dropdown-group">
+                <label for="exchange" class="dropdown-label">Order Type</label>
+                <select name="exchange" class="dropdown-select" [(ngModel)]="selectTradeType"
+                  (change)="onOrderTypeChangeFilter()">
+                  <option disabled>--Select--</option>
+                  <option value="all">All</option>
+                  <option value="buy">BUY</option>
+                  <option value="sell">SELL</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="cmp-toggle-row">
+              <div class="dropdown-group">
+                <label for="predictionFilter" class="dropdown-label">Model Prediction</label>
+                <select id="predictionFilter" class="dropdown-select" [(ngModel)]="predictionFilter"
+                  (change)="onPredictionFilterChange()">
+                  <option value="null">All</option>
+                  <option value="success">Success</option>
+                  <option value="failed">Failed</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="cmp-toggle-row date-row">
+              <input ngxDaterangepickerBootstrap [(ngModel)]="selectedDateRange" [showCustomRangeLabel]="true"
+                [alwaysShowCalendars]="true" [ranges]="ranges" [linkedCalendars]="true" [isInvalidDate]="isInvalidDate"
+                [showClearButton]="true" placeholder="Select Date Range..." [opens]="'left'" class="date-range-input" />
+              <button type="button" class="search-btn" (click)="onSearchButtonClick()">
+                <i class="fas fa-search"></i> Search
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'Stocks'">
+    <div class="orders-wrapper">
+      <!-- Desktop / Tablet Table -->
+      <div class="table-card desktop-view">
+        <div class="table-scroll">
+          <table class="premium-table">
+          <thead>
+            <tr>
+              <th (click)="sortBucketOrders('stock_tick')" style="cursor: pointer;">
+                Stock
+                <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+              </th>
+          
+              <th (click)="sortBucketOrders('time_frame')" style="cursor: pointer;">
+                TF
+                <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+              </th>
+          
+              <th (click)="sortBucketOrders('order_type')" style="cursor: pointer;">
+                Type
+                <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+              </th>
+          
+              <th (click)="sortBucketOrders('entry_price')" style="cursor: pointer;">
+                Entry
+                <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+              </th>
+          
+              <th (click)="sortBucketOrders('stoploss_price')" style="cursor: pointer;">
+                SL
+                <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+              </th>
+          
+              <th (click)="sortBucketOrders('target_price')" style="cursor: pointer;">
+                TP
+                <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+              </th>
+          
+              <th (click)="sortBucketOrders('stock_quantity')" style="cursor: pointer;">
+                Qty
+                <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+              </th>
+          
+              <th (click)="sortBucketOrders('purchased_cmp_date')" style="cursor: pointer;">
+                Date
+                <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+              </th>
+          
+              <th (click)="sortBucketOrders('arima_ab_model_prob')" style="cursor: pointer;">
+                Prediction
+                <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+              </th>
+          
+              <th>View</th>
+              <th>Action</th>
+          
+              <th (click)="sortBucketOrders('approval_status')" style="cursor: pointer;">
+                Status
+                <span *ngIf="sortColumn === 'approval_status'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+              </th>
+            </tr>
+          </thead>
+
+            <tbody>
+             <tr *ngFor="let order of AllbucketListOrders" [ngClass]="{ 'bucket-row-highlight': isHighlighted(order.stock_tick) }">
+                <td [attr.data-stock]="order.stock_tick" #stockCell class="stock-name-cell" title="click to view" (click)="ViewAnalytics(order.stock_tick, order.time_frame)">
+                  {{ order.stock_tick | uppercase }}
+                </td>
+
+                <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                <td>
+                  <span class="type-badge" [ngClass]="order.order_type?.toLowerCase()">
+                    {{ order.order_type }}
+                  </span>
+                </td>
+                <td>{{ order.entry_price | number : '1.2-2' }}</td>
+                <td>{{ order.stoploss_price | number : '1.2-2' }}</td>
+                <td>{{ order.target_price | number : '1.2-2' }}</td>
+                <td>{{ order.stock_quantity }}</td>
+                <td>{{ order.purchased_cmp_date | date : 'dd MMM yy, hh:mm a' }}</td>
+
+                <td>
+                  <ng-container *ngIf="order.arima_ab_model_prediction; else naTemplateDesktop">
+                    <span class="prediction-badge" [ngClass]="{
+                    'success': order.arima_ab_model_prediction.toLowerCase() === 'success',
+                    'failed': order.arima_ab_model_prediction.toLowerCase() === 'failed'
+                  }">
+                      {{ order.arima_ab_model_prediction.toUpperCase() }}
+                      ({{ order.arima_ab_model_prob * 100 | number : '1.0-2' }}%)
+                    </span>
+                  </ng-container>
+                  <ng-template #naTemplateDesktop>NA</ng-template>
+                </td>
+
+                <td>
+                  <button class="icon-btn view-btn" (click)="ViewAnalytics(order.stock_tick, order.time_frame)"
+                    title="Click for View">
+                    <i class="fas fa-chart-line"></i>
+                  </button>
+                </td>
+
+                <td>
+                  <div class="action-buttons compact-actions">
+                    <button class="icon-action approve-icon-btn" [disabled]="order.approval_status === 'approved'"
+                      (click)="approveBucketOrder(order.bucket_id, 'approved')" title="Approve">
+                      <i class="fas fa-check"></i>
+                    </button>
+
+                    <button class="icon-action reject-icon-btn" [disabled]="order.approval_status === 'rejected'"
+                      (click)="approveBucketOrder(order.bucket_id, 'rejected')" title="Reject">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="status-badge" [ngClass]="{
+                  'approved': order.approval_status?.toLowerCase() === 'approved',
+                  'rejected': order.approval_status?.toLowerCase() === 'rejected'
+                }">
+                    {{ order.approval_status | uppercase }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Mobile Cards -->
+      <div class="mobile-cards mobile-view">
+        <div class="order-mobile-card" *ngFor="let order of AllbucketListOrders">
+          <div class="mobile-card-top">
+            <div>
+              <div class="mobile-stock">{{ order.stock_tick | uppercase }}</div>
+              <div class="mobile-id">ID: {{ order.bucket_id }}</div>
+            </div>
+
+            <div class="mobile-top-right">
+              <span class="type-badge" [ngClass]="order.order_type?.toLowerCase()">
+                {{ order.order_type }}
+              </span>
+
+              <span class="status-badge mt-8" [ngClass]="{
+              'approved': order.approval_status?.toLowerCase() === 'approved',
+              'rejected': order.approval_status?.toLowerCase() === 'rejected'
+            }">
+                {{ order.approval_status | uppercase }}
+              </span>
+            </div>
+          </div>
+
+          <div class="price-grid">
+            <div class="price-box entry-box">
+              <label>ENTRY</label>
+              <strong>{{ order.entry_price | number : '1.2-2' }}</strong>
+            </div>
+
+            <div class="price-box target-box">
+              <label>TARGET</label>
+              <strong>{{ order.target_price | number : '1.2-2' }}</strong>
+            </div>
+
+            <div class="price-box stoploss-box">
+              <label>STOPLOSS</label>
+              <strong>{{ order.stoploss_price | number : '1.2-2' }}</strong>
+            </div>
+          </div>
+
+          <!-- <div class="mobile-info-box date-box">
+        <label>DATE</label>
+        <strong>{{ order.purchased_cmp_date | date : 'dd MMM yy, hh:mm a' }}</strong>
+      </div> -->
+
+          <div class="mobile-date-pred-grid">
+            <div class="mobile-info-box compact-box">
+              <label>DATE</label>
+              <strong>{{ order.purchased_cmp_date | date : 'dd MMM yy, hh:mm a' }}</strong>
+            </div>
+
+            <div class="mobile-info-box compact-box prediction-compact-box">
+              <label>PREDICTION</label>
+              <strong>
+                <ng-container *ngIf="order.arima_ab_model_prediction; else naTemplateMobile">
+                  <span class="prediction-badge" [ngClass]="{
+            'success': order.arima_ab_model_prediction.toLowerCase() === 'success',
+            'failed': order.arima_ab_model_prediction.toLowerCase() === 'failed'
+          }">
+                    {{ order.arima_ab_model_prediction.toUpperCase() }}
+                    ({{ order.arima_ab_model_prob * 100 | number : '1.0-2' }}%)
+                  </span>
+                </ng-container>
+                <ng-template #naTemplateMobile>NA</ng-template>
+              </strong>
+            </div>
+          </div>
+
+          <div class="mobile-mini-grid">
+            <div class="mobile-info-box">
+              <label>TIME FRAME</label>
+              <strong>{{ getTimeFrameLabel(order.time_frame) }}</strong>
+            </div>
+
+            <div class="mobile-info-box">
+              <label>QUANTITY</label>
+              <strong>{{ order.stock_quantity }}</strong>
+            </div>
+          </div>
+
+          <!-- <div class="mobile-info-box prediction-box">
+        <label>PREDICTION</label>
+        <strong>
+          <ng-container *ngIf="order.arima_ab_model_prediction; else naTemplateMobile">
+            <span
+              class="prediction-badge"
+              [ngClass]="{
+                'success': order.arima_ab_model_prediction.toLowerCase() === 'success',
+                'failed': order.arima_ab_model_prediction.toLowerCase() === 'failed'
+              }"
+            >
+              {{ order.arima_ab_model_prediction.toUpperCase() }}
+              ({{ order.arima_ab_model_prob * 100 | number : '1.0-2' }}%)
+            </span>
+          </ng-container>
+          <ng-template #naTemplateMobile>NA</ng-template>
+        </strong>
+      </div> -->
+
+          <div class="mobile-action-grid">
+            <button class="mobile-btn view-gradient" (click)="ViewAnalytics(order.stock_tick, order.time_frame)">
+              <i class="fas fa-chart-line"></i> View
+            </button>
+
+            <button class="mobile-btn create-btn" [disabled]="order.approval_status?.toLowerCase() === 'approved'"
+              (click)="approveBucketOrder(order.bucket_id, 'approved')">
+              <i class="fas fa-check"></i> Approve
+            </button>
+
+            <button class="mobile-btn delete-btn" [disabled]="order.approval_status?.toLowerCase() === 'rejected'"
+              (click)="approveBucketOrder(order.bucket_id, 'rejected')">
+              <i class="fas fa-times"></i> Reject
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-wrap">
+        <div class="pagination-container">
+          <button class="nav-btn" (click)="goToPreviousPage()" [disabled]="getCurrentPage() === 1">
+            ‹ Prev
+          </button>
+
+          <ng-container *ngFor="let page of getPageNumbers()">
+            <button class="page-btn" [class.active]="page === getCurrentPage()" (click)="goToPage(page)">
+              {{ page }}
+            </button>
+          </ng-container>
+
+          <button class="nav-btn" (click)="goToNextPage()" [disabled]="getCurrentPage() >= getTotalPages()">
+            Next ›
+          </button>
+
+          <select class="page-size-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+            <option *ngFor="let size of pageSizeOptions" [value]="size">
+              {{ size }} per page
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+
+
+
+    <!-- Table Card -->
+    <!-- <div class="table-card">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Stock</th>
+              <th>TF</th>
+              <th>Type</th>
+              <th>Entry</th>
+              <th>SL</th>
+              <th>TP</th>
+              <th>Quantity</th>
+              <th>Date</th>
+              <th>Prediction</th>
+              <th>View</th>
+              <th>Action</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody *ngFor="let order of AllbucketListOrders">
+            <tr>
+              <td [ngStyle]="isHighlighted(order.stock_tick) ? { 'background-color': '#c4c439' } : {}"
+                [attr.data-stock]="order.stock_tick" #stockCell>{{
+                order.stock_tick | uppercase }}</td>
+              <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+              <td>{{order.order_type}}</td>
+              <td>{{order.entry_price| number : "1.2-2"}}</td>
+              <td>{{order.stoploss_price | number : "1.2-2" }}</td>
+              <td>{{order.target_price | number : "1.2-2"}}</td>
+              <td>{{order.stock_quantity }}</td>
+              <td>{{order.purchased_cmp_date | date : "MMM d, y, hh:mm a"}}</td>
+              <td>
+                <ng-container *ngIf="
+                            order.arima_ab_model_prediction;
+                            else naTemplate
+                          ">
+                  <span class="prediction-text" [ngClass]="{
+                              'text-success':
+                                order.arima_ab_model_prediction.toLowerCase() ===
+                                'success',
+                              'text-danger':
+                                order.arima_ab_model_prediction.toLowerCase() ===
+                                'failed'
+                            }">
+                    {{ order.arima_ab_model_prediction.toUpperCase() }}
+                    ({{
+                    order.arima_ab_model_prob * 100
+                    | number : "1.0-2"
+                    }}%)
+                  </span>
+                </ng-container>
+                <ng-template #naTemplate>NA</ng-template>
+
+                <ng-template #naTemplate>NA</ng-template>
+              </td>
+              <td> <i class="fas fa-chart-line" style="color: green; cursor: pointer; font-size: 20px"
+                  (click)="ViewAnalytics(order.stock_tick,order.time_frame)" title="Click for View">
+                </i>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="status-btn active" [disabled]="order.approval_status === 'approved'"
+                    (click)="approveBucketOrder(order.bucket_id, 'approved')">
+                    Approve
+                  </button>
+
+                  <button class="status-btn deactive" [disabled]="order.approval_status === 'rejected'"
+                    (click)="approveBucketOrder(order.bucket_id,'rejected')">
+                    Reject
+                  </button>
+                </div>
+              </td>
+
+              <td> <span [ngClass]="{'text-success': order.approval_status?.toLowerCase() === 'approved',
+                                        'text-danger': order.approval_status?.toLowerCase() === 'rejected'}">
+                  {{ order.approval_status | uppercase }}
+                </span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <br>
+    <div class="d-flex justify-content-end align-items-center flex-wrap">
+      <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+        <button class="btn btn-sm nav-btn" (click)="goToPreviousPage()" [disabled]="getCurrentPage() === 1">
+          ‹ Prev
+        </button>
+        <ng-container *ngFor="let page of getPageNumbers()">
+          <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPage()" (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        </ng-container>
+        <button class="btn btn-sm nav-btn" (click)="goToNextPage()" [disabled]="getCurrentPage() >= getTotalPages()">
+          Next ›
+        </button>
+
+        <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSize" style="height: 38px"
+          (change)="onPageSizeChange()">
+          <option *ngFor="let size of pageSizeOptions" [value]="size">
+            {{ size }} per page
+          </option>
+        </select>
+      </div>
+    </div> -->
+  </div>
+
+  <div *ngIf="activeTab === 'Commodity'">
+    <h4>Commodity</h4>
+  </div>
+  <div *ngIf="activeTab === 'Future'">
+    <h4>Future</h4>
+  </div>
+
+
+</div>
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

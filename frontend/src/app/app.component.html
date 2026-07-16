@@ -1,0 +1,14 @@
+<ng-container *ngIf="showLayout; else noLayout">
+
+  <app-master-header></app-master-header>
+  <app-master-layout></app-master-layout>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+</ng-container>
+
+<ng-template #noLayout>
+  <router-outlet></router-outlet>
+</ng-template>

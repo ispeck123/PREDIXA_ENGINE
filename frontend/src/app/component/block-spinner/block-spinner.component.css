@@ -1,0 +1,35 @@
+.block { position: relative; }
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(1.5px);
+  z-index: 10;
+  pointer-events: all; /* blocks clicks inside the block while loading */
+  border-radius: inherit;
+}
+
+.label { color: #111827; font-size: .9rem; }
+
+.spinner { width: 42px; height: 42px; position: relative; }
+.ring {
+  box-sizing: border-box;
+  width: 100%; height: 100%;
+  border: 3px solid rgba(0,0,0,.15);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin .9s linear infinite;
+}
+.dot {
+  position: absolute; top: 6px; left: 50%;
+  width: 6px; height: 6px; background: #3b82f6; border-radius: 50%;
+  transform: translateX(-50%);
+  animation: bob .9s ease-in-out infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes bob { 0%,100% { transform: translate(-50%,0); } 50% { transform: translate(-50%,5px); } }

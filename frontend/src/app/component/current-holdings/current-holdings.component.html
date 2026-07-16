@@ -1,0 +1,597 @@
+<!-- <div class="top-bar">
+    <ul class="nav nav-tabs left-tabs">
+    </ul>
+
+    <div class="table-controls">
+        <div class="overall-section" *ngIf="overAll">
+            <span class="item">
+                <strong>Total Trades:</strong><span class="overall-value">{{ overAll.count_total }}</span>
+            </span>
+            <span class="logo-bar">||</span>
+
+            <span class="item">
+                <strong>Total Investment:</strong><span class="overall-value">{{ overAll.total_investment |
+                    number : '1.2-2' }}</span>
+            </span>
+            <span class="logo-bar">||</span>
+
+            <span class="item">
+                <strong>Current Value:</strong><span class="overall-value">{{ overAll.total_current_value |
+                    number : '1.2-2' }}</span>
+            </span>
+            <span class="logo-bar">||</span>
+
+            <span class="item">
+                <strong>Total P/L:</strong><span class="overall-value" [ngClass]="{
+                                'pl-positive': overAll.total_pl > 0,
+                                'pl-negative': overAll.total_pl < 0,
+                                'pl-zero': overAll.total_pl === 0
+                                }">
+                    {{ overAll.total_pl > 0 ? '+' : '' }}{{ overAll.total_pl | number:'1.2-2' }}
+                </span>
+            </span>
+            <span class="logo-bar">||</span>
+            <span class="item">
+                <strong>P/L %:</strong><span class="overall-value" [ngClass]="{
+                                'pl-positive': overAll.pnl_perc > 0,
+                                'pl-negative': overAll.pnl_perc < 0,
+                                 'pl-zero': overAll.pnl_perc === 0
+                                }">
+                    {{ overAll.pnl_perc > 0 ? '+' : '' }}{{ overAll.pnl_perc | number:'1.2-2' }}%
+                </span>
+            </span>
+        </div>
+        <div class="right-controls">
+            <div class="holding-actions">
+                <button class="square-off-btn" [disabled]="!hasAnyHoldingSelected()" (click)="exitSelectedPositions()">
+                    Sqr. Off Position
+                </button>
+            </div>
+            <input type="text" placeholder="Search..." class="control search" [(ngModel)]="searchText"
+                (input)="onSearchInput(searchText)">
+        </div>
+    </div>
+</div> -->
+
+
+<div class="portfolio-topbar">
+
+  <div class="portfolio-summary" *ngIf="overAll">
+
+    <div class="summary-card">
+      <span class="summary-label">Total Trades</span>
+      <span class="summary-value">{{ overAll.count_total }}</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-label">Total Investment</span>
+      <span class="summary-value">
+        {{ overAll.total_investment | number : '1.2-2' }}
+      </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-label">Current Value</span>
+      <span class="summary-value">
+        {{ overAll.total_current_value | number : '1.2-2' }}
+      </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-label">Total P/L</span>
+      <span
+        class="summary-value"
+        [ngClass]="{
+          'pl-positive': overAll.total_pl > 0,
+          'pl-negative': overAll.total_pl < 0,
+          'pl-zero': overAll.total_pl === 0
+        }"
+      >
+        {{ overAll.total_pl > 0 ? '+' : '' }}{{ overAll.total_pl | number:'1.2-2' }}
+      </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-label">P/L %</span>
+      <span
+        class="summary-value"
+        [ngClass]="{
+          'pl-positive': overAll.pnl_perc > 0,
+          'pl-negative': overAll.pnl_perc < 0,
+          'pl-zero': overAll.pnl_perc === 0
+        }"
+      >
+        {{ overAll.pnl_perc > 0 ? '+' : '' }}{{ overAll.pnl_perc | number:'1.2-2' }}%
+      </span>
+    </div>
+
+  </div>
+
+  <div class="portfolio-actions">
+
+    <button
+      class="square-off-btn"
+      [disabled]="!hasAnyHoldingSelected()"
+      (click)="exitSelectedPositions()"
+    >
+      Sqr. Off Position
+    </button>
+
+    <div class="search-box">
+      <span class="search-icon">⌕</span>
+      <input
+        type="text"
+        placeholder="Search..."
+        [(ngModel)]="searchText"
+        (input)="onSearchInput(searchText)"
+      />
+    </div>
+
+  </div>
+
+</div>
+
+<div>
+
+    <!-- <div class="filter-container">
+                            <button class="filter-btn" (click)="openPopup()">
+                                <i class="fas fa-filter" style="color: green;" title="Filter"></i>
+                            </button>
+                    
+                            <div class="filter-popup" *ngIf="isPopupOpen">
+                                <div class="popup-header">
+                                    <span style="color: #141E30;">Filter Options</span>
+                                    <button class="reset" title="Reset Filter" (click)="resetFilter()">Reset</button>
+                                    <button class="close-btn" (click)="togglePopsup()" style="font-size: 30px;">×</button>
+                                </div>
+                                <div class="popup-body">
+                    
+                                    <div class="cmp-toggle-row">
+                                        <div class="dropdown-group">
+                                           <option value="" disabled selected>Select Status</option>
+                                            <select name="exchange" [(ngModel)]="currentStatus" class="dropdown-select"
+                                                (change)="onCurrentStatusTypeChange()">
+                                                <option disabled>--Select--</option>
+                                                <option value="running">Running</option>
+                                                <option value="pending">Pending</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+    <!-- Table Card -->
+    <!-- <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">
+                        <input type="checkbox" [checked]="isAllSelected()"
+                            [indeterminate]="isSomeSelected() && !isAllSelected()" (change)="toggleSelectAll($event)">
+                    </th>
+
+                    <th class="sortable-header" (click)="sortTable('symbol')">
+                        Symbol
+                        <span *ngIf="sortColumn === 'symbol'">
+                            {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                        </span>
+                    </th>
+
+                    <th>Orders</th>
+                    <th>Exchange</th>
+                    <th>Segment</th>
+
+                    <th class="sortable-header" (click)="sortTable('costPrice')">
+                        Buy Price
+                        <span *ngIf="sortColumn === 'costPrice'">
+                            {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                        </span>
+                    </th>
+
+                    <th class="sortable-header" (click)="sortTable('marketVal')">
+                        Market Value
+                        <span *ngIf="sortColumn === 'marketVal'">
+                            {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                        </span>
+                    </th>
+
+                    <th class="sortable-header" (click)="sortTable('quantity')">
+                        Quantity
+                        <span *ngIf="sortColumn === 'quantity'">
+                            {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                        </span>
+                    </th>
+
+                    <th>LTP</th>
+                    <th>Holding Type</th>
+
+                    <th class="sortable-header" (click)="sortTable('pl')">
+                        Profit/Loss
+                        <span *ngIf="sortColumn === 'pl'">
+                            {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let item of AllHoldings">
+                    <tr [ngClass]="{ 'holding-highlight-row': isHighlighted(item.symbol) }">
+                        <td>
+                            <input type="checkbox" [checked]="item.selected"
+                                (change)="toggleRowSelection(item, $event)">
+                        </td>
+
+                        <td id="stockCell" #stockCell [attr.data-stock]="item.symbol">
+                            {{ item.symbol | uppercase }}
+                        </td>
+
+                        <td>
+                            <button class="order-toggle-btn" *ngIf="hasOrdersForHolding(item.symbol)"
+                                (click)="toggleHoldingOrders(item.symbol)">
+                                {{ expandedHoldingSymbol === item.symbol ? 'Hide Orders' : 'View Orders (' +
+                                getOrdersForHolding(item.symbol).length + ')' }}
+                            </button>
+
+                            <span *ngIf="!hasOrdersForHolding(item.symbol)">-</span>
+                        </td>
+
+                        <td>{{ item.exchange }}</td>
+                        <td>{{ item.segment }}</td>
+                        <td>{{ item.costPrice | number : "1.2-2" }}</td>
+                        <td>{{ item.marketVal | number : "1.2-2" }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.ltp | number : "1.2-2" }}</td>
+                        <td>{{ item.holdingType }}</td>
+
+                        <td [ngClass]="{
+                                            'pl-positive': item.pl > 0,
+                                            'pl-negative': item.pl < 0
+                                          }">
+                            {{ item.pl > 0 ? '+' : '' }}{{ item.pl | number:'1.2-2' }}
+                        </td>
+                    </tr>
+
+                    <tr *ngIf="expandedHoldingSymbol === item.symbol">
+                        <td colspan="11" class="holding-orders-row">
+                            <div class="holding-orders-box">
+                                <h4 class="holding-orders-title">
+                                    Pending GTT Orders for {{ item.symbol | uppercase }}
+                                </h4>
+
+                                <table class="holding-orders-table" *ngIf="getOrdersForHolding(item.symbol).length > 0">
+                                    <thead>
+                                        <tr>
+                                            <th>GTT ID</th>
+                                            <th>Side</th>
+                                            <th>Qty</th>
+                                            <th>Type</th>
+                                            <th>Trigger 1</th>
+                                            <th>Limit 1</th>
+                                            <th>Trigger 2</th>
+                                            <th>Limit 2</th>
+                                            <th>Classification</th>
+                                            <th>Reason</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr *ngFor="let order of getOrdersForHolding(item.symbol)">
+                                            <td>{{ order.gtt_id }}</td>
+                                            <td>{{ getSideLabel(order.tran_side) }}</td>
+                                            <td>{{ order.qty }}</td>
+                                            <td>{{ getOcoLabel(order.gtt_oco_ind) }}</td>
+                                            <td>{{ order.price_trigger }}</td>
+                                            <td>{{ order.price_limit }}</td>
+                                            <td>{{ order.price2_trigger }}</td>
+                                            <td>{{ order.price2_limit }}</td>
+                                            <td>{{ order.classification }}</td>
+                                            <td>{{ order.reason }}</td>
+                                            <td>
+                                                <button (click)="openModifyGtt(order)">Modify</button>&nbsp;&nbsp;
+                                                <button (click)="CancelGtt(order)">Cancel</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <div *ngIf="getOrdersForHolding(item.symbol).length === 0">
+                                    No pending orders found.
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-container>
+            </tbody>
+
+        </table>
+    </div> -->
+
+
+    <div class="premium-table-card">
+        <div class="premium-table-scroll">
+            <table class="premium-data-table">
+                <thead>
+                    <tr>
+                        <th class="select-header">
+                            <input class="premium-checkbox" type="checkbox" [checked]="isAllSelected()"
+                                [indeterminate]="isSomeSelected() && !isAllSelected()"
+                                (change)="toggleSelectAll($event)" />
+                        </th>
+
+                        <th class="sortable-header" (click)="sortTable('symbol')">
+                            Symbol
+                            <span *ngIf="sortColumn === 'symbol'" class="sort-icon">
+                                {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                            </span>
+                        </th>
+
+                        <th>Orders</th>
+                        <th>Exchange</th>
+                        <th>Segment</th>
+
+                        <th class="sortable-header text-right" (click)="sortTable('costPrice')">
+                            Buy Price
+                            <span *ngIf="sortColumn === 'costPrice'" class="sort-icon">
+                                {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                            </span>
+                        </th>
+
+                        <th class="sortable-header text-right" (click)="sortTable('marketVal')">
+                            Market Value
+                            <span *ngIf="sortColumn === 'marketVal'" class="sort-icon">
+                                {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                            </span>
+                        </th>
+
+                        <th class="sortable-header text-right" (click)="sortTable('quantity')">
+                            Quantity
+                            <span *ngIf="sortColumn === 'quantity'" class="sort-icon">
+                                {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                            </span>
+                        </th>
+
+                        <th class="text-right">LTP</th>
+                        <th>Holding Type</th>
+
+                        <th class="sortable-header text-right" (click)="sortTable('pl')">
+                            Profit/Loss
+                            <span *ngIf="sortColumn === 'pl'" class="sort-icon">
+                                {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                            </span>
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <ng-container *ngFor="let item of AllHoldings">
+                        <tr class="holding-row" [ngClass]="{ 'holding-highlight-row': isHighlighted(item.symbol) }">
+                            <td class="select-cell">
+                                <input class="premium-checkbox" type="checkbox" [checked]="item.selected"
+                                    (change)="toggleRowSelection(item, $event)" />
+                            </td>
+
+                            <td id="stockCell" #stockCell class="symbol-cell" data-label="Symbol"
+                                [attr.data-stock]="item.symbol">
+                                {{ item.symbol | uppercase }}
+                            </td>
+
+                            <td data-label="Orders">
+                                <button class="order-toggle-btn" *ngIf="hasOrdersForHolding(item.symbol)"
+                                    (click)="toggleHoldingOrders(item.symbol)">
+                                    {{ expandedHoldingSymbol === item.symbol
+                                    ? 'Hide Orders'
+                                    : 'View Orders (' + getOrdersForHolding(item.symbol).length + ')' }}
+                                </button>
+
+                                <span class="empty-value" *ngIf="!hasOrdersForHolding(item.symbol)">-</span>
+                            </td>
+
+                            <td data-label="Exchange">{{ item.exchange }}</td>
+                            <td data-label="Segment">{{ item.segment }}</td>
+
+                            <td data-label="Buy Price" class="text-right">
+                                {{ item.costPrice | number : "1.2-2" }}
+                            </td>
+
+                            <td data-label="Market Value" class="text-right">
+                                {{ item.marketVal | number : "1.2-2" }}
+                            </td>
+
+                            <td data-label="Quantity" class="text-right">
+                                {{ item.quantity }}
+                            </td>
+
+                            <td data-label="LTP" class="text-right">
+                                {{ item.ltp | number : "1.2-2" }}
+                            </td>
+
+                            <td data-label="Holding Type">
+                                {{ item.holdingType }}
+                            </td>
+
+                            <td data-label="Profit/Loss" class="text-right" [ngClass]="{
+                'pl-positive': item.pl > 0,
+                'pl-negative': item.pl < 0,
+                'pl-zero': item.pl === 0
+              }">
+                                {{ item.pl > 0 ? '+' : '' }}{{ item.pl | number:'1.2-2' }}
+                            </td>
+                        </tr>
+
+                        <tr class="orders-expand-tr" *ngIf="expandedHoldingSymbol === item.symbol">
+                            <td colspan="11" class="holding-orders-row">
+                                <div class="holding-orders-box">
+                                    <div class="holding-orders-header">
+                                        <h4 class="holding-orders-title">
+                                            Pending GTT Orders
+                                        </h4>
+                                        <span class="holding-orders-symbol">
+                                            {{ item.symbol | uppercase }}
+                                        </span>
+                                    </div>
+
+                                    <div class="holding-orders-scroll"
+                                        *ngIf="getOrdersForHolding(item.symbol).length > 0">
+                                        <table class="holding-orders-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>GTT ID</th>
+                                                    <th>Side</th>
+                                                    <th>Qty</th>
+                                                    <th>Type</th>
+                                                    <th>Trigger 1</th>
+                                                    <th>Limit 1</th>
+                                                    <th>Trigger 2</th>
+                                                    <th>Limit 2</th>
+                                                    <th>Classification</th>
+                                                    <th>Reason</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                <tr *ngFor="let order of getOrdersForHolding(item.symbol)">
+                                                    <td>{{ order.gtt_id }}</td>
+                                                    <td>{{ getSideLabel(order.tran_side) }}</td>
+                                                    <td>{{ order.qty }}</td>
+                                                    <td>{{ getOcoLabel(order.gtt_oco_ind) }}</td>
+                                                    <td>{{ order.price_trigger }}</td>
+                                                    <td>{{ order.price_limit }}</td>
+                                                    <td>{{ order.price2_trigger }}</td>
+                                                    <td>{{ order.price2_limit }}</td>
+                                                    <td>{{ order.classification }}</td>
+                                                    <td>{{ order.reason }}</td>
+                                                    <td>
+                                                        <div class="order-action-group">
+                                                            <button class="modify-btn" (click)="openModifyGtt(order)">
+                                                                Modify
+                                                            </button>
+                                                            <button class="cancel-btn" (click)="CancelGtt(order)">
+                                                                Cancel
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="no-orders-box" *ngIf="getOrdersForHolding(item.symbol).length === 0">
+                                        No pending orders found.
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="gtt-modal-backdrop" *ngIf="showModifyGttModal">
+        <div class="gtt-modal">
+            <div class="gtt-modal-header">
+                <h3>Modify GTT Order</h3>
+                <button class="gtt-close-btn" (click)="closeModifyGttModal()">×</button>
+            </div>
+
+            <div class="gtt-modal-body" [formGroup]="modifyGttForm">
+                <div class="form-row">
+                    <label>GTT ID</label>
+                    <input type="text" formControlName="id" readonly />
+                </div>
+
+                <div class="form-row">
+                    <label>Type</label>
+                    <input type="text" formControlName="type" readonly />
+                </div>
+
+                <div class="form-row">
+                    <label>Quantity</label>
+                    <input type="number" formControlName="qty" />
+                </div>
+
+                <div class="form-row" *ngIf="modifyGttForm.value.type === 'Single'">
+                    <label>Entry</label>
+                    <input type="number" formControlName="entry" step="0.01" />
+                </div>
+
+                <ng-container *ngIf="modifyGttForm.value.type === 'OCO'">
+                    <div class="form-row">
+                        <label>TP</label>
+                        <input type="number" formControlName="tp" step="0.01" />
+                    </div>
+
+                    <div class="form-row">
+                        <label>SL</label>
+                        <input type="number" formControlName="sl" step="0.01" />
+                    </div>
+                </ng-container>
+            </div>
+
+            <div class="gtt-modal-footer">
+                <button class="btn-cancel" (click)="closeModifyGttModal()">Cancel</button>
+                <button class="btn-save" (click)="submitModifyGtt()">Update</button>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="premium-bottom-bar">
+
+        <!-- Left side note -->
+        <div class="premium-holding-note">
+            <div class="holding-note-title">
+                <span class="red-star">*</span>
+                <span>Holding Type</span>
+            </div>
+
+            <div class="holding-note-text">
+                <span><b>T 1</b> - Shares are purchased but not yet delivered to the demat account.</span>
+                <span><b>HLD</b> - Shares are purchased and available in the demat account.</span>
+            </div>
+        </div>
+
+        <!-- Right side pagination -->
+        <div class="premium-pagination">
+
+            <button class="page-nav-btn" (click)="goToPreviousPage()" [disabled]="getCurrentPage() === 1">
+                ‹ Prev
+            </button>
+
+            <div class="page-number-group">
+                <button class="page-number-btn" *ngFor="let page of getPageNumbers()"
+                    [class.active]="page === getCurrentPage()" (click)="goToPage(page)">
+                    {{ page }}
+                </button>
+            </div>
+
+            <button class="page-nav-btn" (click)="goToNextPage()" [disabled]="getCurrentPage() >= getTotalPages()">
+                Next ›
+            </button>
+
+            <select class="premium-page-size" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+                <option *ngFor="let size of pageSizeOptions" [value]="size">
+                    {{ size }} per page
+                </option>
+            </select>
+
+        </div>
+
+    </div>
+</div>
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

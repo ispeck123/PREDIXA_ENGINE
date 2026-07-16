@@ -1,0 +1,164 @@
+<body>
+  <header>
+    <div class="logo">
+      <img src="assets/image/LOGO.png" alt="ISPECK">
+    </div>
+  </header>
+
+  <section id="home">
+    <div class="login-container">
+      <h3 class="login-heading">Innovative Approach To Trading</h3>
+      <br>
+      <div class="login-form">
+        <h2>Login</h2>
+
+        <div style="position: relative; width: 100%;">
+          <input type="text" id="username" name="email" placeholder="Username" [(ngModel)]="email"
+            style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
+
+          <span aria-hidden="true" style="
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      color: #667085;
+      line-height: 0;
+    ">
+            <!-- User icon -->
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.6" />
+              <path d="M4 20c0-4 4-6 8-6s8 2 8 6" fill="none" stroke="currentColor" stroke-width="1.6"
+                stroke-linecap="round" />
+            </svg>
+          </span>
+        </div>
+
+
+        <div class="pw-wrap">
+          <input id="password" name="password" class="pw-input" [type]="hidePassword ? 'password' : 'text'"
+            placeholder="Password" [(ngModel)]="password" autocomplete="current-password" />
+
+          <button type="button" class="pw-toggle" aria-controls="password"
+            [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'"
+            [attr.title]="hidePassword ? 'Show password' : 'Hide password'" (click)="togglePasswordVisibility()">
+
+            <!-- Eye (show) -->
+            <svg *ngIf="hidePassword" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" fill="none" stroke="currentColor"
+                stroke-width="1.6" />
+              <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.6" />
+            </svg>
+
+            <!-- Eye-off (hide) -->
+            <svg *ngIf="!hidePassword" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+              <path d="M3 3l18 18" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" />
+              <path d="M10.6 5.1A10.9 10.9 0 0 1 12 5c7 0 11 7 11 7a20.7 20.7 0 0 1-4.1 4.8" fill="none"
+                stroke="currentColor" stroke-width="1.6" />
+              <path d="M6.1 6.9A20.8 20.8 0 0 0 1 12s4 7 11 7c1.5 0 2.9-.3 4.1-.8" fill="none" stroke="currentColor"
+                stroke-width="1.6" />
+              <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.6" />
+            </svg>
+          </button>
+        </div>
+
+
+
+        <!-- <input type="text" placeholder="Username" required [(ngModel)]="email">
+            <br>
+            <input type="password" placeholder="Password" required [(ngModel)]="password"> -->
+        <br>
+        <button class="SubmitBtn" (click)="submit()">Sign In</button>
+      </div>
+      <br>
+    </div>
+
+  </section>
+
+  <!-- PREDIXA™ Access Framework -->
+<section class="predixa-access">
+  <div class="pa-head">
+    <div class="pa-title">PREDIXA™ Access Framework</div>
+    <div class="pa-sub">Market Listener → Edge Subscriber → Strategy Analyst → Command Admin</div>
+  </div>
+
+  <div class="pa-grid">
+    <!-- Level 0 -->
+    <article class="pa-card">
+      <div class="pa-top">
+        <span class="pa-pill">Level 0</span>
+        <span class="pa-role">Market Listener</span>
+      </div>
+      <div class="pa-desc">
+        Receive curated AI trade alerts instantly via Telegram/WhatsApp — no platform login required.
+      </div>
+      <div class="pa-meta">Access type: Alerts stream</div>
+    </article>
+
+    <!-- Level 1 -->
+    <article class="pa-card">
+      <div class="pa-top">
+        <span class="pa-pill">Level 1</span>
+        <span class="pa-role">Edge Subscriber</span>
+      </div>
+      <div class="pa-desc">
+        Secure dashboard access to live charts, AI signals, watchlists, and smart alerts in a view-only workspace.
+      </div>
+      <div class="pa-meta">Access type: Dashboard (view-only)</div>
+    </article>
+
+    <!-- Level 2 -->
+    <article class="pa-card">
+      <div class="pa-top">
+        <span class="pa-pill">Level 2</span>
+        <span class="pa-role">Strategy Analyst</span>
+      </div>
+      <div class="pa-desc">
+        Internal-grade visibility into zones, model outputs, signal diagnostics, and performance metrics — read-only.
+      </div>
+      <div class="pa-meta">Access type: Research (read-only)</div>
+    </article>
+
+    <!-- Level 3 -->
+    <article class="pa-card">
+      <div class="pa-top">
+        <span class="pa-pill">Level 3</span>
+        <span class="pa-role">Command Admin</span>
+      </div>
+      <div class="pa-desc">
+        Full platform control — configure rules, manage access, control alerts, and execute strategic overrides.
+      </div>
+      <div class="pa-meta">Access type: Admin console</div>
+    </article>
+  </div>
+</section>
+
+
+
+
+  <div class="button-container">
+    <button class="btn">NIFTY</button>
+    <button class="btn">BANK NIFTY</button>
+    <button class="btn">FINNIFTY</button>
+    <button class="btn">SENSEX</button>
+    <!-- <button class="btn">SENSEX</button> -->
+  </div>
+  <footer class="footer">
+    <p>© 2025 ISPECK . All Rights Reserved.</p>
+  </footer>
+
+</body>
+
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

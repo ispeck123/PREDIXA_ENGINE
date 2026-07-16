@@ -1,0 +1,14 @@
+<div class="block">
+  <ng-content></ng-content>
+
+  <div *ngIf="loading" class="overlay" aria-busy="true" aria-live="polite">
+    <div class="spinner">
+      <div class="ring"></div>
+      <div class="dot"></div>
+    </div>
+    <div class="label">{{ label }}</div>
+  </div>
+</div>
+
+
+

@@ -1,0 +1,105 @@
+<!-- Overlay for mobile -->
+<div class="ml-overlay" *ngIf="isMobile && isOpen" (click)="close()"></div>
+<aside class="ml-sidenav"
+      [class.collapsed]="isCollapsed"
+      [class.mobile]="isMobile"
+      [class.open]="isOpen">
+
+  <div class="ml-top">
+    <div class="ml-brand">
+      <div class="ml-logo">P</div>
+      <div class="ml-text" *ngIf="!isCollapsed">
+        <div class="ml-name">PREDIXA</div>
+        <div class="ml-sub">Trading Platform</div>
+      </div>
+    </div>
+  </div>
+
+ <ul class="ml-menu">
+  <li (click)="go('/dashboard')" [class.active]="isActive('/dashboard')">
+    <i class="fas fa-tachometer-alt"></i>
+    <span *ngIf="!isCollapsed">Dashboard</span>
+  </li>
+
+   <li (click)="go('/watchlist')" [class.active]="isActive('/watchlist')">
+    <i class="fas fa-cog"></i>
+    <span *ngIf="!isCollapsed">Watchlist</span>
+  </li>
+
+    <li (click)="go('/bucket-orders')" [class.active]="isActive('/bucket-orders')">
+    <i class="fas fa-inbox"></i>
+    <span *ngIf="!isCollapsed">Bucket Orders</span>
+  </li>
+
+  <li (click)="go('/holdings')" [class.active]="isActive('/holdings')">
+    <i class="fas fa-briefcase"></i>
+    <span *ngIf="!isCollapsed">Holdings</span>
+  </li> 
+
+  <li (click)="go('/home')" [class.active]="isActive('/home')">
+    <i class="fas fa-chart-line"></i>
+    <span *ngIf="!isCollapsed">Custom Screener</span>
+  </li>
+
+  <li (click)="go('/orderlist')" [class.active]="isActive('/orderlist')">
+    <i class="fas fa-shopping-cart"></i>
+    <span *ngIf="!isCollapsed">Orders</span>
+  </li>
+
+  <!-- <li *ngIf="isAdmin" (click)="go('/auto-order-list')" [class.active]="isActive('/auto-order-list')">
+    <i class="fas fa-shopping-cart"></i>
+    <span *ngIf="!isCollapsed">Auto Orders</span>
+  </li> -->
+
+  <li (click)="go('/news')" [class.active]="isActive('/news')">
+    <i class="fas fa-globe"></i>
+    <span *ngIf="!isCollapsed">News</span>
+  </li>
+
+  <li (click)="go('/alerts')" [class.active]="isActive('/alerts')">
+    <i class="fas fa-bell"></i>
+    <span *ngIf="!isCollapsed">Alerts</span>
+  </li>
+
+  <li (click)="go('/trades')" [class.active]="isActive('/trades')">
+    <i class="fas fa-exchange-alt"></i>
+    <span *ngIf="!isCollapsed">Available Trades</span>
+  </li>
+
+  <li (click)="go('/system-management')" [class.active]="isActive('/system-management')">
+    <i class="fas fa-cog"></i>
+    <span *ngIf="!isCollapsed">System Management</span>
+  </li>
+
+   <li (click)="go('/user-plans')" [class.active]="isActive('/user-plans')">
+    <i class="fas fa-cog"></i>
+    <span *ngIf="!isCollapsed">User Plans</span>
+  </li>
+
+   
+
+  <li class="danger" (click)="logout()">
+    <i class="fas fa-door-open"></i>
+    <span *ngIf="!isCollapsed">Logout</span>
+  </li>
+</ul>
+
+
+  <div class="ml-footer">
+    <img src="assets/image/Predixa_TRNS_LOGO_WHITE.png" alt="Logo" />
+  </div>
+</aside>
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

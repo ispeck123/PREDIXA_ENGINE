@@ -1,0 +1,3734 @@
+<div class="px-topbar">
+  <!-- Left side -->
+  <div class="px-topbar__left">
+    <div class="px-timebar">
+
+      <!-- NSE -->
+      <ng-container *ngIf="this.selectedExchange.exchange_name=='NSE'">
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'fifteen'" (click)="switchMenu('fifteen')">
+          <span class="px-label-full">15 Min</span>
+          <span class="px-label-mobile">15</span>
+        </button>
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'twenty_five'"
+          (click)="switchMenu('twenty_five')">
+          <span class="px-label-full">25 Min</span>
+          <span class="px-label-mobile">25</span>
+        </button>
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'sixty'" (click)="switchMenu('sixty')">
+          <span class="px-label-full">60 Min</span>
+          <span class="px-label-mobile">60</span>
+        </button>
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'seventy_five'"
+          (click)="switchMenu('seventy_five')">
+          <span class="px-label-full">75 Min</span>
+          <span class="px-label-mobile">75</span>
+        </button>
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'one_twenty_five'"
+          (click)="switchMenu('one_twenty_five')">
+          <span class="px-label-full">125 Min</span>
+          <span class="px-label-mobile">125</span>
+        </button>
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'daily'" (click)="switchMenu('daily')">
+          <span class="px-label-full">Daily</span>
+          <span class="px-label-mobile">D</span>
+        </button>
+      </ng-container>
+
+      <!-- MCX -->
+      <ng-container *ngIf="this.selectedExchange.exchange_name=='MCX'">
+        <!-- <button class="px-timebar__btn" [class.is-active]="activeMenu === 'twenty_five'"
+          (click)="switchMenu('twenty_five')">
+          <span class="px-label-full">25 Min</span>
+          <span class="px-label-mobile">25</span>
+        </button> -->
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'sixty'" (click)="switchMenu('sixty')">
+          <span class="px-label-full">60 Min</span>
+          <span class="px-label-mobile">60</span>
+        </button>
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'one_twenty'"
+          (click)="switchMenu('one_twenty')">
+          <span class="px-label-full">120 Min</span>
+          <span class="px-label-mobile">120</span>
+        </button>
+
+        <!-- <button class="px-timebar__btn" [class.is-active]="activeMenu === 'one_twenty_five'"
+          (click)="switchMenu('one_twenty_five')">
+          <span class="px-label-full">125 Min</span>
+          <span class="px-label-mobile">125</span>
+        </button> -->
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'two_forty'"
+          (click)="switchMenu('two_forty')">
+          <span class="px-label-full">240 Min</span>
+          <span class="px-label-mobile">240</span>
+        </button>
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'daily'" (click)="switchMenu('daily')">
+          <span class="px-label-full">Daily</span>
+          <span class="px-label-mobile">D</span>
+        </button>
+      </ng-container>
+
+      <!-- NSEFO -->
+      <ng-container *ngIf="this.selectedExchange.exchange_name=='NSEFO'">
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'fifteen'" (click)="switchMenu('fifteen')">
+          <span class="px-label-full">15 Min</span>
+          <span class="px-label-mobile">15</span>
+        </button>
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'twenty_five'"
+          (click)="switchMenu('twenty_five')">
+          <span class="px-label-full">25 Min</span>
+          <span class="px-label-mobile">25</span>
+        </button>
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'sixty'" (click)="switchMenu('sixty')">
+          <span class="px-label-full">60 Min</span>
+          <span class="px-label-mobile">60</span>
+        </button>
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'seventy_five'"
+          (click)="switchMenu('seventy_five')">
+          <span class="px-label-full">75 Min</span>
+          <span class="px-label-mobile">75</span>
+        </button>
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'one_twenty_five'"
+          (click)="switchMenu('one_twenty_five')">
+          <span class="px-label-full">125 Min</span>
+          <span class="px-label-mobile">125</span>
+        </button>
+
+        <button class="px-timebar__btn" [class.is-active]="activeMenu === 'daily'" (click)="switchMenu('daily')">
+          <span class="px-label-full">Daily</span>
+          <span class="px-label-mobile">D</span>
+        </button>
+      </ng-container>
+
+      <div class="px-pagebox">
+        <select class="px-pagebox__select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right side -->
+  <div class="px-topbar__right">
+ <button
+  type="button"
+  class="btn btn-success"
+  (click)="downloadActiveTabExcel()"
+  [disabled]="isDownloadingTrades">
+
+  {{ isDownloadingTrades ? 'Preparing Excel...' : 'Download Excel' }}
+</button>
+    <div class="px-search">
+
+      <input type="text" class="px-search__input" placeholder="Search stock symbol..." [(ngModel)]="searchText"
+        (input)="onSearchInput(searchText)" />
+
+      <svg class="px-search__icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.6" />
+        <path d="M20 20l-3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+      </svg>
+    </div>
+
+    <div class="fx-filter-wrap" (click)="$event.stopPropagation()">
+      <!-- Filter button -->
+      <button class="fx-filter-trigger" type="button" (click)="toggleFilterPopup() ;  $event.stopPropagation()"
+        aria-label="Open filters">
+        <i class="fas fa-filter"></i>
+      </button>
+
+      <!-- Backdrop -->
+      <!-- <div class="fx-filter-backdrop" *ngIf="isPopupOpen" (click)="closeFilterPopup()"></div> -->
+
+      <!-- Popup -->
+      <div class="fx-filter-panel" *ngIf="isPopupOpen" (click)="$event.stopPropagation()">
+        <div class="fx-filter-panel__header">
+          <div class="fx-filter-panel__title">Filter Options</div>
+
+          <div class="fx-filter-panel__actions">
+            <button class="fx-filter-reset" type="button" (click)="resetFilter()">Reset</button>
+            <button class="fx-filter-close" type="button" (click)="closeFilterPopup()" aria-label="Close">×</button>
+          </div>
+        </div>
+
+        <div class="fx-filter-panel__body">
+          <div class="fx-filter-row fx-filter-row--toggle">
+            <span class="fx-filter-label">Sort By Date</span>
+            <label class="fx-switch">
+              <input type="checkbox" [checked]="isChecked" (change)="onDateToggle($event)">
+              <span class="fx-switch__slider"></span>
+            </label>
+          </div>
+
+          <div class="fx-filter-row fx-filter-row--toggle">
+            <span class="fx-filter-label">Sort By CMP</span>
+            <label class="fx-switch">
+              <input type="checkbox" [checked]="isCheckedForCMP" (change)="onCMPtoggle($event)">
+              <span class="fx-switch__slider"></span>
+            </label>
+          </div>
+
+          <div class="fx-filter-group">
+            <label class="fx-filter-group__label">Select Exchange</label>
+            <select [(ngModel)]="selectedExchange" class="fx-filter-select" (change)="onExchangeChange()">
+              <option [ngValue]="null" disabled>Select Exchange</option>
+              <option *ngFor="let exch of exchanges" [ngValue]="exch">
+                {{ exch.exchange_name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="fx-filter-group">
+            <label class="fx-filter-group__label">Trade Type</label>
+            <select [(ngModel)]="selectTradeType" class="fx-filter-select" (change)="onTradeTypeChange()">
+              <option disabled>--Select--</option>
+              <option value="all">All</option>
+              <option value="buy">BUY</option>
+              <option value="sell">SELL</option>
+            </select>
+          </div>
+
+          <div class="fx-filter-group">
+            <label class="fx-filter-group__label">Date Range</label>
+            <div class="fx-filter-dateRow">
+              <input ngxDaterangepickerBootstrap [(ngModel)]="selectedDateRange" [showCustomRangeLabel]="true"
+                [alwaysShowCalendars]="true" [ranges]="ranges" [linkedCalendars]="true" [isInvalidDate]="isInvalidDate"
+                [showClearButton]="true" placeholder="Select Date Range..." [opens]="'left'"
+                class="fx-filter-dateInput" />
+
+              <button type="button" class="fx-filter-search" (click)="Search()">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<div *ngIf="activeMenu === 'daily'" class="trade-shell">
+
+  <!-- Top Bar -->
+  <div class="trade-topbar">
+    <div class="trade-pager">
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToPreviousPage()"
+        [disabled]="getCurrentPage() === 1">
+        ‹ Prev
+      </button>
+
+      <ng-container *ngFor="let page of getPageNumbers()">
+        <button class="trade-pager__btn trade-pager__btn--page" [class.is-active]="page === getCurrentPage()"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToNextPage()"
+        [disabled]="getCurrentPage() >= getTotalPages()">
+        Next ›
+      </button>
+    </div>
+
+    <div class="trade-summary">
+      Total Available Trades : <b>{{dailyState.totalCount}}</b>
+      <span class="trade-summary__sep">|</span>
+      Matched Found : <b>{{MatchedCount}}</b>
+    </div>
+  </div>
+
+  <!-- DESKTOP TABLE -->
+  <div class="trade-tableWrap trade-desktop" *ngIf="DailyTrades.length > 0">
+    <div class="trade-table-scroll"  #tradeScroll>
+    <table class="trade-table" id="dailyTradesTable">
+      <thead>
+        <tr>
+          <th>Trade Id</th>
+
+          <th style="cursor:pointer" (click)="sortData('STOCK_SYMBOL')">
+            Stock Symbol
+          </th>
+
+          <th (click)="sortData('TRADE_TYPE')" style="cursor:pointer">
+            Trade Type
+            <span *ngIf="sortColumn === 'TRADE_TYPE'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+            Expiry
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price')" style="cursor:pointer">
+            Entry Price (INR)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price')" style="cursor:pointer">
+            Target Price (INR)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stop_loss')" style="cursor:pointer">
+            StopLoss (INR)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price')" style="cursor:pointer">
+            Entry Price (USD)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price')" style="cursor:pointer">
+            Target Price (USD)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stop_loss')" style="cursor:pointer">
+            StopLoss (USD)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('BUY_RRR')" style="cursor:pointer">
+            RR
+            <span *ngIf="sortColumn === 'BUY_RRR'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('TIMESTAMP')" style="cursor:pointer">
+            Date
+            <span *ngIf="sortColumn === 'TIMESTAMP'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('PROBABILITY')" style="cursor:pointer">
+            Prediction
+            <span *ngIf="sortColumn === 'PROBABILITY'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th>View Setup</th>
+          <th>Create</th>
+          <th>Delete</th>
+          <th>View Order</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr #stockCells *ngFor="let item of DailyTrades" [attr.data-stock]="item.STOCK_SYMBOL" [ngClass]="{
+      'trade-signal-highlight': isTradeSignalHighlighted(item),
+      'trade-row-highlight': isHighlighted(item.STOCK_SYMBOL)}">
+          <ng-container *ngFor="let key of getKeys(item)">
+            <td>{{ item.TRADE_ID }}</td>
+
+            <td class="trade-stockCell" data-bs-toggle="modal" data-bs-target="#myModal"
+              [attr.data-stock]="item.STOCK_SYMBOL"  (mouseenter)="onSymbolHover($event, item, key)"
+          (mousemove)="moveCmpPopup($event)"
+          (mouseleave)="onSymbolLeave()" (click)="ViewGraph(
+                item.STOCK_NAME,
+                item[key]?.entry_price,
+                item[key]?.stop_loss,
+                item[key]?.target_price,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                key === 'BUY' ? item.BUY_RRR : item.SELL_RRR,
+                item.EXP_NUM,
+                item.TRADE_ID,
+                key,item.PROBABILITY,
+                item.PREDICTION,
+                item.STOCK_ID,
+                item.TIMESTAMP
+              )">
+              {{item.STOCK_SYMBOL}}
+            </td>
+
+            <td>
+              <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+                {{ key }}
+              </span>
+            </td>
+
+            <td *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+              <div class="expiry-wrap">
+                {{ formatExpiry(item.EXP_NUM) }}
+              </div>
+            </td>
+
+            <td>{{ item[key]?.entry_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.target_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.stop_loss | number:'1.2-2' }}</td>
+
+            <td *ngIf="key === 'BUY'">{{ item.BUY_RRR }}</td>
+            <td *ngIf="key !== 'BUY'">{{ item.SELL_RRR }}</td>
+
+            <!-- <td>{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</td> -->
+            <td class="trade-date-cell">
+              <div class="trade-date-wrap">
+                <span class="trade-date-main">{{ item.TIMESTAMP | date:'MMM d, y' }}</span>
+                <span class="trade-date-time">{{ item.TIMESTAMP | date:'hh:mm a' }}</span>
+              </div>
+            </td>
+
+            <td>
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+                title="View Setup" (click)="ViewGraph(
+                  item.STOCK_NAME,
+                  item[key]?.entry_price,
+                  item[key]?.stop_loss,
+                  item[key]?.target_price,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                  key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+                  item.EXP_NUM,
+                  item.TRADE_ID,
+                  key,
+                  item.PROBABILITY,
+                  item.PREDICTION,
+                  item.STOCK_ID,
+                  item.TIMESTAMP
+                )">
+                <i class="fas fa-chart-line"></i>
+              </button>
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                title="Create Order"
+                (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+                <i class="fas fa-cart-plus"></i>
+              </button>
+            </td>
+          </ng-container>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--delete" title="Delete" (click)="deleteTrade(item.TRADE_ID)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--view" title="View Order" *ngIf="item.TRADE_SIGNAL_ID != null"
+              (click)="vieworder(item.TRADE_ID)">
+              <i class="fa fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- MOBILE / TABLET CARD VIEW -->
+  <div class="trade-mobile" *ngIf="DailyTrades.length > 0">
+    <div class="trade-card" *ngFor="let item of DailyTrades"
+      [ngClass]="{'trade-signal-highlight': isTradeSignalHighlighted(item)}">
+      <ng-container *ngFor="let key of getKeys(item)">
+
+        <div class="trade-card__head">
+          <div>
+            <div class="trade-card__symbol">{{ item.STOCK_SYMBOL }}</div>
+            <div class="trade-card__sub">
+              ID: {{ item.TRADE_ID }}
+              <span *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+                • {{ formatExpiry(item.EXP_NUM) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="trade-card__headRight">
+            <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+              {{ key }}
+            </span>
+
+            <div class="trade-rrPill">
+              RR {{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry / center pill / Target -->
+        <div class="trade-et-row">
+          <div class="trade-priceBox trade-priceBox--entry">
+            <span class="trade-priceBox__label">Entry</span>
+            <span class="trade-priceBox__value">{{ item[key]?.entry_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--target">
+            <span class="trade-priceBox__label">Target</span>
+            <span class="trade-priceBox__value">{{ item[key]?.target_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--stop">
+            <span class="trade-priceBox__label">StopLoss</span>
+            <span class="trade-priceBox__value">{{ item[key]?.stop_loss | number:'1.2-2' }}</span>
+          </div>
+
+        </div>
+
+        <!-- Date + Prediction -->
+        <div class="trade-card__compactGrid">
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Date</span>
+            <span class="trade-mini__value">{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</span>
+          </div>
+
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Prediction</span>
+            <span class="trade-mini__value">
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </span>
+          </div>
+        </div>
+
+        <div class="trade-card__actions compact-actions">
+          <button class="trade-actionBtn trade-actionBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+            (click)="ViewGraph(
+          item.STOCK_NAME,
+          item[key]?.entry_price,
+          item[key]?.stop_loss,
+          item[key]?.target_price,
+          key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+          key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+          key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+          item.EXP_NUM,
+          item.TRADE_ID,
+          key,
+          item.PROBABILITY,
+          item.PREDICTION,
+          item.STOCK_ID,
+          item.TIMESTAMP
+        )">
+            <i class="fas fa-chart-line"></i>
+            <span>View</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+            (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+            <i class="fas fa-cart-plus"></i>
+            <span>Create</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--delete" (click)="deleteTrade(item.TRADE_ID)">
+            <i class="fa fa-trash"></i>
+            <span>Delete</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--view" *ngIf="item.TRADE_SIGNAL_ID != null"
+            (click)="vieworder(item.TRADE_ID)">
+            <i class="fa fa-eye"></i>
+            <span>Order</span>
+          </button>
+        </div>
+
+      </ng-container>
+    </div>
+  </div>
+
+  <div *ngIf="DailyTrades.length === 0" class="trade-empty">
+    <p>No Trades available</p>
+  </div>
+</div>
+
+<div *ngIf="activeMenu === 'sixty'" class="trade-shell">
+
+  <!-- Top Bar -->
+  <div class="trade-topbar">
+    <div class="trade-pager">
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToPreviousPage()"
+        [disabled]="getCurrentPage() === 1">
+        ‹ Prev
+      </button>
+
+      <ng-container *ngFor="let page of getPageNumbers()">
+        <button class="trade-pager__btn trade-pager__btn--page" [class.is-active]="page === getCurrentPage()"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToNextPage()"
+        [disabled]="getCurrentPage() >= getTotalPages()">
+        Next ›
+      </button>
+    </div>
+
+    <div class="trade-summary">
+      Total Trades : <b>{{sixtyState.totalCount}}</b>
+      <span class="trade-summary__sep">|</span>
+      Matched Found : <b>{{MatchedCount}}</b>
+    </div>
+  </div>
+
+  <!-- DESKTOP TABLE -->
+  <div class="trade-tableWrap trade-desktop" *ngIf="SixtyTrades.length > 0">
+    <div class="trade-table-scroll"  #tradeScroll>
+    <table class="trade-table" id="sixtyTradesTable">
+      <thead>
+        <tr>
+          <th>Trade Id</th>
+
+          <th (click)="sortData('STOCK_SYMBOL')" style="cursor: pointer;">
+            Stock Symbol
+          </th>
+
+          <th (click)="sortData('TRADE_TYPE')" style="cursor: pointer;">
+            Trade Type
+            <span *ngIf="sortColumn === 'TRADE_TYPE'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+            <span style="cursor:pointer" (click)="sortData('EXPIRY')">
+              Expiry
+              <span *ngIf="sortColumn === 'EXPIRY'">
+                {{ sortDirection === 'asc' ? '↑' : '↓' }}
+              </span>
+            </span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (INR)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (INR)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (INR)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (USD)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (USD)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (USD)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('BUY_RRR')" style="cursor: pointer;">
+            RR
+            <span *ngIf="sortColumn === 'BUY_RRR'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('TIMESTAMP')" style="cursor: pointer;">
+            Date
+            <span *ngIf="sortColumn === 'TIMESTAMP'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('PROBABILITY')" style="cursor: pointer;">
+            Prediction
+            <span *ngIf="sortColumn === 'PROBABILITY'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th>View Setup</th>
+          <th>Create</th>
+          <th>Delete</th>
+          <th>View Order</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr #stockCells *ngFor="let item of SixtyTrades; let i = index" [attr.data-stock]="item.STOCK_SYMBOL" [ngClass]="{
+            'trade-signal-highlight': isTradeSignalHighlighted(item)
+          }">
+
+          <ng-container *ngFor="let key of getKeys(item)">
+            <td>{{ item.TRADE_ID }}</td>
+
+            <td class="trade-stockCell" (mouseenter)="onSymbolHover($event, item, key)"
+          (mousemove)="moveCmpPopup($event)"
+          (mouseleave)="onSymbolLeave()" data-bs-toggle="modal" data-bs-target="#myModal"
+              [attr.data-stock]="item.STOCK_SYMBOL"
+              [ngStyle]="isHighlightedsixty(item.STOCK_SYMBOL) ? { 'background-color': '#c4c439' } : {}" (click)="ViewGraph(
+                item.STOCK_NAME,
+                item[key]?.entry_price,
+                item[key]?.stop_loss,
+                item[key]?.target_price,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                key === 'BUY' ? item.BUY_RRR : item.SELL_RRR,
+                item.EXP_NUM,
+                item.TRADE_ID,
+                key,
+                item.PROBABILITY,
+                item.PREDICTION,
+                item.STOCK_ID,
+                item.TIMESTAMP
+              )">
+              {{item.STOCK_SYMBOL}}
+            </td>
+
+            <td>
+              <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+                {{ key }}
+              </span>
+            </td>
+
+            <td *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+              {{ formatExpiry(item.EXP_NUM) }}
+            </td>
+
+            <td>{{ item[key]?.entry_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.target_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.stop_loss | number:'1.2-2' }}</td>
+
+            <td>{{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}</td>
+
+            <!-- <td>{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</td> -->
+              <td class="trade-date-cell">
+                <div class="trade-date-wrap">
+                  <span class="trade-date-main">{{ item.TIMESTAMP | date:'MMM d, y' }}</span>
+                  <span class="trade-date-time">{{ item.TIMESTAMP | date:'hh:mm a' }}</span>
+                </div>
+              </td>
+
+            <td>
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+                title="View Setup" (click)="ViewGraph(
+                  item.STOCK_NAME,
+                  item[key]?.entry_price,
+                  item[key]?.stop_loss,
+                  item[key]?.target_price,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                  key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+                  item.EXP_NUM,
+                  item.TRADE_ID,
+                  key,
+                  item.PROBABILITY,
+                  item.PREDICTION,
+                  item.STOCK_ID,
+                  item.TIMESTAMP
+                )">
+                <i class="fas fa-chart-line"></i>
+              </button>
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                title="Create Order"
+                (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+                <i class="fas fa-cart-plus"></i>
+              </button>
+            </td>
+          </ng-container>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--delete" title="Delete" (click)="deleteTrade(item.TRADE_ID)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--view" title="View Order" *ngIf="item.TRADE_SIGNAL_ID != null"
+              (click)="vieworder(item.TRADE_ID)">
+              <i class="fa fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- MOBILE / TABLET CARD VIEW -->
+  <div class="trade-mobile" *ngIf="SixtyTrades.length > 0">
+    <div class="trade-card" *ngFor="let item of SixtyTrades"
+      [ngClass]="{'trade-signal-highlight': isTradeSignalHighlighted(item)}">
+
+      <ng-container *ngFor="let key of getKeys(item)">
+
+        <div class="trade-card__head">
+          <div>
+            <div class="trade-card__symbol">{{ item.STOCK_SYMBOL }}</div>
+            <div class="trade-card__sub">
+              ID: {{ item.TRADE_ID }}
+              <span *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+                • {{ formatExpiry(item.EXP_NUM) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="trade-card__headRight">
+            <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+              {{ key }}
+            </span>
+
+            <div class="trade-rrPill">
+              RR {{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}
+            </div>
+          </div>
+        </div>
+
+        <div class="trade-et-row">
+          <div class="trade-priceBox trade-priceBox--entry">
+            <span class="trade-priceBox__label">Entry</span>
+            <span class="trade-priceBox__value">{{ item[key]?.entry_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--target">
+            <span class="trade-priceBox__label">Target</span>
+            <span class="trade-priceBox__value">{{ item[key]?.target_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--stop">
+            <span class="trade-priceBox__label">StopLoss</span>
+            <span class="trade-priceBox__value">{{ item[key]?.stop_loss | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="trade-card__compactGrid">
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Date</span>
+            <span class="trade-mini__value">{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</span>
+          </div>
+
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Prediction</span>
+            <span class="trade-mini__value">
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </span>
+          </div>
+        </div>
+
+        <div class="trade-card__actions compact-actions">
+          <button class="trade-actionBtn trade-actionBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+            (click)="ViewGraph(
+              item.STOCK_NAME,
+              item[key]?.entry_price,
+              item[key]?.stop_loss,
+              item[key]?.target_price,
+              key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+              key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+              key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+              item.EXP_NUM,
+              item.TRADE_ID,
+              key,
+              item.PROBABILITY,
+              item.PREDICTION,
+              item.STOCK_ID,
+              item.TIMESTAMP
+            )">
+            <i class="fas fa-chart-line"></i>
+            <span>View</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+            (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+            <i class="fas fa-cart-plus"></i>
+            <span>Create</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--delete" (click)="deleteTrade(item.TRADE_ID)">
+            <i class="fa fa-trash"></i>
+            <span>Delete</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--view" *ngIf="item.TRADE_SIGNAL_ID != null"
+            (click)="vieworder(item.TRADE_ID)">
+            <i class="fa fa-eye"></i>
+            <span>Order</span>
+          </button>
+
+        </div>
+
+      </ng-container>
+    </div>
+  </div>
+
+  <div *ngIf="SixtyTrades.length === 0" class="trade-empty">
+    <p>No Trades available</p>
+  </div>
+</div>
+
+<div *ngIf="activeMenu === 'fifteen'" class="trade-shell">
+
+  <!-- Top Bar -->
+  <div class="trade-topbar">
+    <div class="trade-pager">
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToPreviousPage()"
+        [disabled]="getCurrentPage() === 1">
+        ‹ Prev
+      </button>
+
+      <ng-container *ngFor="let page of getPageNumbers()">
+        <button class="trade-pager__btn trade-pager__btn--page" [class.is-active]="page === getCurrentPage()"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToNextPage()"
+        [disabled]="getCurrentPage() >= getTotalPages()">
+        Next ›
+      </button>
+    </div>
+
+    <div class="trade-summary">
+      Total Trades : <b>{{fifteenState.totalCount}}</b>
+      <span class="trade-summary__sep">|</span>
+      Matched Found : <b>{{MatchedCount}}</b>
+    </div>
+  </div>
+
+  <!-- DESKTOP TABLE -->
+  <div class="trade-tableWrap trade-desktop" *ngIf="FifteenTrades.length > 0">
+    <div class="trade-table-scroll"  #tradeScroll>
+    <table class="trade-table" id="fifteenTradesTable">
+      <thead>
+        <tr>
+          <th>Trade Id</th>
+
+          <th (click)="sortData('STOCK_SYMBOL')" style="cursor: pointer;">
+            Stock Symbol
+          </th>
+
+          <th (click)="sortData('TRADE_TYPE')" style="cursor: pointer;">
+            Trade Type
+            <span *ngIf="sortColumn === 'TRADE_TYPE'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+            <span style="cursor:pointer" (click)="sortData('EXPIRY')">
+              Expiry
+              <span *ngIf="sortColumn === 'EXPIRY'">
+                {{ sortDirection === 'asc' ? '↑' : '↓' }}
+              </span>
+            </span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (INR)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (INR)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (INR)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (USD)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (USD)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (USD)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('BUY_RRR')" style="cursor: pointer;">
+            RR
+            <span *ngIf="sortColumn === 'BUY_RRR'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('TIMESTAMP')" style="cursor: pointer;">
+            Date
+            <span *ngIf="sortColumn === 'TIMESTAMP'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('PROBABILITY')" style="cursor: pointer;">
+            Prediction
+            <span *ngIf="sortColumn === 'PROBABILITY'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th>View Setup</th>
+          <th>Create</th>
+          <th>Delete</th>
+          <th>View Order</th>
+        </tr>
+      </thead>
+
+      <tbody>
+      <tr #stockCells *ngFor="let item of FifteenTrades; let i = index" [attr.data-stock]="item.STOCK_SYMBOL" [ngClass]="{
+          'trade-signal-highlight': isTradeSignalHighlighted(item)
+        }">
+
+          <ng-container *ngFor="let key of getKeys(item)">
+            <td>{{ item.TRADE_ID }}</td>
+
+            <td class="trade-stockCell" (mouseenter)="onSymbolHover($event, item, key)"
+          (mousemove)="moveCmpPopup($event)"
+          (mouseleave)="onSymbolLeave()" data-bs-toggle="modal" data-bs-target="#myModal"
+              [attr.data-stock]="item.STOCK_SYMBOL"
+              [ngStyle]="isHighlightedfifteen(item.STOCK_SYMBOL) ? { 'background-color': '#c4c439' } : {}" (click)="ViewGraph(
+                item.STOCK_NAME,
+                item[key]?.entry_price,
+                item[key]?.stop_loss,
+                item[key]?.target_price,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                key === 'BUY' ? item.BUY_RRR : item.SELL_RRR,
+                item.EXP_NUM,
+                item.TRADE_ID,
+                key,
+                item.PROBABILITY,
+                item.PREDICTION,
+                item.STOCK_ID,
+                item.TIMESTAMP
+              )">
+              {{item.STOCK_SYMBOL}}
+            </td>
+
+            <td>
+              <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+                {{ key }}
+              </span>
+            </td>
+
+            <td *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+              {{ formatExpiry(item.EXP_NUM) }}
+            </td>
+
+            <td>{{ item[key]?.entry_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.target_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.stop_loss | number:'1.2-2' }}</td>
+
+            <td>{{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}</td>
+
+            <!-- <td>{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</td> -->
+              <td class="trade-date-cell">
+                <div class="trade-date-wrap">
+                  <span class="trade-date-main">{{ item.TIMESTAMP | date:'MMM d, y' }}</span>
+                  <span class="trade-date-time">{{ item.TIMESTAMP | date:'hh:mm a' }}</span>
+                </div>
+              </td>
+
+            <td>
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+                title="View Setup" (click)="ViewGraph(
+                  item.STOCK_NAME,
+                  item[key]?.entry_price,
+                  item[key]?.stop_loss,
+                  item[key]?.target_price,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                  key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+                  item.EXP_NUM,
+                  item.TRADE_ID,
+                  key,
+                  item.PROBABILITY,
+                  item.PREDICTION,
+                  item.STOCK_ID,
+                  item.TIMESTAMP
+                )">
+                <i class="fas fa-chart-line"></i>
+              </button>
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                title="Create Order"
+                (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+                <i class="fas fa-cart-plus"></i>
+              </button>
+            </td>
+          </ng-container>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--delete" title="Delete" (click)="deleteTrade(item.TRADE_ID)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--view" title="View Order" *ngIf="item.TRADE_SIGNAL_ID != null"
+              (click)="vieworder(item.TRADE_ID)">
+              <i class="fa fa-eye"></i>
+            </button>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- MOBILE / TABLET CARD VIEW -->
+  <div class="trade-mobile" *ngIf="FifteenTrades.length > 0">
+    <div class="trade-card" *ngFor="let item of FifteenTrades"
+      [ngClass]="{'trade-signal-highlight': isTradeSignalHighlighted(item)}">
+
+      <ng-container *ngFor="let key of getKeys(item)">
+
+        <div class="trade-card__head">
+          <div>
+            <div class="trade-card__symbol">{{ item.STOCK_SYMBOL }}</div>
+            <div class="trade-card__sub">
+              ID: {{ item.TRADE_ID }}
+              <span *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+                • {{ formatExpiry(item.EXP_NUM) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="trade-card__headRight">
+            <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+              {{ key }}
+            </span>
+
+            <div class="trade-rrPill">
+              RR {{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}
+            </div>
+          </div>
+        </div>
+
+        <div class="trade-et-row">
+          <div class="trade-priceBox trade-priceBox--entry">
+            <span class="trade-priceBox__label">Entry</span>
+            <span class="trade-priceBox__value">{{ item[key]?.entry_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--target">
+            <span class="trade-priceBox__label">Target</span>
+            <span class="trade-priceBox__value">{{ item[key]?.target_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--stop">
+            <span class="trade-priceBox__label">StopLoss</span>
+            <span class="trade-priceBox__value">{{ item[key]?.stop_loss | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="trade-card__compactGrid">
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Date</span>
+            <span class="trade-mini__value">{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</span>
+          </div>
+
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Prediction</span>
+            <span class="trade-mini__value">
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </span>
+          </div>
+        </div>
+
+        <div class="trade-card__actions compact-actions">
+          <button class="trade-actionBtn trade-actionBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+            (click)="ViewGraph(
+              item.STOCK_NAME,
+              item[key]?.entry_price,
+              item[key]?.stop_loss,
+              item[key]?.target_price,
+              key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+              key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+              key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+              item.EXP_NUM,
+              item.TRADE_ID,
+              key,
+              item.PROBABILITY,
+              item.PREDICTION,
+              item.STOCK_ID,
+              item.TIMESTAMP
+            )">
+            <i class="fas fa-chart-line"></i>
+            <span>View</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+            (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+            <i class="fas fa-cart-plus"></i>
+            <span>Create</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--delete" (click)="deleteTrade(item.TRADE_ID)">
+            <i class="fa fa-trash"></i>
+            <span>Delete</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--view" *ngIf="item.TRADE_SIGNAL_ID != null"
+            (click)="vieworder(item.TRADE_ID)">
+            <i class="fa fa-eye"></i>
+            <span>Order</span>
+          </button>
+        </div>
+
+      </ng-container>
+    </div>
+  </div>
+
+  <div *ngIf="FifteenTrades.length === 0" class="trade-empty">
+    <p>No Trades available</p>
+  </div>
+</div>
+
+<div *ngIf="activeMenu === 'seventy_five'" class="trade-shell">
+
+  <!-- Top Bar -->
+  <div class="trade-topbar">
+    <div class="trade-pager">
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToPreviousPage()"
+        [disabled]="getCurrentPage() === 1">
+        ‹ Prev
+      </button>
+
+      <ng-container *ngFor="let page of getPageNumbers()">
+        <button class="trade-pager__btn trade-pager__btn--page" [class.is-active]="page === getCurrentPage()"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToNextPage()"
+        [disabled]="getCurrentPage() >= getTotalPages()">
+        Next ›
+      </button>
+    </div>
+
+    <div class="trade-summary">
+      Total Trades : <b>{{seventyfiveState.totalCount}}</b>
+      <span class="trade-summary__sep">|</span>
+      Matched Found : <b>{{MatchedCount}}</b>
+    </div>
+  </div>
+
+  <!-- DESKTOP TABLE -->
+  <div class="trade-tableWrap trade-desktop" *ngIf="SeventyFiveTrades.length > 0">
+    <div class="trade-table-scroll"  #tradeScroll>
+    <table class="trade-table" id="seventyFiveTradesTable">
+      <thead>
+        <tr>
+          <th>Trade Id</th>
+
+          <th style="cursor: pointer;" (click)="sortData('STOCK_SYMBOL')">
+            Stock Symbol
+          </th>
+
+          <th (click)="sortData('TRADE_TYPE')" style="cursor: pointer;">
+            Trade Type
+            <span *ngIf="sortColumn === 'TRADE_TYPE'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+            <span style="cursor:pointer" (click)="sortData('EXPIRY')">
+              Expiry
+              <span *ngIf="sortColumn === 'EXPIRY'">
+                {{ sortDirection === 'asc' ? '↑' : '↓' }}
+              </span>
+            </span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (INR)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (INR)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (INR)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (USD)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (USD)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (USD)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('BUY_RRR')" style="cursor: pointer;">
+            RR
+            <span *ngIf="sortColumn === 'BUY_RRR'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('TIMESTAMP')" style="cursor: pointer;">
+            Date
+            <span *ngIf="sortColumn === 'TIMESTAMP'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('PROBABILITY')" style="cursor: pointer;">
+            Prediction
+            <span *ngIf="sortColumn === 'PROBABILITY'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th>View Setup</th>
+          <th>Create</th>
+          <th>Delete</th>
+          <th>View Order</th>
+        </tr>
+      </thead>
+
+      <tbody>
+      <tr #stockCells *ngFor="let item of SeventyFiveTrades; let i = index" [attr.data-stock]="item.STOCK_SYMBOL" [ngClass]="{
+          'trade-signal-highlight': isTradeSignalHighlighted(item)
+        }">
+
+          <ng-container *ngFor="let key of getKeys(item)">
+            <td>{{ item.TRADE_ID }}</td>
+
+            <td class="trade-stockCell" (mouseenter)="onSymbolHover($event, item, key)"
+          (mousemove)="moveCmpPopup($event)"
+          (mouseleave)="onSymbolLeave()" data-bs-toggle="modal" data-bs-target="#myModal"
+              [attr.data-stock]="item.STOCK_SYMBOL"
+              [ngStyle]="isHighlightedseventy_five(item.STOCK_SYMBOL) ? { 'background-color': '#c4c439' } : {}" (click)="ViewGraph(
+                item.STOCK_NAME,
+                item[key]?.entry_price,
+                item[key]?.stop_loss,
+                item[key]?.target_price,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                key === 'BUY' ? item.BUY_RRR : item.SELL_RRR,
+                item.EXP_NUM,
+                item.TRADE_ID,
+                key,
+                item.PROBABILITY,
+                item.PREDICTION,
+                item.STOCK_ID,
+                item.TIMESTAMP
+              )">
+              {{item.STOCK_SYMBOL}}
+            </td>
+
+            <td>
+              <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+                {{ key }}
+              </span>
+            </td>
+
+            <td *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+              {{ formatExpiry(item.EXP_NUM) }}
+            </td>
+
+            <td>{{ item[key]?.entry_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.target_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.stop_loss | number:'1.2-2' }}</td>
+
+            <td>{{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}</td>
+
+            <!-- <td>{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</td> -->
+              <td class="trade-date-cell">
+                <div class="trade-date-wrap">
+                  <span class="trade-date-main">{{ item.TIMESTAMP | date:'MMM d, y' }}</span>
+                  <span class="trade-date-time">{{ item.TIMESTAMP | date:'hh:mm a' }}</span>
+                </div>
+              </td>
+
+            <td>
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+                title="View Setup" (click)="ViewGraph(
+                  item.STOCK_NAME,
+                  item[key]?.entry_price,
+                  item[key]?.stop_loss,
+                  item[key]?.target_price,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                  key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+                  item.EXP_NUM,
+                  item.TRADE_ID,
+                  key,
+                  item.PROBABILITY,
+                  item.PREDICTION,
+                  item.STOCK_ID,
+                  item.TIMESTAMP
+                )">
+                <i class="fas fa-chart-line"></i>
+              </button>
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                title="Create Order"
+                (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+                <i class="fas fa-cart-plus"></i>
+              </button>
+            </td>
+          </ng-container>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--delete" title="Delete" (click)="deleteTrade(item.TRADE_ID)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--view" title="View Order" *ngIf="item.TRADE_SIGNAL_ID != null"
+              (click)="vieworder(item.TRADE_ID)">
+              <i class="fa fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- MOBILE / TABLET CARD VIEW -->
+  <div class="trade-mobile" *ngIf="SeventyFiveTrades.length > 0">
+    <div class="trade-card" *ngFor="let item of SeventyFiveTrades"
+      [ngClass]="{'trade-signal-highlight': isTradeSignalHighlighted(item)}">
+
+      <ng-container *ngFor="let key of getKeys(item)">
+
+        <div class="trade-card__head">
+          <div>
+            <div class="trade-card__symbol">{{ item.STOCK_SYMBOL }}</div>
+            <div class="trade-card__sub">
+              ID: {{ item.TRADE_ID }}
+              <span *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+                • {{ formatExpiry(item.EXP_NUM) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="trade-card__headRight">
+            <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+              {{ key }}
+            </span>
+
+            <div class="trade-rrPill">
+              RR {{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}
+            </div>
+          </div>
+        </div>
+
+        <div class="trade-et-row">
+          <div class="trade-priceBox trade-priceBox--entry">
+            <span class="trade-priceBox__label">Entry</span>
+            <span class="trade-priceBox__value">{{ item[key]?.entry_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--target">
+            <span class="trade-priceBox__label">Target</span>
+            <span class="trade-priceBox__value">{{ item[key]?.target_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--stop">
+            <span class="trade-priceBox__label">StopLoss</span>
+            <span class="trade-priceBox__value">{{ item[key]?.stop_loss | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="trade-card__compactGrid">
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Date</span>
+            <span class="trade-mini__value">{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</span>
+          </div>
+
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Prediction</span>
+            <span class="trade-mini__value">
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </span>
+          </div>
+        </div>
+
+        <div class="trade-card__actions compact-actions">
+          <button class="trade-actionBtn trade-actionBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+            (click)="ViewGraph(
+              item.STOCK_NAME,
+              item[key]?.entry_price,
+              item[key]?.stop_loss,
+              item[key]?.target_price,
+              key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+              key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+              key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+              item.EXP_NUM,
+              item.TRADE_ID,
+              key,
+              item.PROBABILITY,
+              item.PREDICTION,
+              item.STOCK_ID,
+              item.TIMESTAMP
+            )">
+            <i class="fas fa-chart-line"></i>
+            <span>View</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+            (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+            <i class="fas fa-cart-plus"></i>
+            <span>Create</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--delete" (click)="deleteTrade(item.TRADE_ID)">
+            <i class="fa fa-trash"></i>
+            <span>Delete</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--view" *ngIf="item.TRADE_SIGNAL_ID != null"
+            (click)="vieworder(item.TRADE_ID)">
+            <i class="fa fa-eye"></i>
+            <span>Order</span>
+          </button>
+        </div>
+
+      </ng-container>
+    </div>
+  </div>
+
+  <div *ngIf="SeventyFiveTrades.length === 0" class="trade-empty">
+    <p>No Trades available</p>
+  </div>
+</div>
+
+<div *ngIf="activeMenu === 'two_forty'" class="trade-shell">
+
+  <!-- Top Bar -->
+  <div class="trade-topbar">
+    <div class="trade-pager">
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToPreviousPage()"
+        [disabled]="getCurrentPage() === 1">
+        ‹ Prev
+      </button>
+
+      <ng-container *ngFor="let page of getPageNumbers()">
+        <button class="trade-pager__btn trade-pager__btn--page" [class.is-active]="page === getCurrentPage()"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToNextPage()"
+        [disabled]="getCurrentPage() >= getTotalPages()">
+        Next ›
+      </button>
+    </div>
+
+    <div class="trade-summary">
+      Total Trades : <b>{{twofortyState.totalCount}}</b>
+      <span class="trade-summary__sep">|</span>
+      Matched Found : <b>{{MatchedCount}}</b>
+    </div>
+  </div>
+
+  <!-- DESKTOP TABLE -->
+  <div class="trade-tableWrap trade-desktop" *ngIf="TwoFortyTrades.length > 0">
+    <div class="trade-table-scroll"  #tradeScroll>
+    <table class="trade-table">
+      <thead>
+        <tr>
+          <th>Trade Id</th>
+
+          <th style="cursor: pointer;" (click)="sortData('STOCK_SYMBOL')">
+            Stock Symbol
+          </th>
+
+          <th (click)="sortData('TRADE_TYPE')" style="cursor: pointer;">
+            Trade Type
+            <span *ngIf="sortColumn === 'TRADE_TYPE'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+            <span style="cursor:pointer" (click)="sortData('EXPIRY')">
+              Expiry
+              <span *ngIf="sortColumn === 'EXPIRY'">
+                {{ sortDirection === 'asc' ? '↑' : '↓' }}
+              </span>
+            </span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (INR)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (INR)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (INR)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (USD)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (USD)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (USD)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('BUY_RRR')" style="cursor: pointer;">
+            RR
+            <span *ngIf="sortColumn === 'BUY_RRR'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('TIMESTAMP')" style="cursor: pointer;">
+            Date
+            <span *ngIf="sortColumn === 'TIMESTAMP'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('PROBABILITY')" style="cursor: pointer;">
+            Prediction
+            <span *ngIf="sortColumn === 'PROBABILITY'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th>View Setup</th>
+          <th>Create</th>
+          <th>Delete</th>
+          <th>View Order</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr #stockCells *ngFor="let item of TwoFortyTrades; let i = index" [attr.data-stock]="item.STOCK_SYMBOL" [ngClass]="{
+            'trade-signal-highlight': isTradeSignalHighlighted(item)
+          }">
+
+          <ng-container *ngFor="let key of getKeys(item)">
+            <td>{{ item.TRADE_ID }}</td>
+
+            <td class="trade-stockCell" (mouseenter)="onSymbolHover($event, item, key)"
+          (mousemove)="moveCmpPopup($event)"
+          (mouseleave)="onSymbolLeave()" data-bs-toggle="modal" data-bs-target="#myModal"
+              [attr.data-stock]="item.STOCK_SYMBOL"
+              [ngStyle]="isHighlighted240(item.STOCK_SYMBOL) ? { 'background-color': '#c4c439' } : {}" (click)="ViewGraph(
+                item.STOCK_NAME,
+                item[key]?.entry_price,
+                item[key]?.stop_loss,
+                item[key]?.target_price,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                key === 'BUY' ? item.BUY_RRR : item.SELL_RRR,
+                item.EXP_NUM,
+                item.TRADE_ID,
+                key,
+                item.PROBABILITY,
+                item.PREDICTION,
+                item.STOCK_ID,
+                item.TIMESTAMP
+              )">
+              {{item.STOCK_SYMBOL}}
+            </td>
+
+            <td>
+              <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+                {{ key }}
+              </span>
+            </td>
+
+            <td *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+              {{ formatExpiry(item.EXP_NUM) }}
+            </td>
+
+            <td>{{ item[key]?.entry_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.target_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.stop_loss | number:'1.2-2' }}</td>
+
+            <td>{{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}</td>
+
+            <!-- <td>{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</td> -->
+              <td class="trade-date-cell">
+                <div class="trade-date-wrap">
+                  <span class="trade-date-main">{{ item.TIMESTAMP | date:'MMM d, y' }}</span>
+                  <span class="trade-date-time">{{ item.TIMESTAMP | date:'hh:mm a' }}</span>
+                </div>
+              </td>
+
+            <td>
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+                title="View Setup" (click)="ViewGraph(
+                  item.STOCK_NAME,
+                  item[key]?.entry_price,
+                  item[key]?.stop_loss,
+                  item[key]?.target_price,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                  key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+                  item.EXP_NUM,
+                  item.TRADE_ID,
+                  key,
+                  item.PROBABILITY,
+                  item.PREDICTION,
+                  item.STOCK_ID,
+                  item.TIMESTAMP
+                )">
+                <i class="fas fa-chart-line"></i>
+              </button>
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                title="Create Order"
+                (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+                <i class="fas fa-cart-plus"></i>
+              </button>
+            </td>
+          </ng-container>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--delete" title="Delete" (click)="deleteTrade(item.TRADE_ID)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--view" title="View Order" *ngIf="item.TRADE_SIGNAL_ID != null"
+              (click)="vieworder(item.TRADE_ID)">
+              <i class="fa fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- MOBILE / TABLET CARD VIEW -->
+  <div class="trade-mobile" *ngIf="TwoFortyTrades.length > 0">
+    <div class="trade-card" *ngFor="let item of TwoFortyTrades"
+      [ngClass]="{'trade-signal-highlight': isTradeSignalHighlighted(item)}">
+
+      <ng-container *ngFor="let key of getKeys(item)">
+
+        <div class="trade-card__head">
+          <div>
+            <div class="trade-card__symbol">{{ item.STOCK_SYMBOL }}</div>
+            <div class="trade-card__sub">
+              ID: {{ item.TRADE_ID }}
+              <span *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+                • {{ formatExpiry(item.EXP_NUM) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="trade-card__headRight">
+            <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+              {{ key }}
+            </span>
+
+            <div class="trade-rrPill">
+              RR {{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}
+            </div>
+          </div>
+        </div>
+
+        <div class="trade-et-row">
+          <div class="trade-priceBox trade-priceBox--entry">
+            <span class="trade-priceBox__label">Entry</span>
+            <span class="trade-priceBox__value">{{ item[key]?.entry_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--target">
+            <span class="trade-priceBox__label">Target</span>
+            <span class="trade-priceBox__value">{{ item[key]?.target_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--stop">
+            <span class="trade-priceBox__label">StopLoss</span>
+            <span class="trade-priceBox__value">{{ item[key]?.stop_loss | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="trade-card__compactGrid">
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Date</span>
+            <span class="trade-mini__value">{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</span>
+          </div>
+
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Prediction</span>
+            <span class="trade-mini__value">
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </span>
+          </div>
+        </div>
+
+        <div class="trade-card__actions compact-actions">
+          <button class="trade-actionBtn trade-actionBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+            (click)="ViewGraph(
+              item.STOCK_NAME,
+              item[key]?.entry_price,
+              item[key]?.stop_loss,
+              item[key]?.target_price,
+              key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+              key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+              key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+              item.EXP_NUM,
+              item.TRADE_ID,
+              key,
+              item.PROBABILITY,
+              item.PREDICTION,
+              item.STOCK_ID,
+              item.TIMESTAMP
+            )">
+            <i class="fas fa-chart-line"></i>
+            <span>View</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+            (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+            <i class="fas fa-cart-plus"></i>
+            <span>Create</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--delete" (click)="deleteTrade(item.TRADE_ID)">
+            <i class="fa fa-trash"></i>
+            <span>Delete</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--view" *ngIf="item.TRADE_SIGNAL_ID != null"
+            (click)="vieworder(item.TRADE_ID)">
+            <i class="fa fa-eye"></i>
+            <span>Order</span>
+          </button>
+
+        </div>
+
+      </ng-container>
+    </div>
+  </div>
+
+  <div *ngIf="TwoFortyTrades.length === 0" class="trade-empty">
+    <p>No Trades available</p>
+  </div>
+</div>
+
+<div *ngIf="activeMenu === 'one_twenty'" class="trade-shell">
+
+  <!-- Top Bar -->
+  <div class="trade-topbar">
+    <div class="trade-pager">
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToPreviousPage()"
+        [disabled]="getCurrentPage() === 1">
+        ‹ Prev
+      </button>
+
+      <ng-container *ngFor="let page of getPageNumbers()">
+        <button class="trade-pager__btn trade-pager__btn--page" [class.is-active]="page === getCurrentPage()"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToNextPage()"
+        [disabled]="getCurrentPage() >= getTotalPages()">
+        Next ›
+      </button>
+    </div>
+
+    <div class="trade-summary">
+      Total Trades : <b>{{onetwentyState.totalCount}}</b>
+      <span class="trade-summary__sep">|</span>
+      Matched Found : <b>{{MatchedCount}}</b>
+    </div>
+  </div>
+
+  <!-- DESKTOP TABLE -->
+  <div class="trade-tableWrap trade-desktop" *ngIf="OneTwentyTrades.length > 0">
+    <div class="trade-table-scroll"  #tradeScroll>
+    <table class="trade-table">
+      <thead>
+        <tr>
+          <th>Trade Id</th>
+
+          <th style="cursor: pointer;" (click)="sortData('STOCK_SYMBOL')">
+            Stock Symbol
+          </th>
+
+          <th (click)="sortData('TRADE_TYPE')" style="cursor: pointer;">
+            Trade Type
+            <span *ngIf="sortColumn === 'TRADE_TYPE'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+            <span style="cursor:pointer" (click)="sortData('EXPIRY')">
+              Expiry
+              <span *ngIf="sortColumn === 'EXPIRY'">
+                {{ sortDirection === 'asc' ? '↑' : '↓' }}
+              </span>
+            </span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (INR)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (INR)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (INR)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (USD)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (USD)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (USD)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('BUY_RRR')" style="cursor: pointer;">
+            RR
+            <span *ngIf="sortColumn === 'BUY_RRR'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('TIMESTAMP')" style="cursor: pointer;">
+            Date
+            <span *ngIf="sortColumn === 'TIMESTAMP'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('PROBABILITY')" style="cursor: pointer;">
+            Prediction
+            <span *ngIf="sortColumn === 'PROBABILITY'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th>View Setup</th>
+          <th>Create</th>
+          <th>Delete</th>
+          <th>View Order</th>
+        </tr>
+      </thead>
+
+      <tbody>
+      <tr #stockCells *ngFor="let item of OneTwentyTrades; let i = index" [attr.data-stock]="item.STOCK_SYMBOL" [ngClass]="{
+          'trade-signal-highlight': isTradeSignalHighlighted(item)
+        }">
+
+          <ng-container *ngFor="let key of getKeys(item)">
+            <td>{{ item.TRADE_ID }}</td>
+
+            <td class="trade-stockCell" (mouseenter)="onSymbolHover($event, item, key)"
+          (mousemove)="moveCmpPopup($event)"
+          (mouseleave)="onSymbolLeave()" data-bs-toggle="modal" data-bs-target="#myModal"
+              [attr.data-stock]="item.STOCK_SYMBOL"
+              [ngStyle]="isHighlighted120(item.STOCK_SYMBOL) ? { 'background-color': '#c4c439' } : {}" (click)="ViewGraph(
+                item.STOCK_NAME,
+                item[key]?.entry_price,
+                item[key]?.stop_loss,
+                item[key]?.target_price,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                key === 'BUY' ? item.BUY_RRR : item.SELL_RRR,
+                item.EXP_NUM,
+                item.TRADE_ID,
+                key,
+                item.PROBABILITY,
+                item.PREDICTION,
+                item.STOCK_ID,
+                item.TIMESTAMP
+              )">
+              {{item.STOCK_SYMBOL}}
+            </td>
+
+            <td>
+              <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+                {{ key }}
+              </span>
+            </td>
+
+            <td *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+              {{ formatExpiry(item.EXP_NUM) }}
+            </td>
+
+            <td>{{ item[key]?.entry_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.target_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.stop_loss | number:'1.2-2' }}</td>
+
+            <td>{{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}</td>
+
+            <!-- <td>{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</td> -->
+             <td class="trade-date-cell">
+                <div class="trade-date-wrap">
+                  <span class="trade-date-main">{{ item.TIMESTAMP | date:'MMM d, y' }}</span>
+                  <span class="trade-date-time">{{ item.TIMESTAMP | date:'hh:mm a' }}</span>
+                </div>
+              </td>
+
+            <td>
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+                title="View Setup" (click)="ViewGraph(
+                  item.STOCK_NAME,
+                  item[key]?.entry_price,
+                  item[key]?.stop_loss,
+                  item[key]?.target_price,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                  key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+                  item.EXP_NUM,
+                  item.TRADE_ID,
+                  key,
+                  item.PROBABILITY,
+                  item.PREDICTION,
+                  item.STOCK_ID,
+                  item.TIMESTAMP
+                )">
+                <i class="fas fa-chart-line"></i>
+              </button>
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                title="Create Order"
+                (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+                <i class="fas fa-cart-plus"></i>
+              </button>
+            </td>
+          </ng-container>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--delete" title="Delete" (click)="deleteTrade(item.TRADE_ID)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--view" title="View Order" *ngIf="item.TRADE_SIGNAL_ID != null"
+              (click)="vieworder(item.TRADE_ID)">
+              <i class="fa fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- MOBILE / TABLET CARD VIEW -->
+  <div class="trade-mobile" *ngIf="OneTwentyTrades.length > 0">
+    <div class="trade-card" *ngFor="let item of OneTwentyTrades"
+      [ngClass]="{'trade-signal-highlight': isTradeSignalHighlighted(item)}">
+
+      <ng-container *ngFor="let key of getKeys(item)">
+
+        <div class="trade-card__head">
+          <div>
+            <div class="trade-card__symbol">{{ item.STOCK_SYMBOL }}</div>
+            <div class="trade-card__sub">
+              ID: {{ item.TRADE_ID }}
+              <span *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+                • {{ formatExpiry(item.EXP_NUM) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="trade-card__headRight">
+            <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+              {{ key }}
+            </span>
+
+            <div class="trade-rrPill">
+              RR {{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}
+            </div>
+          </div>
+        </div>
+
+        <div class="trade-et-row">
+          <div class="trade-priceBox trade-priceBox--entry">
+            <span class="trade-priceBox__label">Entry</span>
+            <span class="trade-priceBox__value">{{ item[key]?.entry_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--target">
+            <span class="trade-priceBox__label">Target</span>
+            <span class="trade-priceBox__value">{{ item[key]?.target_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--stop">
+            <span class="trade-priceBox__label">StopLoss</span>
+            <span class="trade-priceBox__value">{{ item[key]?.stop_loss | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="trade-card__compactGrid">
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Date</span>
+            <span class="trade-mini__value">{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</span>
+          </div>
+
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Prediction</span>
+            <span class="trade-mini__value">
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </span>
+          </div>
+        </div>
+
+        <div class="trade-card__actions compact-actions">
+          <button class="trade-actionBtn trade-actionBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+            (click)="ViewGraph(
+              item.STOCK_NAME,
+              item[key]?.entry_price,
+              item[key]?.stop_loss,
+              item[key]?.target_price,
+              key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+              key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+              key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+              item.EXP_NUM,
+              item.TRADE_ID,
+              key,
+              item.PROBABILITY,
+              item.PREDICTION,
+              item.STOCK_ID,
+              item.TIMESTAMP
+            )">
+            <i class="fas fa-chart-line"></i>
+            <span>View</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+            (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+            <i class="fas fa-cart-plus"></i>
+            <span>Create</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--delete" (click)="deleteTrade(item.TRADE_ID)">
+            <i class="fa fa-trash"></i>
+            <span>Delete</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--view" *ngIf="item.TRADE_SIGNAL_ID != null"
+            (click)="vieworder(item.TRADE_ID)">
+            <i class="fa fa-eye"></i>
+            <span>Order</span>
+          </button>
+
+        </div>
+
+      </ng-container>
+    </div>
+  </div>
+
+  <div *ngIf="OneTwentyTrades.length === 0" class="trade-empty">
+    <p>No Trades available</p>
+  </div>
+</div>
+
+<div *ngIf="activeMenu === 'one_twenty_five'" class="trade-shell">
+
+  <!-- Top Bar -->
+  <div class="trade-topbar">
+    <div class="trade-pager">
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToPreviousPage()"
+        [disabled]="getCurrentPage() === 1">
+        ‹ Prev
+      </button>
+
+      <ng-container *ngFor="let page of getPageNumbers()">
+        <button class="trade-pager__btn trade-pager__btn--page" [class.is-active]="page === getCurrentPage()"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToNextPage()"
+        [disabled]="getCurrentPage() >= getTotalPages()">
+        Next ›
+      </button>
+    </div>
+
+    <div class="trade-summary">
+      Total Trades : <b>{{onetwentyfiveState.totalCount}}</b>
+      <span class="trade-summary__sep">|</span>
+      Matched Found : <b>{{MatchedCount}}</b>
+    </div>
+  </div>
+
+  <!-- DESKTOP TABLE -->
+  <div class="trade-tableWrap trade-desktop" *ngIf="OneTwentyFiveTrades.length > 0">
+    <div class="trade-table-scroll"  #tradeScroll>
+    <table class="trade-table">
+      <thead>
+        <tr>
+          <th>Trade Id</th>
+
+          <th style="cursor: pointer;" (click)="sortData('STOCK_SYMBOL')">
+            Stock Symbol
+          </th>
+
+          <th (click)="sortData('TRADE_TYPE')" style="cursor: pointer;">
+            Trade Type
+            <span *ngIf="sortColumn === 'TRADE_TYPE'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+            <span style="cursor:pointer" (click)="sortData('EXPIRY')">
+              Expiry
+              <span *ngIf="sortColumn === 'EXPIRY'">
+                {{ sortDirection === 'asc' ? '↑' : '↓' }}
+              </span>
+            </span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (INR)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (INR)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (INR)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (USD)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (USD)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (USD)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('BUY_RRR')" style="cursor: pointer;">
+            RR
+            <span *ngIf="sortColumn === 'BUY_RRR'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('TIMESTAMP')" style="cursor: pointer;">
+            Date
+            <span *ngIf="sortColumn === 'TIMESTAMP'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('PROBABILITY')" style="cursor: pointer;">
+            Prediction
+            <span *ngIf="sortColumn === 'PROBABILITY'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th>View Setup</th>
+          <th>Create</th>
+          <th>Delete</th>
+          <th>View Order</th>
+        </tr>
+      </thead>
+
+      <tbody>
+      <tr #stockCells *ngFor="let item of OneTwentyFiveTrades; let i = index" [attr.data-stock]="item.STOCK_SYMBOL" [ngClass]="{
+          'trade-signal-highlight': isTradeSignalHighlighted(item)
+        }">
+
+          <ng-container *ngFor="let key of getKeys(item)">
+            <td>{{ item.TRADE_ID }}</td>
+
+            <td class="trade-stockCell" (mouseenter)="onSymbolHover($event, item, key)"
+          (mousemove)="moveCmpPopup($event)"
+          (mouseleave)="onSymbolLeave()" data-bs-toggle="modal" data-bs-target="#myModal"
+              [attr.data-stock]="item.STOCK_SYMBOL"
+              [ngStyle]="isHighlighted125(item.STOCK_SYMBOL) ? { 'background-color': '#c4c439' } : {}" (click)="ViewGraph(
+                item.STOCK_NAME,
+                item[key]?.entry_price,
+                item[key]?.stop_loss,
+                item[key]?.target_price,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                key === 'BUY' ? item.BUY_RRR : item.SELL_RRR,
+                item.EXP_NUM,
+                item.TRADE_ID,
+                key,
+                item.PROBABILITY,
+                item.PREDICTION,
+                item.STOCK_ID,
+                item.TIMESTAMP
+              )">
+              {{item.STOCK_SYMBOL}}
+            </td>
+
+            <td>
+              <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+                {{ key }}
+              </span>
+            </td>
+
+            <td *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+              {{ formatExpiry(item.EXP_NUM) }}
+            </td>
+
+            <td>{{ item[key]?.entry_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.target_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.stop_loss | number:'1.2-2' }}</td>
+
+            <td>{{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}</td>
+
+            <!-- <td>{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</td> -->
+             <td class="trade-date-cell">
+                <div class="trade-date-wrap">
+                  <span class="trade-date-main">{{ item.TIMESTAMP | date:'MMM d, y' }}</span>
+                  <span class="trade-date-time">{{ item.TIMESTAMP | date:'hh:mm a' }}</span>
+                </div>
+              </td>
+
+            <td>
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+                title="View Setup" (click)="ViewGraph(
+                  item.STOCK_NAME,
+                  item[key]?.entry_price,
+                  item[key]?.stop_loss,
+                  item[key]?.target_price,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                  key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+                  item.EXP_NUM,
+                  item.TRADE_ID,
+                  key,
+                  item.PROBABILITY,
+                  item.PREDICTION,
+                  item.STOCK_ID,
+                  item.TIMESTAMP
+                )">
+                <i class="fas fa-chart-line"></i>
+              </button>
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                title="Create Order"
+                (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+                <i class="fas fa-cart-plus"></i>
+              </button>
+            </td>
+          </ng-container>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--delete" title="Delete" (click)="deleteTrade(item.TRADE_ID)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--view" title="View Order" *ngIf="item.TRADE_SIGNAL_ID != null"
+              (click)="vieworder(item.TRADE_ID)">
+              <i class="fa fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- MOBILE / TABLET CARD VIEW -->
+  <div class="trade-mobile" *ngIf="OneTwentyFiveTrades.length > 0">
+    <div class="trade-card" *ngFor="let item of OneTwentyFiveTrades"
+      [ngClass]="{'trade-signal-highlight': isTradeSignalHighlighted(item)}">
+
+      <ng-container *ngFor="let key of getKeys(item)">
+
+        <div class="trade-card__head">
+          <div>
+            <div class="trade-card__symbol">{{ item.STOCK_SYMBOL }}</div>
+            <div class="trade-card__sub">
+              ID: {{ item.TRADE_ID }}
+              <span *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+                • {{ formatExpiry(item.EXP_NUM) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="trade-card__headRight">
+            <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+              {{ key }}
+            </span>
+
+            <div class="trade-rrPill">
+              RR {{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}
+            </div>
+          </div>
+        </div>
+
+        <div class="trade-et-row">
+          <div class="trade-priceBox trade-priceBox--entry">
+            <span class="trade-priceBox__label">Entry</span>
+            <span class="trade-priceBox__value">{{ item[key]?.entry_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--target">
+            <span class="trade-priceBox__label">Target</span>
+            <span class="trade-priceBox__value">{{ item[key]?.target_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--stop">
+            <span class="trade-priceBox__label">StopLoss</span>
+            <span class="trade-priceBox__value">{{ item[key]?.stop_loss | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="trade-card__compactGrid">
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Date</span>
+            <span class="trade-mini__value">{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</span>
+          </div>
+
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Prediction</span>
+            <span class="trade-mini__value">
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </span>
+          </div>
+        </div>
+
+        <div class="trade-card__actions compact-actions">
+          <button class="trade-actionBtn trade-actionBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+            (click)="ViewGraph(
+              item.STOCK_NAME,
+              item[key]?.entry_price,
+              item[key]?.stop_loss,
+              item[key]?.target_price,
+              key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+              key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+              key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+              item.EXP_NUM,
+              item.TRADE_ID,
+              key,
+              item.PROBABILITY,
+              item.PREDICTION,
+              item.STOCK_ID,
+              item.TIMESTAMP
+            )">
+            <i class="fas fa-chart-line"></i>
+            <span>View</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+            (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+            <i class="fas fa-cart-plus"></i>
+            <span>Create</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--delete" (click)="deleteTrade(item.TRADE_ID)">
+            <i class="fa fa-trash"></i>
+            <span>Delete</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--view" *ngIf="item.TRADE_SIGNAL_ID != null"
+            (click)="vieworder(item.TRADE_ID)">
+            <i class="fa fa-eye"></i>
+            <span>Order</span>
+          </button>
+
+        </div>
+
+      </ng-container>
+    </div>
+  </div>
+
+  <div *ngIf="OneTwentyFiveTrades.length === 0" class="trade-empty">
+    <p>No Trades available</p>
+  </div>
+</div>
+
+<div *ngIf="activeMenu === 'twenty_five'" class="trade-shell">
+
+  <!-- Top Bar -->
+  <div class="trade-topbar">
+    <div class="trade-pager">
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToPreviousPage()"
+        [disabled]="getCurrentPage() === 1">
+        ‹ Prev
+      </button>
+
+      <ng-container *ngFor="let page of getPageNumbers()">
+        <button class="trade-pager__btn trade-pager__btn--page" [class.is-active]="page === getCurrentPage()"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button class="trade-pager__btn trade-pager__btn--nav" (click)="goToNextPage()"
+        [disabled]="getCurrentPage() >= getTotalPages()">
+        Next ›
+      </button>
+    </div>
+
+    <div class="trade-summary">
+      Total Trades : <b>{{twentyfiveState.totalCount}}</b>
+      <span class="trade-summary__sep">|</span>
+      Matched Found : <b>{{MatchedCount}}</b>
+    </div>
+  </div>
+
+  <!-- DESKTOP TABLE -->
+  <div class="trade-tableWrap trade-desktop" *ngIf="TwentyFiveTrades.length > 0">
+    <div class="trade-table-scroll"  #tradeScroll>
+    <table class="trade-table">
+      <thead>
+        <tr>
+          <th>Trade Id</th>
+
+          <th style="cursor: pointer;" (click)="sortData('STOCK_SYMBOL')">
+            Stock Symbol
+          </th>
+
+          <th (click)="sortData('TRADE_TYPE')" style="cursor: pointer;">
+            Trade Type
+            <span *ngIf="sortColumn === 'TRADE_TYPE'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+            <span style="cursor:pointer" (click)="sortData('EXPIRY')">
+              Expiry
+              <span *ngIf="sortColumn === 'EXPIRY'">
+                {{ sortDirection === 'asc' ? '↑' : '↓' }}
+              </span>
+            </span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (INR)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (INR)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (INR)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price')" style="cursor: pointer;">
+            Entry Price (USD)
+            <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price')" style="cursor: pointer;">
+            Target Price (USD)
+            <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stop_loss')" style="cursor: pointer;">
+            StopLoss (USD)
+            <span *ngIf="sortColumn === 'stop_loss'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('BUY_RRR')" style="cursor: pointer;">
+            RR
+            <span *ngIf="sortColumn === 'BUY_RRR'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('TIMESTAMP')" style="cursor: pointer;">
+            Date
+            <span *ngIf="sortColumn === 'TIMESTAMP'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th (click)="sortData('PROBABILITY')" style="cursor: pointer;">
+            Prediction
+            <span *ngIf="sortColumn === 'PROBABILITY'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+          </th>
+
+          <th>View Setup</th>
+          <th>Create</th>
+          <th>Delete</th>
+          <th>View Order</th>
+        </tr>
+      </thead>
+
+      <tbody>
+      <tr #stockCells *ngFor="let item of TwentyFiveTrades; let i = index" [attr.data-stock]="item.STOCK_SYMBOL" [ngClass]="{
+          'trade-signal-highlight': isTradeSignalHighlighted(item)
+        }">
+          <ng-container *ngFor="let key of getKeys(item)">
+            <td>{{ item.TRADE_ID }}</td>
+
+            <td class="trade-stockCell" (mouseenter)="onSymbolHover($event, item, key)"
+          (mousemove)="moveCmpPopup($event)"
+          (mouseleave)="onSymbolLeave()" data-bs-toggle="modal" data-bs-target="#myModal"
+              [attr.data-stock]="item.STOCK_SYMBOL"
+              [ngStyle]="ishighlighted25(item.STOCK_SYMBOL) ? { 'background-color': '#c4c439' } : {}" (click)="ViewGraph(
+                item.STOCK_NAME,
+                item[key]?.entry_price,
+                item[key]?.stop_loss,
+                item[key]?.target_price,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                key === 'BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                key === 'BUY' ? item.BUY_RRR : item.SELL_RRR,
+                item.EXP_NUM,
+                item.TRADE_ID,
+                key,
+                item.PROBABILITY,
+                item.PREDICTION,
+                item.STOCK_ID,
+                item.TIMESTAMP
+              )">
+              {{item.STOCK_SYMBOL}}
+            </td>
+
+            <td>
+              <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+                {{ key }}
+              </span>
+            </td>
+
+            <td *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+              {{ formatExpiry(item.EXP_NUM) }}
+            </td>
+
+            <td>{{ item[key]?.entry_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.target_price | number:'1.2-2' }}</td>
+            <td>{{ item[key]?.stop_loss | number:'1.2-2' }}</td>
+
+            <td>{{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}</td>
+
+            <!-- <td>{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</td> -->
+             <td class="trade-date-cell">
+                <div class="trade-date-wrap">
+                  <span class="trade-date-main">{{ item.TIMESTAMP | date:'MMM d, y' }}</span>
+                  <span class="trade-date-time">{{ item.TIMESTAMP | date:'hh:mm a' }}</span>
+                </div>
+              </td>
+
+            <td>
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+                title="View Setup" (click)="ViewGraph(
+                  item.STOCK_NAME,
+                  item[key]?.entry_price,
+                  item[key]?.stop_loss,
+                  item[key]?.target_price,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+                  key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+                  key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+                  item.EXP_NUM,
+                  item.TRADE_ID,
+                  key,
+                  item.PROBABILITY,
+                  item.PREDICTION,
+                  item.STOCK_ID,
+                  item.TIMESTAMP
+                )">
+                <i class="fas fa-chart-line"></i>
+              </button>
+            </td>
+
+            <td>
+              <button class="trade-iconBtn trade-iconBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                title="Create Order"
+                (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+                <i class="fas fa-cart-plus"></i>
+              </button>
+            </td>
+          </ng-container>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--delete" title="Delete" (click)="deleteTrade(item.TRADE_ID)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+
+          <td>
+            <button class="trade-iconBtn trade-iconBtn--view" title="View Order" *ngIf="item.TRADE_SIGNAL_ID != null"
+              (click)="vieworder(item.TRADE_ID)">
+              <i class="fa fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- MOBILE / TABLET CARD VIEW -->
+  <div class="trade-mobile" *ngIf="TwentyFiveTrades.length > 0">
+    <div class="trade-card" *ngFor="let item of TwentyFiveTrades"
+      [ngClass]="{'trade-signal-highlight': isTradeSignalHighlighted(item)}">
+
+      <ng-container *ngFor="let key of getKeys(item)">
+
+        <div class="trade-card__head">
+          <div>
+            <div class="trade-card__symbol">{{ item.STOCK_SYMBOL }}</div>
+            <div class="trade-card__sub">
+              ID: {{ item.TRADE_ID }}
+              <span *ngIf="SelectedExchange_Name=='MCX' || SelectedExchange_Name=='NSEFO'">
+                • {{ formatExpiry(item.EXP_NUM) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="trade-card__headRight">
+            <span class="trade-badge" [ngClass]="key === 'BUY' ? 'is-buy' : 'is-sell'">
+              {{ key }}
+            </span>
+
+            <div class="trade-rrPill">
+              RR {{ key === 'BUY' ? item.BUY_RRR : item.SELL_RRR }}
+            </div>
+          </div>
+        </div>
+
+        <div class="trade-et-row">
+          <div class="trade-priceBox trade-priceBox--entry">
+            <span class="trade-priceBox__label">Entry</span>
+            <span class="trade-priceBox__value">{{ item[key]?.entry_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--target">
+            <span class="trade-priceBox__label">Target</span>
+            <span class="trade-priceBox__value">{{ item[key]?.target_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="trade-priceBox trade-priceBox--stop">
+            <span class="trade-priceBox__label">StopLoss</span>
+            <span class="trade-priceBox__value">{{ item[key]?.stop_loss | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="trade-card__compactGrid">
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Date</span>
+            <span class="trade-mini__value">{{ item.TIMESTAMP | date: 'MMM d, y, hh:mm a' }}</span>
+          </div>
+
+          <div class="trade-mini trade-mini--wide">
+            <span class="trade-mini__label">Prediction</span>
+            <span class="trade-mini__value">
+              {{ item.PROBABILITY != null ? (item.PROBABILITY * 100 | number:'1.0-2') + '%' : 'NA' }}
+              {{ item.PREDICTION | uppercase }}
+            </span>
+          </div>
+        </div>
+
+        <div class="trade-card__actions compact-actions">
+          <button class="trade-actionBtn trade-actionBtn--chart" data-bs-toggle="modal" data-bs-target="#myModal"
+            (click)="ViewGraph(
+              item.STOCK_NAME,
+              item[key]?.entry_price,
+              item[key]?.stop_loss,
+              item[key]?.target_price,
+              key=='BUY' ? item.BUY_TIMESTAMPS.entry_price_timestamp : item.SELL_TIMESTAMPS.entry_price_timestamp,
+              key=='BUY' ? item.BUY_TIMESTAMPS.extend_timestamp : item.SELL_TIMESTAMPS.extend_timestamp,
+              key=='BUY' ? item.BUY_RRR : item.SELL_RRR,
+              item.EXP_NUM,
+              item.TRADE_ID,
+              key,
+              item.PROBABILITY,
+              item.PREDICTION,
+              item.STOCK_ID,
+              item.TIMESTAMP
+            )">
+            <i class="fas fa-chart-line"></i>
+            <span>View</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--cart" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+            (click)="slectedStock(item, key, item.TRADE_ID, item.PROBABILITY, item.PREDICTION,item.EXP_NUM,item.TRADE_ID); openCreateOrderPanelforButton()">
+            <i class="fas fa-cart-plus"></i>
+            <span>Create</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--delete" (click)="deleteTrade(item.TRADE_ID)">
+            <i class="fa fa-trash"></i>
+            <span>Delete</span>
+          </button>
+
+          <button class="trade-actionBtn trade-actionBtn--view" *ngIf="item.TRADE_SIGNAL_ID != null"
+            (click)="vieworder(item.TRADE_ID)">
+            <i class="fa fa-eye"></i>
+            <span>Order</span>
+          </button>
+        </div>
+
+      </ng-container>
+    </div>
+  </div>
+
+  <div *ngIf="TwentyFiveTrades.length === 0" class="trade-empty">
+    <p>No Trades available</p>
+  </div>
+</div>
+
+<!-- MODAL FOR FULLSCREEN CHART-->
+<div class="modal" id="myModal" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-fullscreen custom-modal">
+    <div class="modal-content">
+
+      <div class="drawer px-order-drawer" *ngIf="showCreateOrderModal">
+        <div class="drawer-body px-order-drawer__body">
+          <form class="form-card px-order-form" [formGroup]="fincreateformForPanel" novalidate>
+            <div class="drawer-header px-order-form__header">
+              <label class="px-order-form__title">Create Order</label>
+              <button type="button" class="close-btn-order px-order-form__close"
+                (click)="closeCreateOrderPanel()">×</button>
+            </div>
+
+            <div class="form-group px-order-form__group">
+              <b><label for="dropdown1">Select Stock <span style="color: red;">*</span></label></b>
+              <select class="form-control px-order-input" id="dropdown1" style="appearance: auto;"
+                [ngClass]="{ 'is-invalid': submit && f['stock_tick'].errors }" autocomplete="off" [attr.disabled]="true"
+                (click)="$event.stopPropagation()">
+                <option *ngFor="let stock of stockData" [selected]="stock.stock_tick == SelectedStockName">
+                  {{ SelectedStockName | uppercase }}
+                </option>
+              </select>
+              <div *ngIf="submit && f['stock_tick'].errors" class="invalid-feedback">
+                <div *ngIf="f['stock_tick'].errors['required']">
+                  <span style="color:red">Stock Name is required</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="rowMessage px-order-form__row">
+              <div class="form-group px-order-form__group">
+                <b><label for="purchasedPrice">Entry Price</label></b>
+                <input type="number" class="form-control px-order-input" id="purchasedPrice"
+                  formControlName="entry_price" [ngClass]="{ 'is-invalid': submit && f['entry_price'].errors }"
+                  autocomplete="off">
+                <div *ngIf="submit && f['entry_price'].errors" class="invalid-feedback">
+                  <div *ngIf="f['entry_price'].errors['required']">
+                    <span style="color:red">Purchased Price is required</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group px-order-form__group">
+                <b><label for="targetPrice">Target Price</label></b>
+                <input type="number" class="form-control px-order-input" id="targetPrice" formControlName="target_price"
+                  [ngClass]="{ 'is-invalid': submit && f['target_price'].errors }" autocomplete="off">
+                <div *ngIf="submit && f['target_price'].errors" class="invalid-feedback">
+                  <div *ngIf="f['target_price'].errors['required']">
+                    <span style="color:red">Target Price is required</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group px-order-form__group">
+                <b><label for="stoplossPrice">Stoploss Price</label></b>
+                <input type="number" class="form-control px-order-input" id="stoplossPrice"
+                  formControlName="stoploss_price" [ngClass]="{ 'is-invalid': submit && f['stoploss_price'].errors }"
+                  autocomplete="off">
+                <div *ngIf="submit && f['stoploss_price'].errors" class="invalid-feedback">
+                  <div *ngIf="f['stoploss_price'].errors['required']">
+                    <span style="color:red">Stoploss Price is required</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group px-order-form__group">
+              <b><label for="stockquantity">Stock Quantity</label></b>
+              <input type="number" class="form-control px-order-input" id="stockquantity"
+                formControlName="stock_quantity" [ngClass]="{ 'is-invalid': submit && f['stock_quantity'].errors }"
+                autocomplete="off">
+              <div *ngIf="submit && f['stock_quantity'].errors" class="invalid-feedback">
+                <div *ngIf="f['stock_quantity'].errors['required']">
+                  <span style="color:red">Quantity is required</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="px-order-form__actions">
+              <button type="button" class="form-control submit-btn px-order-btn px-order-btn--demo"
+                (click)="onSubmitofPanelOrder('demo')">
+                Place Demo Order
+              </button>
+
+              <button type="button" class="form-control submit-btn px-order-btn px-order-btn--real"
+                (click)="onSubmitofPanelOrder('real')" *ngIf="Role=='admin'">
+                Place Real Order
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- new premium header -->
+      <header class="trade-header">
+        <div class="trade-header__left">
+          <button class="trade-header__settings" (mouseenter)="handleSettingsEnter()"
+            (mouseleave)="handleSettingsLeave()" (click)="toggleLeftBar()" type="button" aria-label="Settings">
+            <img src="assets/image/settingIcon.png" class="trade-header__settings-icon" alt="Settings">
+          </button>
+
+          <div class="trade-header__ohlc" [ngClass]="CandleColor">
+            <span class="trade-header__ohlc-item">Open: {{ Open }}</span>
+            <span class="trade-header__ohlc-item">High: {{ High }}</span>
+            <span class="trade-header__ohlc-item">Low: {{ Low }}</span>
+            <span class="trade-header__ohlc-item">Close: {{ Close }}</span>
+          </div>
+        </div>
+
+        <div class="trade-header__right">
+            <!-- <div class="manual-zone-draw-wrapper">
+              <button type="button" class="manual-zone-draw-btn manual-zone-draw-btn-buy"
+                [class.active]="activeManualZoneType === 'BUY'" (click)="startBuyZoneDrawing($event)" title="Draw Buy Zone">
+                <div class="manual-zone-draw-mini-chart">
+                  <div class="manual-zone-draw-box manual-zone-draw-box-green"></div>
+            
+                  <span class="manual-zone-draw-candle manual-zone-draw-green manual-zone-draw-c1"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-green manual-zone-draw-c2"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-green manual-zone-draw-c3"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-blue manual-zone-draw-c4"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-blue manual-zone-draw-c5"></span>
+                </div>
+              </button>
+            
+              <button type="button" class="manual-zone-draw-btn manual-zone-draw-btn-sell"
+                [class.active]="activeManualZoneType === 'SELL'" (click)="startSellZoneDrawing($event)" title="Draw Sell Zone">
+                <div class="manual-zone-draw-mini-chart">
+                  <div class="manual-zone-draw-box manual-zone-draw-box-orange"></div>
+            
+                  <span class="manual-zone-draw-candle manual-zone-draw-orange manual-zone-draw-c1"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-orange manual-zone-draw-c2"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-red manual-zone-draw-c3"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-red manual-zone-draw-c4"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-red manual-zone-draw-c5"></span>
+                </div>
+              </button>
+            </div> -->
+
+            <!-- <div class="tt-chart-tool-wrapper">
+              <button type="button" class="tt-chart-tool-main-btn" (click)="toggleChartDrawingToolMenu($event)"
+                title="Drawing Tools">
+                <i class="fas fa-pencil-ruler"></i>
+              </button>
+            </div> -->
+
+            <!-- <div class="tt-chart-tool-popup" *ngIf="showChartDrawingToolMenu" [ngStyle]="chartDrawingToolPopupStyle">
+              <button type="button" [class.active]="activeChartDrawingTool === 'select'" (click)="selectChartDrawingTool('select')">
+                <i class="fas fa-mouse-pointer"></i>
+                Select / Move
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'vertical'"
+                (click)="selectChartDrawingTool('vertical')">
+                <i class="fas fa-arrows-alt-v"></i>
+                Vertical Line
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'horizontal'"
+                (click)="selectChartDrawingTool('horizontal')">
+                <i class="fas fa-grip-lines"></i>
+                Horizontal Line
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'trendline'"
+                (click)="selectChartDrawingTool('trendline')">
+                <i class="fas fa-slash"></i>
+                Free Line
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'text'" (click)="selectChartDrawingTool('text')">
+                <i class="fas fa-font"></i>
+                Text
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'longPosition'"
+                (click)="selectChartDrawingTool('longPosition')">
+                <i class="fas fa-chart-line"></i>
+                Long Position
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'shortPosition'"
+                (click)="selectChartDrawingTool('shortPosition')">
+                <i class="fas fa-chart-line"></i>
+                Short Position
+              </button>
+            </div> -->
+
+            
+          <button type="button" (click)="openPopupPP()" class="trade-header__action trade-header__action--icon"
+            title="Check Price Percentage">
+            <img src="assets/image/execution_white.png" alt="Check Price" width="18" height="18">
+          </button>
+
+          <button class="trade-header__action" (click)="openCreateOrderPanel()">CREATE ORDER</button>
+          <button class="trade-header__action" (click)="UpdatePrediction()">UPDATE PREDICTION</button>
+          <button class="trade-header__action" (click)="UpdateAlert()">UPDATE TRADE</button>
+        </div>
+
+        <div class="trade-header__mobile-tools">
+          <button type="button" class="trade-header__mobile-menu-btn" (click)="toggleMobileTradeMenu()"
+            aria-label="Open actions menu">
+            ☰
+          </button>
+        </div>
+
+        <button type="button" #closeButton class="btn-close trade-header__close" data-bs-dismiss="modal"
+          (click)="CloseFullModal()" aria-label="Close"></button>
+      </header>
+
+        <!-- TRADINGVIEW STYLE LEFT DRAWING TOOLBAR -->
+          <aside class="tv-left-drawing-toolbar" >
+          
+            <!-- Select / Move -->
+            <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'select'"
+              (click)="selectChartDrawingTool('select')" title="Select / Move">
+              <i class="fas fa-mouse-pointer"></i>
+            </button>
+          
+            <!-- Vertical Line -->
+            <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'vertical'"
+              (click)="selectChartDrawingTool('vertical')" title="Vertical Line">
+              <i class="fas fa-arrows-alt-v"></i>
+            </button>
+          
+            <!-- Horizontal Line -->
+            <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'horizontal'"
+              (click)="selectChartDrawingTool('horizontal')" title="Horizontal Line">
+              <i class="fas fa-grip-lines"></i>
+            </button>
+          
+            <!-- Free Line -->
+            <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'trendline'"
+              (click)="selectChartDrawingTool('trendline')" title="Free Line">
+              <i class="fas fa-slash"></i>
+            </button>
+          
+            <!-- Rectangle -->
+            <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'rectangle'"
+              (click)="selectChartDrawingTool('rectangle')" title="Rectangle">
+              <span class="tv-left-rectangle-icon"></span>
+            </button>
+          
+            <!-- Text -->
+            <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'text'"
+              (click)="selectChartDrawingTool('text')" title="Text">
+              <i class="fas fa-font"></i>
+            </button>
+          
+            <div class="tv-left-tool-separator"></div>
+          
+            <!-- Long Position -->
+            <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'longPosition'"
+              (click)="selectChartDrawingTool('longPosition')" title="Long Position">
+              <span class="tv-left-position-icon tv-left-position-icon-long">L</span>
+            </button>
+          
+            <!-- Short Position -->
+            <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'shortPosition'"
+              (click)="selectChartDrawingTool('shortPosition')" title="Short Position">
+              <span class="tv-left-position-icon tv-left-position-icon-short">S</span>
+            </button>
+          
+            <div class="tv-left-tool-separator"></div>
+          
+            <button type="button" class="tv-left-tool-btn tv-left-zone-btn-buy" [class.active]="activeManualZoneType === 'BUY'"
+              (click)="startBuyZoneDrawing($event)" title="Draw Buy Zone">
+              <span class="tv-left-zone-mini">
+                <span class="tv-left-zone-box tv-left-zone-box-buy"></span>
+                <span class="tv-left-zone-candle tv-left-zone-candle-green c1"></span>
+                <span class="tv-left-zone-candle tv-left-zone-candle-green c2"></span>
+                <span class="tv-left-zone-candle tv-left-zone-candle-blue c3"></span>
+              </span>
+            </button>
+          
+            <button type="button" class="tv-left-tool-btn tv-left-zone-btn-sell" [class.active]="activeManualZoneType === 'SELL'"
+              (click)="startSellZoneDrawing($event)" title="Draw Sell Zone">
+              <span class="tv-left-zone-mini">
+                <span class="tv-left-zone-box tv-left-zone-box-sell"></span>
+                <span class="tv-left-zone-candle tv-left-zone-candle-orange c1"></span>
+                <span class="tv-left-zone-candle tv-left-zone-candle-red c2"></span>
+                <span class="tv-left-zone-candle tv-left-zone-candle-red c3"></span>
+              </span>
+            </button>
+          
+            <div class="tv-left-tool-separator"></div>
+          
+            <!-- Delete Selected Drawing -->
+            <button type="button" class="tv-left-tool-btn tv-left-tool-btn-danger" (click)="deleteActiveDrawingFromLeftToolbar()"
+              title="Delete Selected Drawing">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          
+          </aside>
+
+        <!-- TOOL SETTINGS SIDE PANEL -->
+
+        <div class="ctv-drawing-style-panel" *ngIf="selectedChartDrawing">
+          <div class="ctv-style-header">
+            <div>
+              <strong>Drawing Properties</strong>
+              <span>{{ selectedChartDrawing.type }}</span>
+            </div>
+        
+            <button type="button" class="ctv-style-close" (click)="selectedChartDrawing = null" title="Close">
+              ×
+            </button>
+          </div>
+        
+          <div class="ctv-style-body">
+            <!-- Common color -->
+            <div class="ctv-style-row">
+              <label>Color</label>
+              <input type="color" [value]="selectedChartDrawing.color || '#2563eb'"
+                (input)="onSelectedDrawingColorChange($event)" />
+            </div>
+        
+            <!-- Line width -->
+            <div class="ctv-style-row" *ngIf="!isSelectedTextDrawing()">
+              <label>Width</label>
+              <select [value]="selectedChartDrawing.lineWidth || 1" (change)="onSelectedDrawingLineWidthChange($event)">
+                <option *ngFor="let width of drawingLineWidths" [value]="width">
+                  {{ width }} px
+                </option>
+              </select>
+            </div>
+        
+            <!-- Line style -->
+            <div class="ctv-style-row" *ngIf="!isSelectedTextDrawing()">
+              <label>Style</label>
+              <select [value]="selectedChartDrawing.lineStyle || 'solid'" (change)="onSelectedDrawingLineStyleChange($event)">
+                <option *ngFor="let style of drawingLineStyles" [value]="style">
+                  {{ style }}
+                </option>
+              </select>
+            </div>
+        
+            <!-- Text settings -->
+            <ng-container *ngIf="isSelectedTextDrawing()">
+              <div class="ctv-style-row ctv-style-row-full">
+                <label>Text</label>
+                <input type="text" [value]="selectedChartDrawing.text || ''" (input)="onSelectedTextChange($event)"
+                  placeholder="Enter text" />
+              </div>
+        
+              <div class="ctv-style-row">
+                <label>Font Size</label>
+                <select [value]="selectedChartDrawing.fontSize || 13" (change)="onSelectedTextFontSizeChange($event)">
+                  <option [value]="11">11 px</option>
+                  <option [value]="12">12 px</option>
+                  <option [value]="13">13 px</option>
+                  <option [value]="14">14 px</option>
+                  <option [value]="16">16 px</option>
+                  <option [value]="18">18 px</option>
+                  <option [value]="20">20 px</option>
+                  <option [value]="24">24 px</option>
+                </select>
+              </div>
+        
+              <div class="ctv-style-row">
+                <label>Background</label>
+                <input type="color" [value]="selectedChartDrawing.backgroundColor || '#ffffff'"
+                  (input)="onSelectedTextBackgroundChange($event)" />
+              </div>
+        
+              <div class="ctv-style-actions">
+                <button type="button" class="ctv-style-action-btn" [class.active]="selectedChartDrawing.fontWeight === 'bold'"
+                  (click)="toggleSelectedTextBold()">
+                  Bold
+                </button>
+        
+                <button type="button" class="ctv-style-action-btn" (click)="clearSelectedTextBackground()">
+                  Clear BG
+                </button>
+              </div>
+            </ng-container>
+        
+            <!-- Long / Short settings -->
+            <ng-container *ngIf="isSelectedPositionDrawing()">
+              <div class="ctv-position-settings">
+                <div class="ctv-style-row">
+                  <label>Target</label>
+                  <input type="color" [value]="selectedChartDrawing.targetColor || '#10b981'"
+                    (input)="onPositionTargetColorChange($event)" />
+                </div>
+        
+                <div class="ctv-style-row">
+                  <label>Stop</label>
+                  <input type="color" [value]="selectedChartDrawing.stopColor || '#f43f5e'"
+                    (input)="onPositionStopColorChange($event)" />
+                </div>
+        
+                <div class="ctv-style-row">
+                  <label>Entry</label>
+                  <input type="color" [value]="selectedChartDrawing.entryColor || '#14b8a6'"
+                    (input)="onPositionEntryColorChange($event)" />
+                </div>
+        
+                <div class="ctv-style-row ctv-style-row-full">
+                  <label>Opacity</label>
+                  <input type="range" min="0.05" max="0.8" step="0.05" [value]="selectedChartDrawing.fillOpacity || 0.25"
+                    (input)="onPositionOpacityChange($event)" />
+                </div>
+        
+                <button type="button" class="ctv-style-action-btn" [class.active]="selectedChartDrawing.showLabels !== false"
+                  (click)="togglePositionLabels()">
+                  Labels
+                </button>
+              </div>
+            </ng-container>
+        
+            <!-- Common actions -->
+            <div class="ctv-style-footer">
+              <button type="button" class="ctv-style-action-btn" [class.active]="selectedChartDrawing.locked"
+                (click)="toggleSelectedDrawingLock()">
+                {{ selectedChartDrawing.locked ? 'Unlock' : 'Lock' }}
+              </button>
+        
+              <button type="button" class="ctv-style-action-btn" (click)="duplicateSelectedChartDrawing()">
+                Duplicate
+              </button>
+        
+              <button type="button" class="ctv-style-action-btn danger" (click)="deleteSelectedChartDrawingFromPanel()">
+                Delete
+              </button>
+            </div>
+            
+            <div class="ctv-style-row" *ngIf="isSelectedRectangleDrawing()">
+              <label>Fill Opacity</label>
+              <input type="range" min="0.05" max="0.8" step="0.05" [value]="selectedChartDrawing.fillOpacity || 0.18"
+                (input)="onPositionOpacityChange($event)" />
+            </div>
+          </div>
+        </div>
+
+      <!-- mobile backdrop -->
+      <div class="trade-mobile-backdrop" *ngIf="showMobileTradeMenu" (click)="closeMobileTradeMenu()">
+      </div>
+
+      <!-- mobile right drawer -->
+      <div class="trade-mobile-panel" [class.open]="showMobileTradeMenu">
+        <div class="trade-mobile-panel__header">
+          <span>Actions</span>
+          <button type="button" class="trade-mobile-panel__close" (click)="closeMobileTradeMenu()">×</button>
+        </div>
+
+        <div class="trade-mobile-panel__body">
+          <button type="button" class="trade-mobile-panel__btn" (click)="openPopupPP(); closeMobileTradeMenu()">
+            Check Price Percentage
+          </button>
+          <button type="button" class="trade-mobile-panel__btn"
+            (click)="openCreateOrderPanel(); closeMobileTradeMenu()">
+            Create Order
+          </button>
+          <!-- <button type="button" class="trade-mobile-panel__btn" (click)="viewReason(); closeMobileTradeMenu()">
+            View Reason
+          </button> -->
+          <button type="button" class="trade-mobile-panel__btn" (click)="UpdatePrediction(); closeMobileTradeMenu()">
+            Update Prediction
+          </button>
+          <button type="button" class="trade-mobile-panel__btn" (click)="UpdateAlert(); closeMobileTradeMenu()">
+            Update Trade
+          </button>
+        </div>
+      </div>
+
+      <div class="px-reason-panel" *ngIf="showReasonPanel">
+        <div class="px-reason-panel__header">
+          <div class="px-reason-panel__titleWrap">
+            <div class="px-reason-panel__icon">📝</div>
+            <h3 class="px-reason-panel__title">Reason</h3>
+          </div>
+
+          <button type="button" class="px-reason-panel__close" (click)="closePanel()">×</button>
+        </div>
+
+        <div class="px-reason-panel__body">
+          <div class="px-reason-panel__list" *ngIf="reasons.length > 0; else emptyReasonState">
+            <div class="px-reason-item" *ngFor="let reason of reasons; let i = index">
+              <div class="px-reason-item__index">{{ i + 1 }}</div>
+              <div class="px-reason-item__text">{{ reason }}</div>
+            </div>
+          </div>
+
+          <ng-template #emptyReasonState>
+            <div class="px-reason-empty">
+              <div class="px-reason-empty__icon">📄</div>
+              <div class="px-reason-empty__title">No Reason Available</div>
+              <div class="px-reason-empty__subtext">There is no explanation available for this setup right now.</div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+        <div class="modal-body tv-chart-body">
+          <div #chart_container_new id="chart-container_new" style="width: 100%; height: 100%;"></div>
+        </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CPM ON HOVER START -->
+
+<div class="cmp-hover-tooltip" *ngIf="cmpHover.visible" [style.left.px]="cmpHover.x" [style.top.px]="cmpHover.y">
+  <div class="cmp-hover-title">
+    {{ cmpHover.symbol }}
+    <span *ngIf="cmpHover.expiryDate"> • {{ cmpHover.expiryDate }}</span>
+  </div>
+
+  <div class="cmp-hover-body" *ngIf="cmpHover.loading">
+    Loading CMP...
+  </div>
+
+  <div class="cmp-hover-body cmp-hover-price" *ngIf="!cmpHover.loading && cmpHover.price !== null">
+    CMP: {{ cmpHover.price | number:'1.2-2' }}
+  </div>
+
+  <div class="cmp-hover-body cmp-hover-error" *ngIf="!cmpHover.loading && cmpHover.error">
+    {{ cmpHover.error }}
+  </div>
+</div>
+
+<!-- CPM ON HOVER END -->
+
+
+<div id="leftBar" class="px-leftbar" [class.px-leftbar--open]="isLeftBarOpen" (mouseenter)="handleLeftBarEnter()"
+  (mouseleave)="handleLeftBarLeave()">
+  <div class="px-leftbar__header">
+    <span class="px-leftbar__title">Market Zones &amp; Strategy</span>
+    <button type="button" class="px-leftbar__close" (click)="openBar(false)" aria-label="Close panel">
+      ×
+    </button>
+  </div>
+
+  <div class="px-leftbar__body">
+    <div class="px-leftbar__links">
+
+      <div *ngIf="QualifiedZoneFlag" class="px-leftbar__item">
+        <input type="checkbox" [(ngModel)]="selectedOptions['qualified_zones']"
+          (click)="checkboxClicked('qualified_zones')" id="qualified_zones" hidden>
+        <label for="qualified_zones" class="px-leftbar__label px-leftbar__label--primary">
+          <i class="fas fa-cogs"></i>
+          <span>Qualified Zones</span>
+        </label>
+      </div>
+
+      <div class="px-leftbar__item">
+        <input type="checkbox" [(ngModel)]="selectedOptions['base_candle']" (click)="checkboxClicked('base_candle')"
+          id="base_candle" hidden>
+        <label for="base_candle" class="px-leftbar__label">
+          <i class="fas fa-chart-line"></i>
+          <span>Base Candle</span>
+        </label>
+      </div>
+
+      <div class="px-leftbar__item">
+        <input type="checkbox" [(ngModel)]="selectedOptions['bad_zone']" (click)="checkboxClicked('bad_zone')"
+          id="bad_zone" hidden>
+        <label for="bad_zone" class="px-leftbar__label px-leftbar__label--danger">
+          <i class="fas fa-times-circle"></i>
+          <span>Bad Zone</span>
+        </label>
+      </div>
+
+      <!-- <div *ngIf="QualifiedZoneFlag" class="px-leftbar__item">
+        <input type="checkbox" [(ngModel)]="selectedOptions['overlap_evaluate']"
+          (click)="checkboxClicked('overlap_evaluate')" id="overlap_evaluate" hidden>
+        <label for="overlap_evaluate" class="px-leftbar__label px-leftbar__label--success">
+          <i class="fas fa-check-circle"></i>
+          <span>Overlap Evaluate</span>
+        </label>
+      </div>
+
+      <div *ngIf="QualifiedZoneFlag" class="px-leftbar__item">
+        <input type="checkbox" [(ngModel)]="selectedOptions['overlap_analyze']"
+          (click)="checkboxClicked('overlap_analyze')" id="overlap_analyze" hidden>
+        <label for="overlap_analyze" class="px-leftbar__label">
+          <i class="fas fa-search"></i>
+          <span>Overlap Analyze</span>
+        </label>
+      </div> -->
+
+       <div *ngIf="QualifiedZoneFlag" class="px-leftbar__item">
+        <input type="checkbox" [(ngModel)]="selectedOptions['htf_zone']"
+          (click)="checkboxClicked('htf_zone')" id="htf_zone" hidden>
+        <label for="htf_zone" class="px-leftbar__label">
+          <i class="fas fa-search"></i>
+          <span>HTF Zones</span>
+        </label>
+      </div>
+
+      <div *ngIf="QualifiedZoneFlag==false" class="px-leftbar__item">
+        <input type="checkbox" [(ngModel)]="selectedOptions['optimized_buy_sell_zone']"
+          (click)="checkboxClicked('optimized_buy_sell_zone')" id="optimized_buy_sell_zone" hidden>
+        <label for="optimized_buy_sell_zone" class="px-leftbar__label px-leftbar__label--warn">
+          <i class="fas fa-search"></i>
+          <span>Optimize Buy/Sell Zone</span>
+        </label>
+      </div>
+
+      <div class="px-leftbar__item">
+        <input type="checkbox" [(ngModel)]="selectedOptions['score']" (click)="checkboxClicked('score')" id="score"
+          hidden>
+        <label for="score" class="px-leftbar__label px-leftbar__label--danger">
+          <i class="fas fa-times-circle"></i>
+          <span>Score</span>
+        </label>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="px-leftbar__backdrop" *ngIf="isLeftBarOpen" (click)="openBar(false)"></div>
+
+<!-- TRADE SETTINGS LEFT BAR END -->
+
+<!-- Right-Side Panel Drawer Open for Create Order button-->
+<div class="px-btn-order-backdrop" *ngIf="showCreateOrderModalforButtonClick"
+  (click)="closeCreateOrderPanelforButton()"></div>
+
+<div class="px-btn-order-drawer" *ngIf="showCreateOrderModalforButtonClick">
+  <form class="px-btn-order-form" [formGroup]="fincreateform" novalidate>
+
+    <div class="px-btn-order-form__header">
+      <label class="px-btn-order-form__title">Create Order</label>
+      <button type="button" class="px-btn-order-form__close" (click)="closeCreateOrderPanelforButton()">×</button>
+    </div>
+
+    <div class="px-btn-order-form__content">
+
+      <div class="px-btn-order-form__group px-btn-order-form__group--full">
+        <label for="dropdown1">Select Stock <span style="color:red">*</span></label>
+        <div class="form-control px-btn-order-input px-btn-order-input--static">
+          {{ SelectedStock | uppercase }}
+        </div>
+      </div>
+
+      <div class="px-btn-order-form__grid3">
+        <div class="px-btn-order-form__group">
+          <label for="purchasedPrice">Entry Price</label>
+          <input type="number" class="form-control px-btn-order-input" id="purchasedPrice" formControlName="entry_price"
+            [ngClass]="{ 'is-invalid': submitted && g['entry_price'].errors }" autocomplete="off">
+        </div>
+
+        <div class="px-btn-order-form__group">
+          <label for="targetPrice">Target Price</label>
+          <input type="number" class="form-control px-btn-order-input" id="targetPrice" formControlName="target_price"
+            [ngClass]="{ 'is-invalid': submitted && g['target_price'].errors }" autocomplete="off">
+        </div>
+
+        <div class="px-btn-order-form__group">
+          <label for="stoplossPrice">Stoploss Price</label>
+          <input type="number" class="form-control px-btn-order-input" id="stoplossPrice"
+            formControlName="stoploss_price" [ngClass]="{ 'is-invalid': submitted && g['stoploss_price'].errors }"
+            autocomplete="off">
+        </div>
+      </div>
+
+      <div class="px-btn-order-form__group px-btn-order-form__group--full">
+        <label for="stockquantity">Stock Quantity</label>
+        <input type="number" class="form-control px-btn-order-input" id="stockquantity" formControlName="stock_quantity"
+          [ngClass]="{ 'is-invalid': submitted && g['stock_quantity'].errors }" autocomplete="off">
+      </div>
+
+      <div class="px-btn-order-form__actions">
+        <button type="button" class="px-btn-order-btn px-btn-order-btn--demo" (click)="create('demo')">
+          Place Demo Order
+        </button>
+
+        <button type="button" class="px-btn-order-btn px-btn-order-btn--real" (click)="create('real')"
+          *ngIf="Role=='admin'">
+          Place Real Order
+        </button>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<div *ngIf="isNotificationVisible" class="px-prediction-toast" id="custom-notification">
+  <div class="px-prediction-toast__accent"></div>
+
+  <div class="px-prediction-toast__inner">
+    <div class="px-prediction-toast__header">
+      <div class="px-prediction-toast__titleWrap">
+        <div class="px-prediction-toast__title">Prediction</div>
+        <div class="px-prediction-toast__badge">Signal</div>
+      </div>
+
+      <button (click)="closeNotification()" class="px-prediction-toast__close" aria-label="Close">
+        ×
+      </button>
+    </div>
+
+    <div class="px-prediction-toast__body">
+      <div class="px-prediction-toast__prediction">
+        {{ ModelPrediction }}
+      </div>
+    </div>
+  </div>
+</div>
+<!-- PREDICTION PANEL END -->
+
+<app-floating-modal #modalA title="PREDIXA™ Decision Snapshot" class="px-snapshot-modal" [width]="1200" [height]="680">
+  <div class="modal-body">
+    <div class="px-snapshot" *ngIf="PricePercentageData as snap">
+
+      <!-- TOP SUMMARY -->
+      <div class="px-snapshot__summary">
+        <div class="px-snapshot__summary-row">
+          <div class="px-snapshot__summary-label">Bias:</div>
+          <div class="px-snapshot__summary-value">{{ snap.bias || '-' }}</div>
+        </div>
+
+        <div class="px-snapshot__summary-row">
+          <div class="px-snapshot__summary-label">Permission:</div>
+          <div class="px-snapshot__summary-value">
+            Long:
+            <span class="px-state-pill" [ngClass]="snap.allow_long ? 'is-allowed' : 'is-blocked'">
+              {{ snap.allow_long ? 'Allowed' : 'Blocked' }}
+            </span>
+            |
+            Short:
+            <span class="px-state-pill" [ngClass]="snap.allow_short ? 'is-allowed' : 'is-blocked'">
+              {{ snap.allow_short ? 'Allowed' : 'Blocked' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="px-snapshot__summary-row">
+          <div class="px-snapshot__summary-label">Permitted Setup:</div>
+          <div class="px-snapshot__summary-value">{{ snap.permitted_setup || '-' }}</div>
+        </div>
+
+        <div class="px-snapshot__summary-row">
+          <div class="px-snapshot__summary-label">Trade Type:</div>
+          <div class="px-snapshot__summary-value">
+            Long: {{ snap.trade_type_long || '-' }} | Short: {{ snap.trade_type_short || '-' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- THREE COLUMNS -->
+      <div class="px-snapshot__grid">
+
+        <!-- E -->
+        <div class="px-snapshot__panel">
+          <div class="px-snapshot__panel-head">Evaluate (E)</div>
+
+          <div class="px-snapshot__panel-body">
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Regime:</span>
+              <span class="px-regime-pill" [ngClass]="getRegimeClass(snap.result_E?.regime)">
+                {{ snap.result_E?.regime || '-' }}
+              </span>
+            </div>
+
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Quadrant:</span>
+              <span>{{ snap.result_E?.quadrant || '-' }}</span>
+            </div>
+
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Price % in Quadrant:</span>
+              <span>{{ formatPct(snap.result_E?.quadrant_price_pct) }}</span>
+            </div>
+
+            <div class="px-rule-box">
+              <span class="px-rule-box__badge">RULE</span>
+              <span class="px-rule-box__text">{{ snap.result_E?.rule_applied || '-' }}</span>
+            </div>
+
+            <div class="px-diagnosis">
+              <span class="px-snapshot__metric-label">Diagnosis:</span>
+              <span>{{ snap.result_E?.diagnosis || '-' }}</span>
+            </div>
+
+            <div class="px-zone-block">
+              <div><strong>Nearest BZ:</strong> {{ getZoneLine(snap.result_E?.nearest_bz) }}</div>
+              <div class="px-zone-sub">{{ getZoneMetaLine(snap.result_E?.nearest_bz) }}</div>
+              <div><strong>Nearest SZ:</strong> {{ getZoneLine(snap.result_E?.nearest_sz) }}</div>
+              <div class="px-zone-sub" *ngIf="snap.result_E?.nearest_sz">{{ getZoneMetaLine(snap.result_E?.nearest_sz)
+                }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- A -->
+        <div class="px-snapshot__panel">
+          <div class="px-snapshot__panel-head">Analyze (A)</div>
+
+          <div class="px-snapshot__panel-body">
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Regime:</span>
+              <span class="px-regime-pill" [ngClass]="getRegimeClass(snap.result_A?.regime)">
+                {{ snap.result_A?.regime || '-' }}
+              </span>
+            </div>
+
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Quadrant:</span>
+              <span>{{ snap.result_A?.quadrant || '-' }}</span>
+            </div>
+
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Price % in Quadrant:</span>
+              <span>{{ formatPct(snap.result_A?.quadrant_price_pct) }}</span>
+            </div>
+
+            <div class="px-rule-box">
+              <span class="px-rule-box__badge">RULE</span>
+              <span class="px-rule-box__text">{{ snap.result_A?.rule_applied || '-' }}</span>
+            </div>
+
+            <div class="px-diagnosis">
+              <span class="px-snapshot__metric-label">Diagnosis:</span>
+              <span>{{ snap.result_A?.diagnosis || '-' }}</span>
+            </div>
+
+            <div class="px-zone-block">
+              <div><strong>Nearest BZ:</strong> {{ getZoneLine(snap.result_A?.nearest_bz) }}</div>
+              <div class="px-zone-sub">{{ getZoneMetaLine(snap.result_A?.nearest_bz) }}</div>
+              <div><strong>Nearest SZ:</strong> {{ getZoneLine(snap.result_A?.nearest_sz) }}</div>
+              <div class="px-zone-sub" *ngIf="snap.result_A?.nearest_sz">{{ getZoneMetaLine(snap.result_A?.nearest_sz)
+                }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- X -->
+        <div class="px-snapshot__panel">
+          <div class="px-snapshot__panel-head">Execute (X)</div>
+
+          <div class="px-snapshot__panel-body">
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Regime:</span>
+              <span class="px-regime-pill" [ngClass]="getRegimeClass(snap.result_X?.regime)">
+                {{ snap.result_X?.regime || '-' }}
+              </span>
+            </div>
+
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Quadrant:</span>
+              <span>{{ snap.result_X?.quadrant || '-' }}</span>
+            </div>
+
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Price % in Quadrant:</span>
+              <span>{{ formatPct(snap.result_X?.quadrant_price_pct) }}</span>
+            </div>
+
+            <div class="px-rule-box">
+              <span class="px-rule-box__badge">RULE</span>
+              <span class="px-rule-box__text">{{ snap.result_X?.rule_applied || '-' }}</span>
+            </div>
+
+            <div class="px-diagnosis">
+              <span class="px-snapshot__metric-label">Diagnosis:</span>
+              <span>{{ snap.result_X?.diagnosis || '-' }}</span>
+            </div>
+
+            <div class="px-zone-block">
+              <div><strong>Nearest BZ:</strong> {{ getZoneLine(snap.result_X?.nearest_bz) }}</div>
+              <div class="px-zone-sub">{{ getZoneMetaLine(snap.result_X?.nearest_bz) }}</div>
+              <div><strong>Nearest SZ:</strong> {{ getZoneLine(snap.result_X?.nearest_sz) }}</div>
+              <div class="px-zone-sub" *ngIf="snap.result_X?.nearest_sz">{{ getZoneMetaLine(snap.result_X?.nearest_sz)
+                }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</app-floating-modal>
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

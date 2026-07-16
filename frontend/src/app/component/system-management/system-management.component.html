@@ -1,0 +1,271 @@
+<!-- NEW CODE -->
+
+<!-- Main Content -->
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+  <h2 class="stock-list-title"></h2>
+  <div class="button-group">
+    <button class="px-user-add-btn" (click)="openAddIndexModal()">Add Index</button>
+
+    <button class="px-user-add-btn" (click)="openAddStockModal()">Add Stock</button>
+  </div>
+</div>
+
+<!-- Right Side Panel for Add Index -->
+<!-- <div class="right-panel" [class.open]="showAddIndexPanel">
+  <div class="right-panel-header">
+    <h4>Add New Index</h4>
+    <button class="close-btn" (click)="closeAddIndexPanel()">×</button>
+  </div>
+  <div class="right-panel-body">
+    <form [formGroup]="addIndexForm" (ngSubmit)="submitIndex()">
+      <div class="form-group">
+        <label>Index Name</label>
+        <input type="text" class="form-control" formControlName="index_name" placeholder="Enter Index Name">
+      </div>
+      <button type="submit" class="btn btn-success mt-4">Save</button>
+    </form>
+  
+  </div>
+</div> -->
+
+
+<div *ngIf="activeMenu === 'stock'" class="menu-content">
+  <!-- <div class="stock-header">
+        <u>
+          <h2 class="stock-list-title">ADD NEW STOCK</h2>
+        </u>
+      </div> -->
+  <!-- <form [formGroup]="AddStockForm" novalidate class="stock-form">
+
+      
+        <div class="form-group mb-3">
+          <label for="stock_name" class="form-label fw-semibold">Stock Name</label>
+          <input type="text" id="stock_name" class="form-control" placeholder="Enter Stock Name"
+            formControlName="stock_name" [ngClass]="{ 'is-invalid': submittedforAddStock && h['stock_name'].errors }"
+            autocomplete="off" />
+          <div *ngIf="submittedforAddStock && h['stock_name'].errors" class="invalid-feedback d-block">
+            <span *ngIf="h['stock_name'].errors['required']">Stock Name is required</span>
+          </div>
+        </div>
+
+    
+        <div class="form-group mb-3">
+          <label for="y_stock_name" class="form-label fw-semibold">Y-Finance Stock Name</label>
+          <input type="text" id="y_stock_name" class="form-control" placeholder="Enter Y-Finance Stock Name"
+            formControlName="y_stock_name"
+            [ngClass]="{ 'is-invalid': submittedforAddStock && h['y_stock_name'].errors }" autocomplete="off" />
+          <div *ngIf="submittedforAddStock && h['y_stock_name'].errors" class="invalid-feedback d-block">
+            <span *ngIf="h['y_stock_name'].errors['required']">Y Finance Stock Name is required</span>
+          </div>
+        </div>
+        <br>
+      
+        <div class="form-group mb-3">
+          <label class="form-label fw-semibold">Select Indices</label>
+          <div class="d-flex flex-wrap gap-2">
+            <div class="form-check" *ngFor="let index of indexList">
+              <input class="form-check-input" type="checkbox" [value]="index.index_id"
+                (change)="onCheckboxChange($event)" [checked]="AddStockForm.value.index_ids.includes(index.index_id)"
+                [id]="index.index_id" style="margin-top: 10px;" />
+              <label class="form-check-label" [for]="index.index_id" style="margin-top: 10px;">
+                {{ index.index_name }} &nbsp;&nbsp;
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </form> -->
+
+
+
+
+
+  <div class="stock-list-container">
+
+    <div class="container-fluid py-3">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <div class="stock-filter stock-filter--premium d-flex">
+            <input type="text" class="form-control stock-filter__control stock-filter__input me-2"
+              placeholder="Search stock by name..." [(ngModel)]="searchText" (input)="onSearchInput(searchText)" />
+
+            <select class="form-select stock-filter__control stock-filter__select" [(ngModel)]="selectedIndexIds"
+              name="table_name" #indexid (change)="onIndexChange(indexid.value)">
+              <option value="">-- Select index --</option>
+              <option *ngFor="let index of indexList" [value]="index.index_id">
+                {{ index.index_name }}
+              </option>
+            </select>
+          </div>
+          <!-- <div class="stock-filter d-flex">
+                <input type="text" class="form-control me-2" placeholder="Search stock by name..."
+                  [(ngModel)]="searchText" (input)="onSearchInput(searchText)" />
+                <select class="form-select" [(ngModel)]="selectedIndexIds" name="table_name" #indexid
+                  (change)="onIndexChange(indexid.value)">
+                  <option value="">-- Select index --</option>
+                  <option *ngFor="let index of indexList" [value]="index.index_id">
+
+                    {{ index.index_name }}
+                  </option>
+                </select>
+              </div> -->
+        </div>
+        <div class="col-md-6 d-flex justify-content-end">
+          <!-- Left: Pagination Controls -->
+          <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+            <button class="btn btn-sm nav-btn" (click)="goToPreviousPage()" [disabled]="getCurrentPage() === 1">
+              ‹ Prev
+            </button>
+
+            <ng-container *ngFor="let page of getPageNumbers()">
+              <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPage()" (click)="goToPage(page)">
+                {{ page }}
+              </button>
+            </ng-container>
+
+            <button class="btn btn-sm nav-btn" (click)="goToNextPage()"
+              [disabled]="getCurrentPage() >= getTotalPages()">
+              Next ›
+            </button>
+
+            <select style="height:38px;" class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSize"
+              (change)="onPageSizeChange()">
+              <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+            </select>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="stock-table-wrap">
+        <table class="stock-table premium-stock-table">
+          <thead>
+            <tr>
+              <th>SL.</th>
+              <th (click)="sortData('stock_tick')" class="sortable-col">
+                Stock
+                <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+              </th>
+
+              <th (click)="sortData('is_active')" class="sortable-col">
+                Status
+                <span *ngIf="sortColumn === 'is_active'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+              </th>
+
+              <th>Exclude Trading</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of filteredListData; let i = index">
+              <td data-label="SL.">
+                <span class="sl-badge">{{ i + 1 }}</span>
+              </td>
+
+              <td data-label="Stock" class="stock-cell" id="stockCell" #stockCell [attr.data-stock]="item.stock_tick"
+                [ngStyle]="isHighlightedforSystmAlrt(item.stock_tick) ? { 'background-color': '#fff7bf' } : {}">
+                <span class="stock-name">{{ item.stock_tick }}</span>
+              </td>
+
+              <td data-label="Status">
+                <span class="status-pill"
+                  [ngClass]="item.is_active == '1' || item.is_active == 1 ? 'status-pill--active' : 'status-pill--inactive'">
+                  {{ item.is_active == '1' || item.is_active == 1 ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+
+              <td data-label="Exclude Trading">
+                <label class="switch premium-switch">
+                  <input type="checkbox" [checked]="item.is_proc == 1" (change)="toggleProc(item!.id, $event)">
+                  <span class="slider"></span>
+                </label>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- <table class="stock-table">
+            <thead>
+              <tr>
+                <th>SL.</th>
+                <th (click)="sortData('stock_tick')" style="cursor: pointer;">
+                  Stock
+                  <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                </th>
+                <th (click)="sortData('is_active')" style="cursor: pointer;">
+                  Status
+                  <span *ngIf="sortColumn === 'is_active'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                </th>
+                <th>Exclude Trading</th>
+              </tr>
+            </thead>
+            <ng-container>
+              <tbody>
+                <tr *ngFor="let item of filteredListData; let i = index">
+                  <td>{{i+1}}</td>
+                  <td style="cursor: pointer;" id="stockCell" #stockCell [attr.data-stock]="item.stock_tick"
+                    [ngStyle]="isHighlightedforSystmAlrt(item.stock_tick) ? { 'background-color': '#c4c439' } : {}">
+                    {{ item.stock_tick }}
+                  </td>
+                  <td>{{ item.is_active == '1' || item.is_active == 1 ? 'Active' : 'Inactive' }}</td>
+                  <td>
+                    <label class="switch">
+                      <input type="checkbox" [checked]="item.is_proc == 1" (change)="toggleProc(item!.id, $event)">
+                      <span class="slider round"></span>
+                    </label>
+                  </td>
+                </tr>
+              </tbody>
+            </ng-container>
+          </table> -->
+
+      <!-- <div class="pagination-controls">
+          <button (click)="currentPage = currentPage - 1" [disabled]="currentPage === 1">Previous</button>
+          <span>Page {{ currentPage }} of {{ totalPages }}</span>
+          <button (click)="currentPage = currentPage + 1" [disabled]="currentPage === totalPages">Next</button>
+        </div> -->
+
+
+
+    </div>
+
+  </div>
+
+  <!--  token -->
+  <!-- <div *ngIf="activeMenu === 'token'" class="menu-content">
+      <div class="token-wrapper">
+        <div class="token-container">
+          <div class="token-header">
+            <h2 class="token-title">Enter the token</h2>
+
+          </div>
+
+          <div class="token-body">
+            <input type="text" class="form-control token-input" [(ngModel)]="token" placeholder="Enter The Token">
+          </div>
+          <div class="token-footer">
+            <button type="button" class="validate-btn" (click)="validateToken()">Validate</button>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+  <!-- <div *ngIf="activeMenu === 'latestdata'" class="menu-content">
+      LATEST DATA
+    </div> -->
+  <!-- NEW CODE END -->
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

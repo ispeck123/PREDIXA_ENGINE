@@ -1,0 +1,420 @@
+<app-master-layout></app-master-layout>
+<main class="main-content">
+  <app-master-header></app-master-header>
+  <div class="td-page">
+
+    <!-- Top Bar -->
+    <!-- <header class="td-topbar">
+    </header> -->
+
+    <div class="overlay-backdrop" *ngIf="showCustomizePanel"></div>
+
+    <div class="customize-modal" *ngIf="showCustomizePanel">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <h4>Customize Dashboard</h4>
+        <button class="close-btn" (click)="closeCustomizePanel()">×</button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+
+        <div class="chart-grid">
+
+          <!-- Chart 1 -->
+          <div class="chart-card">
+            <span class="card-badge">Chart 1</span>
+
+            <label class="form-label">Search Stock</label>
+            <input type="text" class="form-control" placeholder="Enter stock name" [(ngModel)]="stockSearch"
+              (ngModelChange)="onStockSearchChange($event)"  [class.is-invalid]="!stockSearch?.trim()" />
+
+            <div *ngIf="stockSearchResult" class="selection-box">
+              <strong>{{ stockSearchResult.kite_symbol }}</strong>
+              <span>{{ stockSearchResult.stock_tick }}</span>
+            </div>
+          </div>
+
+          <!-- Chart 2 -->
+          <div class="chart-card">
+            <span class="card-badge">Chart 2</span>
+
+            <div *ngIf="selectedCountryName === 'India'">
+              <label class="form-label">Search Future</label>
+              <input type="text" class="form-control" placeholder="Enter future name" [(ngModel)]="futureSearch"
+                (ngModelChange)="onSearchChange($event)" [class.is-invalid]="!futureSearch?.trim()" />
+            </div>
+
+            <div *ngIf="searchResult" class="selection-box">
+              <strong>{{ searchResult.symbol }}</strong>
+              <span>{{ searchResult.expiry_date }} (NEAR)</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" (click)="closeCustomizePanel()">Cancel</button>
+        <button class="btn btn-success" (click)="submitDashboardConfig()" [disabled]="!isFormValid">
+          Save Changes
+        </button>
+      </div>
+
+    </div>
+
+
+
+    <!-- Main Grid -->
+    <main class="td-grid">
+
+      <!-- Left: Chart -->
+      <section class="td-card td-chart">
+
+        <!-- Header -->
+        <div class="td-card-head">
+          <div class="td-card-title">
+            <!-- <div class="h">NIFTY 50</div> -->
+            <div class="meta">
+              <span class="pill soft">NSE</span>
+              <span class="pill soft">1D</span>
+              <span class="sep"></span>
+              <span class="price">24,310.50</span>
+              <span class="chg up">+110.20 (+0.46%)</span>
+            </div>
+          </div>
+
+          <div class="td-card-actions">
+            <button class="btn setting" (click)="openCustomizePanel()" title="Customize Dashboard"
+              style="display: inline-flex; align-items: center; justify-content: center;">
+              <i class="fas fa-sliders-h" style="font-size: 1.2rem;"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Side-by-side charts -->
+        <div class="td-chart-grid">
+          <div class="td-chart-box" *ngFor="let data of dashboardData" (click)="OpenChart(data)"
+            title="Click to view chart analytics">
+            <div class="td-card-title">
+              <ng-container *ngIf="data.future_symbol">
+                <div class="h">
+                  FUTURES : {{ data.future_symbol | uppercase }}
+                  ({{ data.expiry_date }})
+                </div>
+              </ng-container>
+              <ng-container *ngIf="data.stock_tick">
+                <div class="h"> {{ data.stock_tick | uppercase }}</div>
+              </ng-container>
+            </div>
+            <div class="td-chart-wrap">
+              <div class="td-chart-placeholder">
+                <ng-container *ngIf="data.future_symbol">
+                  <div id="futuredashboardChart" style="height: 100%;width: 100%;"></div>
+                </ng-container>
+                <ng-container *ngIf="data.stock_tick">
+                  <div id="stockdashboardChart" style="height: 100%;width: 100%;"></div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Watchlist -->
+      <aside class="td-card td-watchlist">
+        <div class="td-card-head">
+          <div class="td-card-title">
+            <div class="h">Watchlist (Top 5)</div>
+            <div class="s">Quick glance on your symbols</div>
+          </div>
+          <!-- <button class="icon-btn" title="Manage">⚙</button> -->
+        </div>
+
+        <div class="td-list">
+          <div class="row head">
+            <div>Symbol</div>
+            <div class="r">LTP</div>
+            <div class="r">Chg%</div>
+          </div>
+
+          <!-- Replace *ngFor with your data -->
+          <div class="row" *ngFor="let stock of WatchlistData" (click)="ChartAnalytics(stock)">
+            <div class="sym">
+              <div class="t">{{ stock.stock | uppercase }}</div>
+              <div class="b">NSE</div>
+            </div>
+
+            <div class="r stprice">{{ stock.price }}</div>
+
+            <div class="r chg" [class.up]="stock.day_change_percentage > 0"
+              [class.down]="stock.day_change_percentage < 0">
+              {{ stock.day_change_percentage > 0 ? '+' : '' }}
+              {{ stock.day_change_percentage | number:'1.2-2' }}%
+            </div>
+          </div>
+
+        </div>
+
+        <div class="td-card-foot">
+          <button class="td-btn ghost" (click)="watchlist()">View full watchlist</button>
+        </div>
+      </aside>
+
+      <!-- Bottom Left: Top 5 Nifty 50 -->
+      <section class="td-card td-topnifty">
+        <div class="td-card-head">
+          <div class="td-card-title">
+            <div class="h">Top 5 NIFTY 50 Stocks</div>
+            <div class="s">By % change (today)</div>
+          </div>
+          <button class="td-btn ghost small">All NIFTY 50</button>
+        </div>
+
+        <div class="td-table">
+          <div class="tr th">
+            <div>Stock</div>
+            <div class="r">LTP</div>
+            <div class="r">Chg</div>
+            <div class="r">Chg%</div>
+          </div>
+
+          <!-- ROWS (FOR LOOP) -->
+          <div class="tr" *ngFor="let s of TopNiftyData; trackBy: trackBySymbol" (click)="ChartAnalytics(s)">
+
+            <div class="cell-main">
+              <div class="t">{{ (s.stock || s.symbol || s.trading_symbol || '-') | uppercase }}</div>
+              <div class="b">NSE • NIFTY 50</div>
+            </div>
+
+            <!-- LTP -->
+            <div class="r">
+              {{ toNum(s.ltp ?? s.price) | number:'1.2-2' }}
+            </div>
+
+            <!-- Chg -->
+            <div class="r" [class.up]="toNum(s.day_change ?? s.change) > 0"
+              [class.down]="toNum(s.day_change ?? s.change) < 0">
+              {{ sign(toNum(s.day_change ?? s.change)) }}{{ toNum(s.day_change ?? s.change) | number:'1.2-2' }}
+            </div>
+
+            <!-- Chg% -->
+            <div class="r" [class.up]="toNum(s.day_change_percentage ?? s.change_percent) > 0"
+              [class.down]="toNum(s.day_change_percentage ?? s.change_percent) < 0">
+              {{ sign(toNum(s.day_change_percentage ?? s.change_percent)) }}{{ toNum(s.day_change_percentage ??
+              s.change_percent) | number:'1.2-2' }}%
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- Bottom Middle: Alerts -->
+      <section class="td-card td-alerts">
+        <div class="td-card-head">
+          <div class="td-card-title">
+            <div class="h">Top 5 Alerts</div>
+            <div class="s">Newest first</div>
+          </div>
+        </div>
+
+        <div class="td-stack">
+          <div class="alert-row" *ngFor="let n of Stocknotifications; trackBy: trackByAlertId"  (click)="onViewClick(n)">
+            <div class="badge" [ngClass]="badgeClass(n)">{{ badgeText(n) }}</div>
+
+            <div class="info">
+              <div class="t">{{ alertTitle(n) }}</div>
+              <!-- <div class="b">{{ alertSub(n) }}</div> -->
+            </div>
+          </div>
+
+          <!-- empty state -->
+          <div class="alert-row" *ngIf="!Stocknotifications?.length">
+            <div class="badge warn">INFO</div>
+            <div class="info">
+              <div class="t">No alerts yet</div>
+              <div class="b">Waiting for triggers…</div>
+            </div>
+            <button class="mini-btn" disabled>—</button>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Bottom Middle: Trending News -->
+      <!-- <section class="td-card td-news">
+        <div class="td-card-head">
+          <div class="td-card-title">
+            <div class="h">Trending News (Top 5)</div>
+            <div class="s">Market + company updates</div>
+          </div>
+          <button class="td-btn ghost small">All news</button>
+        </div>
+
+        <div class="td-newslist">
+          <a class="news-item" href="javascript:void(0)">
+            <div class="bullet"></div>
+            <div class="info">
+              <div class="t">NIFTY holds above key level ahead of major earnings</div>
+              <div class="b">2 hours ago • Market</div>
+            </div>
+            <div class="tag">NIFTY</div>
+          </a>
+
+          <a class="news-item" href="javascript:void(0)">
+            <div class="bullet"></div>
+            <div class="info">
+              <div class="t">Banks outperform as yields ease; PSU banks in focus</div>
+              <div class="b">3 hours ago • Sector</div>
+            </div>
+            <div class="tag">BANKS</div>
+          </a>
+
+          <a class="news-item" href="javascript:void(0)">
+            <div class="bullet"></div>
+            <div class="info">
+              <div class="t">IT stocks mixed; clients cautious on spending outlook</div>
+              <div class="b">4 hours ago • Sector</div>
+            </div>
+            <div class="tag">IT</div>
+          </a>
+
+          <a class="news-item" href="javascript:void(0)">
+            <div class="bullet"></div>
+            <div class="info">
+              <div class="t">Crude volatility impacts OMCs; traders watch inventory data</div>
+              <div class="b">5 hours ago • Global</div>
+            </div>
+            <div class="tag">OIL</div>
+          </a>
+
+          <a class="news-item" href="javascript:void(0)">
+            <div class="bullet"></div>
+            <div class="info">
+              <div class="t">Stock-specific momentum picks gaining traction today</div>
+              <div class="b">6 hours ago • Stocks</div>
+            </div>
+            <div class="tag">TOP</div>
+          </a>
+        </div>
+      </section> -->
+
+      <!-- Bottom Right: Trade Setups -->
+      <!-- <section class="td-card td-setups">
+        <div class="td-card-head">
+          <div class="td-card-title">
+            <div class="h">Available Trade Setups (Top 5)</div>
+            <div class="s">Ready-to-trade ideas</div>
+          </div>
+        </div>
+
+        <div class="td-setuplist">
+          <div class="setup">
+            <div class="left">
+              <div class="sym">SBIN</div>
+              <div class="sub">Breakout • 1H • RR 1:2.5</div>
+            </div>
+            <div class="mid">
+              <div class="kv"><span>Entry</span><b>810.0</b></div>
+              <div class="kv"><span>SL</span><b>796.0</b></div>
+              <div class="kv"><span>TP</span><b>845.0</b></div>
+            </div>
+            <div class="right">
+              <div class="score up">High</div>
+              <button class="mini-btn">Trade</button>
+            </div>
+          </div>
+
+          <div class="setup">
+            <div class="left">
+              <div class="sym">RELIANCE</div>
+              <div class="sub">Demand Zone • 15M • RR 1:2</div>
+            </div>
+            <div class="mid">
+              <div class="kv"><span>Entry</span><b>2920</b></div>
+              <div class="kv"><span>SL</span><b>2895</b></div>
+              <div class="kv"><span>TP</span><b>2970</b></div>
+            </div>
+            <div class="right">
+              <div class="score">Med</div>
+              <button class="mini-btn">Trade</button>
+            </div>
+          </div>
+
+          <div class="setup">
+            <div class="left">
+              <div class="sym">INFY</div>
+              <div class="sub">FVG Fill • 1D • RR 1:1.8</div>
+            </div>
+            <div class="mid">
+              <div class="kv"><span>Entry</span><b>1605</b></div>
+              <div class="kv"><span>SL</span><b>1588</b></div>
+              <div class="kv"><span>TP</span><b>1638</b></div>
+            </div>
+            <div class="right">
+              <div class="score down">Low</div>
+              <button class="mini-btn">Details</button>
+            </div>
+          </div>
+
+          <div class="setup">
+            <div class="left">
+              <div class="sym">HDFCBANK</div>
+              <div class="sub">Liquidity Sweep • 4H • RR 1:2.2</div>
+            </div>
+            <div class="mid">
+              <div class="kv"><span>Entry</span><b>1680</b></div>
+              <div class="kv"><span>SL</span><b>1662</b></div>
+              <div class="kv"><span>TP</span><b>1720</b></div>
+            </div>
+            <div class="right">
+              <div class="score">Med</div>
+              <button class="mini-btn">Trade</button>
+            </div>
+          </div>
+
+          <div class="setup">
+            <div class="left">
+              <div class="sym">TCS</div>
+              <div class="sub">Reversal Zone • 1H • RR 1:2</div>
+            </div>
+            <div class="mid">
+              <div class="kv"><span>Entry</span><b>3910</b></div>
+              <div class="kv"><span>SL</span><b>3875</b></div>
+              <div class="kv"><span>TP</span><b>3980</b></div>
+            </div>
+            <div class="right">
+              <div class="score up">High</div>
+              <button class="mini-btn">Trade</button>
+            </div>
+          </div>
+        </div>
+      </section> -->
+    </main>
+  </div>
+
+</main>
+
+
+
+
+<div class="overlay" *ngIf="CustomLoader">
+  <div class="loading-text">Loading Dashboard...</div>
+</div>
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

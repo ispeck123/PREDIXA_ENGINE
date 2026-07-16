@@ -1,0 +1,131 @@
+<!-- overlay -->
+<div class="px-user-overlay" *ngIf="showCreateUserModal" (click)="closeCreateUserModal()">
+</div>
+
+
+<!-- right drawer -->
+<div class="px-user-drawer" *ngIf="showCreateUserModal">
+
+  <div class="px-user-drawer-header">
+    <span>Create New User</span>
+    <button class="px-user-close" (click)="closeCreateUserModal()">×</button>
+  </div>
+
+  <div class="px-user-drawer-body">
+
+    <form [formGroup]="CreateUser" class="px-user-form">
+
+      <div class="px-user-field">
+        <label>Enter User Name</label>
+        <input type="text" formControlName="user_name" placeholder="Enter user name">
+      </div>
+
+      <div class="px-user-field">
+        <label>Enter Email</label>
+        <input type="email" formControlName="email" placeholder="Enter email address">
+      </div>
+
+      <div class="px-user-field password-field">
+        <label>Enter Password</label>
+        <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Enter password">
+
+        <i class="fas" [ngClass]="showPassword ? 'fa-eye-slash':'fa-eye'"
+          (click)="togglePasswordVisibility('password')"></i>
+      </div>
+
+      <div class="px-user-field password-field">
+        <label>Re-enter Password</label>
+        <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword"
+          placeholder="Re-enter password">
+
+        <i class="fas" [ngClass]="showConfirmPassword ? 'fa-eye-slash':'fa-eye'"
+          (click)="togglePasswordVisibility('confirmPassword')"></i>
+      </div>
+
+      <button class="px-user-create-btn" (click)="createusers()">
+        Create User
+      </button>
+
+    </form>
+
+  </div>
+</div>
+
+
+
+<!-- USER TABLE -->
+<div class="px-user-page">
+
+  <div class="px-user-header">
+
+    <h2>
+      <i class="fas fa-users"></i>
+      User List
+    </h2>
+
+    <button class="px-user-add-btn" (click)="openCreateUserModal()">
+      <i class="fas fa-plus"></i>
+      Add User
+    </button>
+
+  </div>
+
+
+  <div class="px-user-table-card">
+
+    <table class="px-user-table">
+
+      <thead>
+        <tr>
+          <th>SL</th>
+          <th>User Name</th>
+          <th>User Role</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let user of allUsers; let i = index">
+
+          <td>{{ i + 1 }}</td>
+
+          <td class="username">
+            {{ user.user_name }}
+          </td>
+
+          <td>
+            <span class="role-pill">
+              {{ user.user_role | uppercase }}
+            </span>
+          </td>
+
+          <td>
+            <button class="delete-user" (click)="deleteUser(user.id)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

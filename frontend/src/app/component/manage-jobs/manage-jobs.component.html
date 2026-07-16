@@ -1,0 +1,76 @@
+<!-- NEW CODE -->
+
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="nav-logo">PREDIXA</div>
+      <ul>
+        <li (click)="dashboard()">
+          <i class="fas fa-tachometer-alt"></i>&nbsp; Dashboard
+        </li>
+        <li (click)="stock_screener()">
+          <i class="fas fa-chart-line"></i>&nbsp; Custom Screener
+        </li>
+        <li (click)="orderList()">
+          <i class="fas fa-shopping-cart"></i>&nbsp; Orders
+        </li>
+        <!-- <li (click)="autoorders()">
+          <i class="fas fa-shopping-cart"></i>&nbsp; Auto Orders
+        </li> -->
+        <li (click)="news()">
+          <i class="fas fa-globe"></i>&nbsp; News
+        </li>
+        <li (click)="alerts()">
+        <i class="fas fa-bell"></i>&nbsp; Alerts
+      </li>
+        <li (click)="available_trades()">
+          <i class="fas fa-exchange-alt"></i>&nbsp; Available Trades
+        </li>
+        <li (click)="sysmgmt()">
+          <i class="fas fa-exchange-alt"></i>&nbsp; System Management
+        </li>
+        <li (click)="logout()">
+          <i class="fas fa-door-open"></i>&nbsp; Logout
+        </li>
+      </ul>
+    </aside>
+
+    <main class="main-content">
+      <app-master-header></app-master-header>
+      <div class="iframe-wrapper">
+        <!-- <iframe
+        src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_12345&symbol=OANDA%3AXAUUSD&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}"
+        class="responsive-iframe"
+        frameborder="0"
+        allowfullscreen>
+      </iframe> -->
+
+      <iframe
+        src="http://127.0.0.1:3000/jobs"
+        class="responsive-iframe"
+        frameborder="0"
+        allowfullscreen>
+      </iframe>
+
+      
+      </div>
+    </main>
+
+</div>
+  
+  
+      
+  
+    
+  
+  <ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

@@ -1,0 +1,211 @@
+<!-- Main Content -->
+<div class="px-stock-page scroll-content">
+
+  <div class="px-stock-titlebar">
+    <div class="px-stock-titlebox">
+      <h3>List of stocks</h3>
+    </div>
+  </div>
+
+  <div class="px-stock-content">
+    <section class="px-stock-section">
+
+      <div class="px-stock-toolbar">
+        <div class="px-stock-toolbar__left">
+
+          <div class="px-stock-pagination">
+            <button class="px-nav-btn" (click)="goToPreviousPage()" [disabled]="getCurrentPage() === 1">
+              ‹ Prev
+            </button>
+
+            <ng-container *ngFor="let page of getPageNumbers()">
+              <button class="px-page-btn" [class.active]="page === getCurrentPage()" (click)="goToPage(page)">
+                {{ page }}
+              </button>
+            </ng-container>
+
+            <button class="px-nav-btn" (click)="goToNextPage()" [disabled]="getCurrentPage() >= getTotalPages()">
+              Next ›
+            </button>
+          </div>
+
+          <div class="px-stock-pagesize">
+            <select class="px-pagesize-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+              <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+            </select>
+          </div>
+
+          <div class="px-stock-matchcount">
+            Matched Found : <span>{{MatchedCount}}</span>
+          </div>
+        </div>
+
+        <div class="px-stock-toolbar__right">
+          <div class="px-stock-search">
+            <input type="text" class="px-stock-search__input" placeholder="Search stock by name..."
+              [(ngModel)]="searchText" (input)="onSearchInput(searchText)" />
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="px-stock-table-card px-stock-table-card--desktop">
+        <div class="px-stock-table-scroll">
+          <table class="px-stock-table fixed-header">
+            <thead>
+              <tr>
+                <th>SL</th>
+                <th (click)="sortData('stock')" class="is-sortable">
+                  <span>Stock</span>
+                  <span class="px-sort-indicator" *ngIf="sortColumn === 'stock'">
+                    {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </th>
+                <th (click)="sortData('price')" class="is-sortable">
+                  <span>Price - CMP</span>
+                  <span class="px-sort-indicator" *ngIf="sortColumn === 'price'">
+                    {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </th>
+                <th (click)="sortData('day_change')" class="is-sortable">
+                  <span>Day Change</span>
+                  <span class="px-sort-indicator" *ngIf="sortColumn === 'day_change'">
+                    {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </th>
+                <th (click)="sortData('day_change_percentage')" class="is-sortable">
+                  <span>Change (%)</span>
+                  <span class="px-sort-indicator" *ngIf="sortColumn === 'day_change_percentage'">
+                    {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </th>
+                <th>Watchlist</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let item of filteredListData; let i = index" class="px-stock-row"
+                [class.px-stock-row--highlight]="isHighlighted(item.stock)">
+
+                <td>{{ i + 1 }}</td>
+
+                <td (click)="ViewAnalytics(item.stock)" class="px-stock-name-cell" id="stockCell" #stockCell
+                  [attr.data-stock]="item.stock">
+                  {{ item.stock }}
+                </td>
+
+                <td class="px-stock-price-cell">{{ item.price }}</td>
+
+                <td [ngClass]="getTextColor(item.day_change)" class="px-stock-change-cell">
+                  {{ item.day_change }}
+                </td>
+
+                <td [ngClass]="getTextColor(item.day_change_percentage)" class="px-stock-change-cell">
+                  {{ item.day_change_percentage }}
+                </td>
+
+                <td>
+                  <div class="px-stock-actions">
+                    <i class="fas fa-bookmark fa-lg icon-clickable" [ngClass]="{
+                  'text-muted': item.watchlist_id,
+                  'text-success': !item.watchlist_id
+                }" [style.cursor]="item.watchlist_id ? 'not-allowed' : 'pointer'"
+                      [title]="item.watchlist_id ? 'Already in Watchlist' : 'Add to Watchlist'"
+                      (click)="!item.watchlist_id && addToWatchlist(item.stock_id)">
+                    </i>
+
+                    <i class="fas fa-trash-alt fa-lg icon-clickable"
+                      [ngClass]="{ 'text-danger': item.watchlist_id, 'text-muted': !item.watchlist_id }"
+                      [style.opacity]="item.watchlist_id ? '1' : '0.3'"
+                      [style.cursor]="item.watchlist_id ? 'pointer' : 'not-allowed'"
+                      [title]="item.watchlist_id ? 'Remove from Watchlist' : 'Not in Watchlist'"
+                      (click)="item.watchlist_id && removeFromWatchlist(item.watchlist_id)">
+                    </i>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div *ngIf="IsLoadingVisible" class="loading-dots px-stock-loading">
+            LOADING STOCKS<span>.</span><span>.</span><span>.</span>
+          </div>
+        </div>
+      </div>
+      <!-- MOBILE CARD LAYOUT -->
+      <div class="px-stock-mobile-list">
+        <div class="px-stock-mobile-card" *ngFor="let item of filteredListData; let i = index">
+
+          <div class="px-stock-mobile-card__top">
+            <div class="px-stock-mobile-card__left">
+              <div class="px-stock-mobile-card__sl">#{{ i + 1 }}</div>
+              <div class="px-stock-mobile-card__name" (click)="ViewAnalytics(item.stock)"
+                [ngStyle]="isHighlighted(item.stock) ? { 'background-color': '#c4c439' } : {}">
+                {{ item.stock }}
+              </div>
+            </div>
+
+            <div class="px-stock-mobile-card__actions">
+              <i class="fas fa-bookmark icon-clickable" [ngClass]="{
+            'text-muted': item.watchlist_id,
+            'text-success': !item.watchlist_id
+          }" [style.cursor]="item.watchlist_id ? 'not-allowed' : 'pointer'"
+                [title]="item.watchlist_id ? 'Already in Watchlist' : 'Add to Watchlist'"
+                (click)="!item.watchlist_id && addToWatchlist(item.stock_id)">
+              </i>
+
+              <i class="fas fa-trash-alt icon-clickable"
+                [ngClass]="{ 'text-danger': item.watchlist_id, 'text-muted': !item.watchlist_id }"
+                [style.opacity]="item.watchlist_id ? '1' : '0.3'"
+                [style.cursor]="item.watchlist_id ? 'pointer' : 'not-allowed'"
+                [title]="item.watchlist_id ? 'Remove from Watchlist' : 'Not in Watchlist'"
+                (click)="item.watchlist_id && removeFromWatchlist(item.watchlist_id)">
+              </i>
+            </div>
+          </div>
+
+          <div class="px-stock-mobile-card__grid">
+            <div class="px-stock-mobile-card__item">
+              <span class="px-stock-mobile-card__label">CMP</span>
+              <span class="px-stock-mobile-card__value">{{ item.price }}</span>
+            </div>
+
+            <div class="px-stock-mobile-card__item">
+              <span class="px-stock-mobile-card__label">Day Change</span>
+              <span class="px-stock-mobile-card__value" [ngClass]="getTextColor(item.day_change)">
+                {{ item.day_change }}
+              </span>
+            </div>
+
+            <div class="px-stock-mobile-card__item">
+              <span class="px-stock-mobile-card__label">Change %</span>
+              <span class="px-stock-mobile-card__value" [ngClass]="getTextColor(item.day_change_percentage)">
+                {{ item.day_change_percentage }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="IsLoadingVisible" class="loading-dots px-stock-loading">
+          LOADING STOCKS<span>.</span><span>.</span><span>.</span>
+        </div>
+      </div>
+
+    </section>
+  </div>
+</div>
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

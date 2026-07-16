@@ -1,0 +1,268 @@
+<div class="sub-page">
+
+  <!-- Page Header -->
+  <section class="sub-head">
+    <div class="sub-title">
+      <div class="s">Assign plans • Manage access • View active subscriptions</div>
+    </div>
+
+    <div class="sub-actions">
+      <button class="btn primary" (click)="openCreateUserModal()">
+        <i class="fas fa-users"></i>
+        User Management
+      </button>
+    </div>
+  </section>
+
+  <!-- Two Cards -->
+  <section class="sub-grid">
+
+    <!-- Assign Subscription -->
+    <form class="card" [formGroup]="AssignPlanForm">
+      <div class="card-head">
+        <div class="card-title">Assign Subscription Plan</div>
+        <div class="card-sub">Select user, plan & validity period</div>
+      </div>
+
+      <div class="form-grid">
+        <div class="fg">
+          <label>Select User</label>
+          <select formControlName="user_id" (change)="onUserChange($event)"
+            [ngClass]="{ 'is-invalid': submitted && f['user_id'].errors }">
+            <option selected value="">-- Select User --</option>
+            <option *ngFor="let item of allUsers" [value]="item.id">
+              {{ item.user_name | uppercase }}
+            </option>
+          </select>
+          <div *ngIf="submitted && f['user_id'].errors" class="err">*This field is required</div>
+        </div>
+
+        <div class="fg">
+          <label>Select Plan</label>
+          <select formControlName="plan_id" [ngClass]="{ 'is-invalid': submitted && f['plan_id'].errors }">
+            <option selected value="">-- Select Plan --</option>
+            <option *ngFor="let item of allSubscriptionPlan" [value]="item.plan_id">
+              {{ item.plan_name }}
+            </option>
+          </select>
+          <div *ngIf="submitted && f['plan_id'].errors" class="err">*This field is required</div>
+        </div>
+
+        <div class="fg">
+          <label>Start Date</label>
+          <input formControlName="start_date" type="date" (click)="datePicker.showPicker()"
+            [ngClass]="{ 'is-invalid': submitted && f['start_date'].errors }" #datePicker />
+          <div *ngIf="submitted && f['start_date'].errors" class="err">*This field is required</div>
+        </div>
+
+        <div class="fg">
+          <label>End Date</label>
+          <input formControlName="end_date" type="date" (click)="datePicker1.showPicker()"
+            [ngClass]="{ 'is-invalid': submitted && f['end_date'].errors }" #datePicker1 />
+          <div *ngIf="submitted && f['end_date'].errors" class="err">*This field is required</div>
+        </div>
+      </div>
+<br>
+      <div class="card-foot">
+        <button type="button" class="btn primary wide" (click)="OnSubmitofAssignPlan()">
+          <i class="fas fa-check-circle"></i>
+          Assign Plan
+        </button>
+      </div>
+    </form>
+
+    <!-- Country Access -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">User Country Access</div>
+        <div class="card-sub">Control which markets user can access</div>
+      </div>
+
+      <div class="form-grid one">
+        <div class="fg">
+          <label>Select User</label>
+          <select #id (change)="changeUsers(id.value)">
+            <option selected value="">-- Select User --</option>
+            <option *ngFor="let item of allUsers" [value]="item.id">
+              {{ item.user_name | uppercase }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="country-box">
+        <div class="country-head">
+          <div class="t">Select Countries</div>
+          <div class="m">{{ countries?.length || 0 }} available</div>
+        </div>
+
+        <div class="country-grid">
+          <label class="country-chip" *ngFor="let country of countries; trackBy: trackByCode">
+            <input type="checkbox"
+              [value]="country.country_id"
+              [(ngModel)]="country.selected"
+              (change)="updateSelectedCountries()" />
+            <span>{{ country.country_name }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card-foot">
+        <button type="button" class="btn primary wide" (click)="submitData()">
+          <i class="fas fa-save"></i>
+          Update Access
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Active Plans Table -->
+  <section class="table-card">
+    <div class="table-head">
+      <div>
+        <div class="table-title">Active Plans</div>
+        <div class="table-sub">All user subscriptions and current status</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="pro-table">
+        <thead>
+          <tr>
+            <th style="width:80px;">SL.</th>
+            <th>User Name</th>
+            <th>Plan Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Accessed Country</th>
+            <th style="width:240px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of AllUsersSubscriptionslist; let i = index">
+            <td class="muted">{{ i + 1 }}</td>
+            <td class="strong">{{ item.user_name }}</td>
+            <td>{{ item.plan_name }}</td>
+            <td class="muted">{{ item.start_date }}</td>
+            <td class="muted">{{ item.end_date }}</td>
+            <td>{{ item.country_name }}</td>
+            <td>
+              <button class="pill success"
+                [disabled]="item.is_active === true"
+                (click)="updateSubscriptionStatus(item, true)">
+                Activate
+              </button>
+
+              <button class="pill danger"
+                [disabled]="item.is_active === false"
+                (click)="updateSubscriptionStatus(item, false)">
+                Deactivate
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<!-- Drawer -->
+<div class="drawer-overlay" *ngIf="showCreateUserModal" (click)="closeCreateUserModal()"></div>
+
+<div class="drawer" *ngIf="showCreateUserModal">
+  <div class="drawer-head">
+    <div class="drawer-title">
+      <i class="fas fa-user-plus"></i> User Management
+    </div>
+    <button class="icon-btn" (click)="closeCreateUserModal()">×</button>
+  </div>
+
+  <div class="drawer-body">
+
+    <form class="card mini" [formGroup]="CreateUser">
+      <div class="card-head">
+        <div class="card-title">Create New User</div>
+        <div class="card-sub">Add users quickly for subscriptions</div>
+      </div>
+
+      <div class="form-grid one">
+        <div class="fg">
+          <label>Enter UserName</label>
+          <input type="text" formControlName="user_name"
+            [ngClass]="{ 'is-invalid': submitted && f1['user_name'].errors }"
+            placeholder="Enter user name" />
+          <div *ngIf="submitted && f1['user_name'].errors" class="err">*This field is required</div>
+        </div>
+
+        <div class="fg">
+          <label>Enter Password</label>
+          <input type="password" formControlName="password"
+            [ngClass]="{ 'is-invalid': submitted && f1['password'].errors }"
+            placeholder="Enter password" />
+          <div *ngIf="submitted && f1['password'].errors" class="err">*This field is required</div>
+        </div>
+
+        <div class="fg">
+          <label>Re-enter Password</label>
+          <input type="password" formControlName="confirmPassword"
+            [ngClass]="{ 'is-invalid': submitted && f1['confirmPassword'].errors }"
+            placeholder="Re-enter password" />
+          <div *ngIf="submitted && f1['confirmPassword'].errors?.['required']" class="err">*This field is required</div>
+          <div *ngIf="submitted && f1['confirmPassword'].errors?.['passwordMismatch']" class="err">*Passwords do not match</div>
+        </div>
+      </div>
+
+      <div class="card-foot">
+        <button type="button" class="btn primary wide" (click)="createusers()">
+          <i class="fas fa-plus-circle"></i>
+          Create
+        </button>
+      </div>
+    </form>
+
+    <div class="table-card mini" *ngIf="allUsers?.length > 0">
+      <div class="table-head">
+        <div>
+          <div class="table-title">User List</div>
+          <div class="table-sub">Existing users in the system</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="pro-table">
+          <thead>
+            <tr>
+              <th style="width:80px;">SL.</th>
+              <th>User Name</th>
+              <th>User Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of allUsers; let i = index">
+              <td class="muted">{{ i + 1 }}</td>
+              <td class="strong">{{ user.user_name }}</td>
+              <td class="muted">{{ user.user_role }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

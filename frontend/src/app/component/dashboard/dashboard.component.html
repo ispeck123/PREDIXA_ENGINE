@@ -1,0 +1,293 @@
+<div class="td-page">
+  <div class="overlay-backdrop" *ngIf="showCustomizePanel"></div>
+  <div class="customize-modal" *ngIf="showCustomizePanel">
+    <!-- Header -->
+    <div class="modal-header">
+      <h4>Customize Dashboard</h4>
+      <button class="close-btn" (click)="closeCustomizePanel()">×</button>
+    </div>
+    <!-- Body -->
+    <div class="modal-body">
+
+      <div class="chart-grid">
+
+        <!-- Chart 1 -->
+        <div class="chart-card">
+          <span class="card-badge">Chart 1</span>
+
+          <label class="form-label">Search Stock</label>
+          <input type="text" class="form-control" placeholder="Enter stock name" [(ngModel)]="stockSearch"
+            (ngModelChange)="onStockSearchChange($event)" [class.is-invalid]="!stockSearch?.trim()" />
+
+          <div *ngIf="isStockSearching || stockSearchResult" class="selection-box">
+            <ng-container *ngIf="isStockSearching; else stockResultTpl">
+              <div class="selection-loading">
+                <span class="mini-spinner"></span>
+                <span>Loading stock...</span>
+              </div>
+            </ng-container>
+          
+            <ng-template #stockResultTpl>
+              <strong>{{ stockSearchResult.kite_symbol }}</strong>
+              <span>{{ stockSearchResult.stock_tick }}</span>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Chart 2 -->
+        <div class="chart-card">
+          <span class="card-badge">Chart 2</span>
+
+          <div *ngIf="selectedCountryName === 'India'">
+            <label class="form-label">Search Future</label>
+            <input type="text" class="form-control" placeholder="Enter future name" [(ngModel)]="futureSearch"
+              (ngModelChange)="onSearchChange($event)" [class.is-invalid]="!futureSearch?.trim()" />
+          </div>
+
+        <div *ngIf="isFutureSearching || searchResult" class="selection-box">
+          <ng-container *ngIf="isFutureSearching; else futureResultTpl">
+            <div class="selection-loading">
+              <span class="mini-spinner"></span>
+              <span>Loading future...</span>
+            </div>
+          </ng-container>
+        
+          <ng-template #futureResultTpl>
+            <strong>{{ searchResult.symbol }}</strong>
+            <span>{{ searchResult.expiry_date }} (NEAR)</span>
+          </ng-template>
+        </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn btn-outline-secondary" (click)="closeCustomizePanel()">Cancel</button>
+      <button class="btn btn-success" (click)="submitDashboardConfig()" [disabled]="!isFormValid">
+        Save Changes
+      </button>
+    </div>
+
+  </div>
+
+
+
+  <!-- Main Grid -->
+  <main class="td-grid">
+
+    <!-- Left: Chart -->
+    <section class="td-card td-chart">
+
+      <!-- Header -->
+      <div class="td-card-head">
+        <div class="td-card-title">
+          <!-- <div class="h">NIFTY 50</div> -->
+          <div class="meta">
+            <span class="pill soft">NSE</span>
+            <span class="pill soft">1D</span>
+          </div>
+        </div>
+
+        <div class="td-card-actions">
+          <button class="btn setting" (click)="openCustomizePanel()" title="Customize Charts"
+            style="display: inline-flex; align-items: center; justify-content: center;">
+            <i class="fas fa-sliders-h" style="font-size: 1.2rem;"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Side-by-side charts -->
+      <div class="td-chart-grid">
+       <div class="td-chart-box" *ngFor="let data of orderedDashboardData; let i = index" (click)="OpenChart(data)"
+          title="Click to view chart analytics">
+          <div class="td-card-title">
+            <ng-container *ngIf="data.future_symbol">
+              <div class="h">
+                FUTURES : {{ data.future_symbol | uppercase }}
+                ({{ data.expiry_date }})
+              </div>
+            </ng-container>
+            <ng-container *ngIf="data.stock_tick">
+              <div class="h"> {{ data.stock_tick | uppercase }}</div>
+            </ng-container>
+          </div>
+          <!-- <div class="td-chart-wrap">
+              <div class="td-chart-placeholder">
+                <ng-container *ngIf="data.future_symbol">
+                  <div id="futuredashboardChart" style="height: 100%;width: 100%;"></div>
+                </ng-container>
+                <ng-container *ngIf="data.stock_tick">
+                  <div id="stockdashboardChart" style="height: 100%;width: 100%;"></div>
+                </ng-container>
+              </div>
+            </div> -->
+
+          <div class="td-chart-wrap">
+            <div class="td-chart-placeholder">
+              <div class="chart-host" [id]="getChartId(data, i)"
+                [class.hidden-chart]="chartStateMap[getChartKey(data, i)] !== 'ready'">
+              </div>
+
+              <div class="chart-overlay-msg" *ngIf="chartStateMap[getChartKey(data, i)] === 'loading'">
+                LOADING CHART...
+              </div>
+
+              <div class="chart-overlay-msg" *ngIf="chartStateMap[getChartKey(data, i)] === 'empty'">
+                NO CHART AVAILABLE
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+    </section>
+
+    <!-- Right: Watchlist -->
+    <aside class="td-card td-watchlist">
+      <div class="td-card-head">
+        <div class="td-card-title">
+          <div class="h">Watchlist (Top 5)</div>
+          <div class="s">Quick glance on your symbols</div>
+        </div>
+        <!-- <button class="icon-btn" title="Manage">⚙</button> -->
+      </div>
+
+      <div class="td-list">
+        <div class="row head">
+          <div>Symbol</div>
+          <div class="r">LTP</div>
+          <div class="r">Chg%</div>
+        </div>
+
+        <!-- Replace *ngFor with your data -->
+        <div class="row" *ngFor="let stock of WatchlistData" (click)="ChartAnalytics(stock)">
+          <div class="sym">
+            <div class="t">{{ stock.stock | uppercase }}</div>
+            <div class="b">NSE</div>
+          </div>
+
+          <div class="r stprice">{{ stock.price }}</div>
+
+          <div class="r chg" [class.up]="stock.day_change_percentage > 0"
+            [class.down]="stock.day_change_percentage < 0">
+            {{ stock.day_change_percentage > 0 ? '+' : '' }}
+            {{ stock.day_change_percentage | number:'1.2-2' }}%
+          </div>
+        </div>
+
+      </div>
+
+      <div class="td-card-foot">
+        <button class="td-btn ghost" (click)="watchlist()">View full watchlist</button>
+      </div>
+    </aside>
+
+    <!-- Bottom Left: Top 5 Nifty 50 -->
+    <section class="td-card td-topnifty">
+      <div class="td-card-head">
+        <div class="td-card-title">
+          <div class="h">Top 5 NIFTY 50 Stocks</div>
+          <div class="s">By % change (today)</div>
+        </div>
+        <button class="td-btn ghost small">All NIFTY 50</button>
+      </div>
+
+      <div class="td-table">
+        <div class="tr th">
+          <div>Stock</div>
+          <div class="r">LTP</div>
+          <div class="r">Chg</div>
+          <div class="r">Chg%</div>
+        </div>
+
+        <!-- ROWS (FOR LOOP) -->
+        <div class="tr" *ngFor="let s of TopNiftyData; trackBy: trackBySymbol" (click)="ChartAnalytics(s)">
+
+          <div class="cell-main">
+            <div class="t">{{ (s.stock || s.symbol || s.trading_symbol || '-') | uppercase }}</div>
+            <div class="b">NSE • NIFTY 50</div>
+          </div>
+
+          <!-- LTP -->
+          <div class="r">
+            {{ toNum(s.ltp ?? s.price) | number:'1.2-2' }}
+          </div>
+
+          <!-- Chg -->
+          <div class="r" [class.up]="toNum(s.day_change ?? s.change) > 0"
+            [class.down]="toNum(s.day_change ?? s.change) < 0">
+            {{ sign(toNum(s.day_change ?? s.change)) }}{{ toNum(s.day_change ?? s.change) | number:'1.2-2' }}
+          </div>
+
+          <!-- Chg% -->
+          <div class="r" [class.up]="toNum(s.day_change_percentage ?? s.change_percent) > 0"
+            [class.down]="toNum(s.day_change_percentage ?? s.change_percent) < 0">
+            {{ sign(toNum(s.day_change_percentage ?? s.change_percent)) }}{{ toNum(s.day_change_percentage ??
+            s.change_percent) | number:'1.2-2' }}%
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Bottom Middle: Alerts -->
+    <section class="td-card td-alerts">
+      <div class="td-card-head">
+        <div class="td-card-title">
+          <div class="h">Top 5 Alerts</div>
+          <div class="s">Newest first</div>
+        </div>
+      </div>
+
+      <div class="td-stack">
+        <div class="alert-row" *ngFor="let n of Stocknotifications; trackBy: trackByAlertId" (click)="onViewClick(n)">
+          <div class="badge" [ngClass]="badgeClass(n)">{{ badgeText(n) }}</div>
+
+          <div class="info">
+            <div class="t">{{ alertTitle(n) }}</div>
+            <!-- <div class="b">{{ alertSub(n) }}</div> -->
+          </div>
+        </div>
+
+        <!-- empty state -->
+        <div class="alert-row" *ngIf="!Stocknotifications?.length">
+          <div class="badge warn">INFO</div>
+          <div class="info">
+            <div class="t">No alerts yet</div>
+            <div class="b">Waiting for triggers…</div>
+          </div>
+          <button class="mini-btn" disabled>—</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+
+
+<div class="overlay" *ngIf="CustomLoader">
+  <div class="loading-text">Loading Dashboard...</div>
+</div>
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

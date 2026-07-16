@@ -1,0 +1,418 @@
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h2>FIN TRADE</h2>
+        <ul>
+            <li (click)="dashboard()">
+                <i class="fas fa-tachometer-alt"></i>&nbsp; Dashboard
+            </li>
+            <li (click)="stock_screener()">
+                <i class="fas fa-chart-line"></i>&nbsp; Custom Screener
+            </li>
+            <li (click)="orderList()">
+                <i class="fas fa-shopping-cart"></i>&nbsp; Orders
+            </li>
+            <li (click)="autoorders()" *ngIf="isAdmin">
+                <i class="fas fa-shopping-cart"></i>&nbsp; Auto Orders
+            </li>
+            <li (click)="news()" class="active">
+                <i class="fas fa-globe"></i>&nbsp; News
+            </li>
+            <li (click)="alerts()">
+                <i class="fas fa-bell"></i>&nbsp; Alerts
+            </li>
+            <li (click)="available_trades()">
+                <i class="fas fa-exchange-alt"></i>&nbsp; Available Trades
+            </li>
+            <li (click)="sysmgmt()">
+                <i class="fas fa-exchange-alt"></i>&nbsp; System Management
+            </li>
+            <li (click)="logout()">
+                <i class="fas fa-door-open"></i>&nbsp; Logout
+            </li>
+        </ul>
+        <div class="sidebar-logo">
+            <img src="assets/image/LOGO.png" alt="Logo" />
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <app-master-header></app-master-header>
+      
+    </main>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="rom">
+
+            <!-- TOP BAR -->
+            <div class="rom-top">
+                <div class="rom-head">
+                    <div class="rom-title">Real Order Management</div>
+                    <div class="rom-sub">Live orders • safe modify controls • audit ready</div>
+                </div>
+
+                <div class="rom-tools">
+                    <div class="rom-search">
+                        <span class="rom-ico">⌕</span>
+                        <input class="rom-input rom-input--search" placeholder="Search symbol / order id"
+                            [(ngModel)]="q" (input)="applyFilters()" />
+                        <button class="rom-x" *ngIf="q" (click)="clearSearch()">×</button>
+                    </div>
+
+                    <select class="rom-input rom-input--sm" [(ngModel)]="filterStatus" (change)="applyFilters()">
+                        <option value="OPEN">Open</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="ALL">All</option>
+                    </select>
+
+                    <select class="rom-input rom-input--sm" [(ngModel)]="filterExchange" (change)="applyFilters()">
+                        <option value="ALL">All Exchanges</option>
+                        <option *ngFor="let ex of exchangeList" [value]="ex">{{ex}}</option>
+                    </select>
+
+                    <button class="rom-btn" (click)="refresh()">Refresh</button>
+                    <button class="rom-btn rom-btn--primary" (click)="openDrawer('new')">+ New Order</button>
+                </div>
+            </div>
+
+            <!-- METRICS -->
+            <div class="rom-metrics">
+                <div class="rom-metric">
+                    <div class="k">Open</div>
+                    <div class="v">{{stats.open}}</div>
+                </div>
+                <div class="rom-metric">
+                    <div class="k">Active</div>
+                    <div class="v">{{stats.active}}</div>
+                </div>
+                <div class="rom-metric">
+                    <div class="k">Completed</div>
+                    <div class="v">{{stats.completed}}</div>
+                </div>
+                <div class="rom-metric">
+                    <div class="k">Unread Alerts</div>
+                    <div class="v">{{stats.unreadAlerts}}</div>
+                </div>
+            </div>
+
+            <!-- INLINE DRAWER (NEW / MODIFY / ALERT) -->
+            <div class="rom-drawer" *ngIf="drawer.open">
+                <div class="rom-drawer-head">
+                    <div class="rom-drawer-left">
+                        <span class="rom-pill" [class.p-new]="drawer.kind==='new'"
+                            [class.p-mod]="drawer.kind==='modify'" [class.p-alert]="drawer.kind==='alert'">
+                            {{drawerTitle(drawer.kind)}}
+                        </span>
+
+                        <span class="rom-drawer-meta" *ngIf="drawer.order">
+                            • <b>{{drawer.order.symbol}}</b> • {{drawer.order.exchange}} • #{{drawer.order.orderId}}
+                        </span>
+                    </div>
+
+                    <div class="rom-drawer-actions">
+                        <button class="rom-btn" (click)="closeDrawer()">Close</button>
+
+                        <button class="rom-btn rom-btn--primary" *ngIf="drawer.kind==='new'" (click)="submitNewOrder()">
+                            Create Order
+                        </button>
+
+                        <button class="rom-btn rom-btn--primary" *ngIf="drawer.kind==='modify'"
+                            (click)="submitModify()">
+                            Save Changes
+                        </button>
+
+                        <button class="rom-btn rom-btn--primary" *ngIf="drawer.kind==='alert'" (click)="submitAlert()">
+                            Save Alert
+                        </button>
+                    </div>
+                </div>
+
+                <div class="rom-drawer-body">
+                    <!-- hint -->
+                    <div class="rom-hint" *ngIf="drawer.kind==='modify'">
+                        {{ stateHint(drawer.order?.state) }}
+                    </div>
+
+                    <!-- NEW / MODIFY FORM -->
+                    <div *ngIf="drawer.kind==='new' || drawer.kind==='modify'">
+                        <div class="rom-grid">
+                            <label class="rom-field">
+                                <span>Symbol</span>
+                                <input class="rom-input" [(ngModel)]="orderForm.symbol"
+                                    [disabled]="drawer.kind==='modify'" />
+                            </label>
+
+                            <label class="rom-field">
+                                <span>Exchange</span>
+                                <select class="rom-input" [(ngModel)]="orderForm.exchange"
+                                    [disabled]="drawer.kind==='modify'">
+                                    <option *ngFor="let ex of exchangeList" [value]="ex">{{ex}}</option>
+                                </select>
+                            </label>
+
+                            <label class="rom-field">
+                                <span>Side</span>
+                                <select class="rom-input" [(ngModel)]="orderForm.side"
+                                    [disabled]="drawer.kind==='modify'">
+                                    <option value="BUY">BUY</option>
+                                    <option value="SELL">SELL</option>
+                                </select>
+                            </label>
+
+                            <label class="rom-field">
+                                <span>Timeframe</span>
+                                <select class="rom-input" [(ngModel)]="orderForm.timeframe"
+                                    [disabled]="drawer.kind==='modify'">
+                                    <option value="5m">5m</option>
+                                    <option value="15m">15m</option>
+                                    <option value="1h">1h</option>
+                                    <option value="1D">1D</option>
+                                </select>
+                            </label>
+
+                            <label class="rom-field">
+                                <span>Entry</span>
+                                <input class="rom-input" type="number" [(ngModel)]="orderForm.entry"
+                                    [disabled]="drawer.kind==='modify' && !canEditEntry(drawer.order!.state)" />
+                            </label>
+
+                            <label class="rom-field">
+                                <span>Stoploss</span>
+                                <input class="rom-input" type="number" [(ngModel)]="orderForm.sl"
+                                    [disabled]="drawer.kind==='modify' && !canEditSL(drawer.order!.state)" />
+                            </label>
+
+                            <label class="rom-field">
+                                <span>Target</span>
+                                <input class="rom-input" type="number" [(ngModel)]="orderForm.tp"
+                                    [disabled]="drawer.kind==='modify' && !canEditTP(drawer.order!.state)" />
+                            </label>
+
+                            <label class="rom-field">
+                                <span>Quantity</span>
+                                <input class="rom-input" type="number" [(ngModel)]="orderForm.qty"
+                                    [disabled]="drawer.kind==='modify' && !canEditQty(drawer.order!.state)" />
+                            </label>
+
+                            <label class="rom-field">
+                                <span>Order Type</span>
+                                <select class="rom-input" [(ngModel)]="orderForm.orderType"
+                                    [disabled]="drawer.kind==='modify' && !canEditOrderType(drawer.order!.state)">
+                                    <option value="LIMIT">LIMIT</option>
+                                    <option value="MARKET">MARKET</option>
+                                </select>
+                            </label>
+
+                            <label class="rom-field">
+                                <span>Validity</span>
+                                <select class="rom-input" [(ngModel)]="orderForm.validity"
+                                    [disabled]="drawer.kind==='modify' && !canEditValidity(drawer.order!.state)">
+                                    <option value="DAY">DAY</option>
+                                    <option value="IOC">IOC</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <div class="rom-note" *ngIf="drawer.kind==='modify' && drawer.order?.state==='ACTIVE'">
+                            Entry & Qty are locked because entry has already hit. Only SL/TP can be modified.
+                        </div>
+                    </div>
+
+                    <!-- ALERT FORM -->
+                    <div *ngIf="drawer.kind==='alert'">
+                        <div class="rom-grid rom-grid--4">
+                            <label class="rom-field">
+                                <span>Alert Type</span>
+                                <select class="rom-input" [(ngModel)]="alertForm.type" (change)="autofillAlertPrice()">
+                                    <option value="ENTRY">ENTRY</option>
+                                    <option value="STOPLOSS">STOPLOSS</option>
+                                    <option value="TARGET">TARGET</option>
+                                    <option value="CMP">CMP</option>
+                                </select>
+                            </label>
+
+                            <label class="rom-field">
+                                <span>Condition</span>
+                                <select class="rom-input" [(ngModel)]="alertForm.condition">
+                                    <option value=">=">>=</option>
+                                    <option value="<=">
+                                        <=< /option>
+                                </select>
+                            </label>
+
+                            <label class="rom-field">
+                                <span>Price</span>
+                                <input class="rom-input" type="number" [(ngModel)]="alertForm.price"
+                                    [disabled]="!canEditAlertPrice(drawer.order!.state, alertForm.type)" />
+                            </label>
+
+                            <label class="rom-field">
+                                <span>Notify On</span>
+                                <select class="rom-input" [(ngModel)]="alertForm.channel">
+                                    <option value="APP">APP</option>
+                                    <option value="PUSH">PUSH</option>
+                                    <option value="BOTH">BOTH</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <label class="rom-field rom-field--full">
+                            <span>Message (optional)</span>
+                            <input class="rom-input" [(ngModel)]="alertForm.message"
+                                placeholder="Eg: Notify when target is hit" />
+                        </label>
+
+                        <div class="rom-note">
+                            {{ alertHint(drawer.order!.state, alertForm.type) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INLINE CONFIRM BAR -->
+            <div class="rom-confirm" *ngIf="confirm.open">
+                <div class="rom-confirm-left">
+                    <div class="rom-confirm-title">{{confirmTitle(confirm.action)}}</div>
+                    <div class="rom-confirm-sub">
+                        {{confirm.order?.symbol}} • #{{confirm.order?.orderId}}
+                        <span *ngIf="confirm.action==='delete'">• irreversible</span>
+                    </div>
+                </div>
+
+                <div class="rom-confirm-actions">
+                    <button class="rom-btn" (click)="confirm.open=false">Cancel</button>
+                    <button class="rom-btn rom-btn--danger" (click)="doConfirm()">Confirm</button>
+                </div>
+            </div>
+
+            <!-- ORDERS TABLE -->
+            <div class="rom-card">
+                <div class="rom-card-head">
+                    <div class="rom-card-title">Orders</div>
+                    <div class="rom-chip">{{filteredOrders.length}} shown</div>
+                </div>
+
+                <div class="rom-table-wrap">
+                    <table class="rom-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Side</th>
+                                <th>Status</th>
+                                <th class="num">Entry</th>
+                                <th class="num">SL</th>
+                                <th class="num">TP</th>
+                                <th class="num">CMP</th>
+                                <th class="num">Qty</th>
+                                <th class="num">P&L</th>
+                                <th class="right">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let o of filteredOrders">
+                                <td>
+                                    <div class="rom-symbol">
+                                        <div class="s1">
+                                            <b>{{o.symbol}}</b>
+                                            <span class="muted">• {{o.exchange}}</span>
+                                        </div>
+                                        <div class="s2">
+                                            <span class="rom-tag">{{o.timeframe}}</span>
+                                            <span class="rom-tag rom-tag--soft">{{o.orderType}}</span>
+                                            <span class="muted tiny">#{{o.orderId}}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="rom-pill2" [class.buy]="o.side==='BUY'" [class.sell]="o.side==='SELL'">
+                                        {{o.side}}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="rom-state" [attr.data-s]="o.state">{{labelState(o.state)}}</span>
+                                </td>
+
+                                <td class="num">{{o.entry}}</td>
+                                <td class="num">{{o.sl}}</td>
+                                <td class="num">{{o.tp}}</td>
+                                <td class="num">{{o.cmp}}</td>
+                                <td class="num">{{o.qty}}</td>
+                                <td class="num" [class.pos]="o.pnl>0" [class.neg]="o.pnl<0">{{o.pnl}}</td>
+
+                                <td class="right">
+                                    <div class="rom-actions">
+                                        <button class="rom-mini" (click)="openDrawer('modify', o)">Modify</button>
+                                        <button class="rom-mini rom-mini--ghost" (click)="openDrawer('alert', o)">Add
+                                            Alert</button>
+
+                                        <button class="rom-mini rom-mini--danger" *ngIf="canCancel(o.state)"
+                                            (click)="openConfirm('cancel', o)">
+                                            Cancel
+                                        </button>
+
+                                        <button class="rom-mini rom-mini--ghost" *ngIf="canSquareOff(o.state)"
+                                            (click)="openConfirm('squareoff', o)">
+                                            Square-off
+                                        </button>
+
+                                        <button class="rom-mini rom-mini--dangerOutline" *ngIf="canDelete(o.state)"
+                                            (click)="openConfirm('delete', o)">
+                                            Delete
+                                        </button>
+                                    </div>
+
+                                    <div class="rom-hint2">{{stateHint(o.state)}}</div>
+                                </td>
+                            </tr>
+
+                            <tr *ngIf="filteredOrders.length===0">
+                                <td colspan="10" class="rom-empty">No orders found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

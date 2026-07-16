@@ -1,0 +1,305 @@
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-logo-wrap">
+    <img class="nav-logo-img" src="assets/image/Predixa_TRNS_LOGO_WHITE.png" alt="PREDIXA logo">
+    <!-- <div class="nav-logo">PREDIXA</div> -->
+  </div>
+
+
+  <ul class="nav-links">
+    <li><a (click)="openLegals()" style="cursor: pointer;">Legals</a></li>
+    <li><a (click)="openResponsibility()" style="cursor: pointer;">User Responsibility</a></li>
+    <li><a (click)="features()" style="cursor: pointer;">Features</a></li>
+    <!-- <li><a (click)="scrollToPricing()" style="cursor: pointer;">Pricing</a></li> -->
+    <li><button class="nav-btn" (click)="openLogin()">Login</button></li>
+    <li><button class="nav-btn solid" (click)="openRegister()">Register</button></li>
+  </ul>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+  <div class="hero-text">
+    <h1>Trade Smarter with <span>PREDIXA</span></h1>
+    <p>Patterns In, Precision Out</p>
+    <p>Engineered by <span style="color: white;">Ispeck</span> . Know where the real market opportunities are.</p>
+    <button class="cta-btn" (click)="openRegister()">Get Started</button>
+  </div>
+
+  <!-- <div class="hero-graphics">
+      <img src="https://assets.tradingview.com/static/bundles/trading-platform.svg" />
+  </div> -->
+</section>
+
+<!-- PREDIXA™ Access Framework -->
+<section class="predixa-access">
+  <div class="pa-head">
+    <div class="pa-title">PREDIXA™ Access Framework</div>
+    <div class="pa-sub">Market Listener → Edge Subscriber → Strategy Analyst → Command Admin</div>
+  </div>
+
+  <div class="pa-grid">
+    <!-- Level 0 -->
+    <article class="pa-card">
+      <div class="pa-top">
+        <span class="pa-pill">Level 0</span>
+        <span class="pa-role">Market Listener</span>
+      </div>
+      <div class="pa-desc">
+        Receive curated AI trade alerts instantly via Telegram/WhatsApp — no platform login required.
+      </div>
+      <div class="pa-meta">Access type: Alerts stream</div>
+      <div class="pa-actions">
+        <button class="pa-btn">Subscribe</button>
+      </div>
+    </article>
+
+    <!-- Level 1 -->
+    <article class="pa-card">
+      <div class="pa-top">
+        <span class="pa-pill">Level 1</span>
+        <span class="pa-role">Edge Subscriber</span>
+      </div>
+      <div class="pa-desc">
+        Secure dashboard access to live charts, AI signals, watchlists, and smart alerts in a view-only workspace.
+      </div>
+      <div class="pa-meta">Access type: Dashboard (view-only)</div>
+      <div class="pa-actions">
+        <button class="pa-btn">Subscribe</button>
+      </div>
+    </article>
+
+    <!-- Level 2 -->
+    <article class="pa-card">
+      <div class="pa-top">
+        <span class="pa-pill">Level 2</span>
+        <span class="pa-role">Strategy Analyst</span>
+      </div>
+      <div class="pa-desc">
+        Internal-grade visibility into zones, model outputs, signal diagnostics, and performance metrics — read-only.
+      </div>
+      <div class="pa-meta">Access type: Research (read-only)</div>
+      <div class="pa-actions">
+        <button class="pa-btn">Subscribe</button>
+      </div>
+    </article>
+
+    <!-- Level 3 -->
+    <article class="pa-card">
+      <div class="pa-top">
+        <span class="pa-pill">Level 3</span>
+        <span class="pa-role">Command Admin</span>
+      </div>
+      <div class="pa-desc">
+        Full platform control — configure rules, manage access, control alerts, and execute strategic overrides.
+      </div>
+      <div class="pa-meta">Access type: Admin console</div>
+      <div class="pa-actions">
+        <button class="pa-btn">Subscribe</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="features">
+  <h2>Platform Highlights</h2>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <h4>⚡ Real-Time Charts</h4>
+      <p>Precision charts engineered for traders who demand accuracy and speed.</p>
+    </div>
+
+    <div class="feature-card">
+      <h4>🤖 AI Predictions</h4>
+      <p>Get AI-generated signals backed by deep-learning models trained on market data.</p>
+    </div>
+
+    <div class="feature-card">
+      <h4>🔔 Smart Alerts</h4>
+      <p>Set alerts for price, volatility, zones, patterns, and breakout conditions.</p>
+    </div>
+
+    <div class="feature-card">
+      <h4>📊 Supply & Demand Zones</h4>
+      <p>
+        PREDIXA™ maps institutional supply and demand zones in real time.
+      </p>
+    </div>
+
+  </div>
+</section>
+<footer>
+  <p>© 2025 PREDIXA Trading. All rights reserved.</p>
+</footer>
+
+<!-- LOGIN MODAL -->
+<div class="modal" *ngIf="showLogin">
+  <div class="modal-box">
+    <span class="close" (click)="closeLogin()">×</span>
+    <h2>Login</h2>
+
+
+    <div class="input-group">
+      <input type="text" placeholder="Username" [(ngModel)]="email" />
+
+      <span class="input-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20">
+          <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.6" />
+          <path d="M4 20c0-4 4-6 8-6s8 2 8 6" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" />
+        </svg>
+      </span>
+    </div>
+
+
+
+    <div class="input-group">
+      <input id="password" name="password" class="pw-input" [type]="hidePassword ? 'password' : 'text'"
+        placeholder="Password" [(ngModel)]="password" />
+
+      <button type="button" class="pw-toggle" (click)="togglePasswordVisibility()">
+
+        <!-- Eye (show) -->
+        <svg *ngIf="hidePassword" viewBox="0 0 24 24" width="22" height="22">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" fill="none" stroke="currentColor" stroke-width="1.6" />
+          <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.6" />
+        </svg>
+
+        <!-- Eye-off -->
+        <svg *ngIf="!hidePassword" viewBox="0 0 24 24" width="22" height="22">
+          <path d="M3 3l18 18" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" />
+          <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.6" />
+        </svg>
+      </button>
+    </div>
+
+
+
+    <button class="cta-primary" (click)="submit()">Login</button>
+  </div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div class="modal" *ngIf="showRegister">
+  <div class="modal-box">
+    <span class="close" (click)="closeRegister()">×</span>
+    <h2>Create Account</h2>
+    <input type="text" placeholder="Full Name">
+    <input type="email" placeholder="Email">
+    <input type="password" placeholder="Password">
+    <button class="cta-primary">Register</button>
+  </div>
+</div>
+
+
+
+<!-- LEGALS MODAL -->
+<div class="legal-backdrop" *ngIf="showLegals" (click)="closeLegals()">
+  <div class="legal-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Legals">
+    <div class="legal-head">
+      <div class="legal-title">
+        <span class="legal-badge">LEGAL</span>
+        <h3>Disclaimer</h3>
+      </div>
+
+      <button class="legal-close" type="button" (click)="closeLegals()" aria-label="Close">
+        ×
+      </button>
+    </div>
+
+    <div class="legal-body">
+      <p class="legal-p">
+        <b>PREDIXA™</b> is a trademark of <b>Ispeck Digital Solutions Pvt. Ltd.</b>
+        Trademark applications have been filed in India in Classes <b>9</b> and <b>42</b>.
+        All other trademarks are the property of their respective owners.
+      </p>
+
+      <div class="legal-divider"></div>
+
+      <p class="legal-p">
+        <b>PREDIXA™</b> provides algorithmic market intelligence and analytical indicators for informational purposes
+        only
+        and does not provide investment advice or execute trades.
+      </p>
+
+      <div class="legal-footnote">
+        This content is provided for informational and compliance purposes.
+      </div>
+    </div>
+
+    <div class="legal-actions">
+      <button class="legal-btn secondary" type="button" (click)="closeLegals()">Close</button>
+      <button class="legal-btn primary" type="button" (click)="closeLegals()">I Understand</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- RESPONSIBILITY MODAL -->
+
+<div class="legal-backdrop" *ngIf="showResponsibiity" (click)="closeResponsibility()">
+  <div class="legal-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Legals">
+    <div class="legal-head">
+      <div class="legal-title">
+        <!-- <span class="legal-badge">LEGAL</span> -->
+        <h3>User Responsibility & Liability</h3>
+      </div>
+
+      <button class="legal-close" type="button" (click)="closeResponsibility()" aria-label="Close">
+        ×
+      </button>
+    </div>
+
+    <div class="legal-body">
+      <p class="legal-p">
+        Any use of the algorithmic intelligence, analytical
+        indicators, insights, signals, or outputs generated
+        by <b>PREDIXA™</b> is undertaken solely at the user’s own
+        discretion and risk.
+      </p>
+
+      <div class="legal-divider"></div>
+
+      <p class="legal-p">
+        The user acknowledges and agrees that <b>PREDIXA™</b> does
+        not guarantee accuracy, completeness, timeliness,
+        or profitability of outputs.
+      </p>
+
+        <div class="legal-divider"></div>
+        
+      <p class="legal-p">
+        <b>Ispeck Digital Solutions Pvt. Ltd.</b>, including its
+        directors, officers, employees, and affiliates,
+        shall not be liable for losses, damages, decisions,
+        or actions arising from the use of <b>PREDIXA™</b>,
+        including financial loss or missed opportunities.
+      </p>
+
+      <div class="legal-footnote">
+        This content is provided for informational and compliance purposes.
+      </div>
+    </div>
+
+    <div class="legal-actions">
+      <button class="legal-btn secondary" type="button" (click)="closeResponsibility()">Close</button>
+      <button class="legal-btn primary" type="button" (click)="closeResponsibility()">I Understand</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

@@ -1,0 +1,699 @@
+<div class="header-tabs-row d-flex align-items-center justify-content-between flex-wrap">
+  <h2 *ngIf="selectedTab === 'custom'" class="alert-add-icon" (click)="openPriceAlert()">
+    <i class="fas fa-plus-circle"></i>
+  </h2>
+  <h4 *ngIf="selectedTab === 'system'">
+    <div></div>
+  </h4>
+
+  <!-- Tabs -->
+  <div class="tab-container d-flex">
+    <button class="tab-button" [class.active]="selectedTab === 'custom'" (click)="selectTab('custom')">
+      Custom Alert
+    </button>
+    <button class="tab-button" [class.active]="selectedTab === 'system'" (click)="selectTab('system')">
+      System Alert
+    </button>
+  </div>
+</div>
+
+
+<!-- Tab Content -->
+<div class="tab-content mt-4">
+  <div *ngIf="selectedTab === 'custom'">
+    <div class="stock-toolbar">
+      <div class="stock-toolbar__row stock-toolbar__row--top">
+        <div class="stock-toolbar__filters">
+          <div class="stock-toolbar__searchWrap">
+            <span class="stock-toolbar__icon">
+              <i class="fas fa-search"></i>
+            </span>
+            <input type="text" class="stock-toolbar__input" placeholder="Search stock by name..."
+              [(ngModel)]="searchTextcustom" (input)="onSearchInputforCustomAlrt(searchTextcustom)" />
+          </div>
+          <div class="stock-toolbar__dateWrap">
+            <input class="stock-toolbar__dateInput" ngxDaterangepickerBootstrap [(ngModel)]="selectedDateRangeforCustom"
+              [showCustomRangeLabel]="true" [alwaysShowCalendars]="true" [ranges]="ranges" [linkedCalendars]="true"
+              [isInvalidDate]="isInvalidDate" [showClearButton]="true" placeholder="Select Date Range..."
+              [opens]="'left'" />
+          </div>
+          <button type="button" class="stock-toolbar__searchBtn" (click)="Search()">
+            <i class="fas fa-search"></i>
+            <span>Search</span>
+          </button>
+        </div>
+        <div class="stock-toolbar__bottom">
+          <div class="stock-toolbar__pagination">
+            <button class="stock-toolbar__navBtn" (click)="goToPreviousPage()"
+              [disabled]="getCurrentPageforCustomAlrt() === 1">
+              ‹ Prev
+            </button>
+
+            <div class="stock-toolbar__pages">
+              <ng-container *ngFor="let page of getPageNumbers()">
+                <button class="stock-toolbar__pageBtn" [class.active]="page === getCurrentPageforCustomAlrt()"
+                  (click)="goToPage(page)">
+                  {{ page }}
+                </button>
+              </ng-container>
+            </div>
+
+            <button class="stock-toolbar__navBtn stock-toolbar__navBtn--dark" (click)="goToNextPage()"
+              [disabled]="getCurrentPageforCustomAlrt() >= getTotalPagesForCustmAlrt()">
+              Next ›
+            </button>
+          </div>
+
+          <div class="stock-toolbar__selectWrap">
+            <select class="stock-toolbar__select" [(ngModel)]="pageSizeforCustomAlrt" (change)="onPageSizeChange()">
+              <option *ngFor="let size of pageSizeOptions" [value]="size">
+                {{ size }} per page
+              </option>
+            </select>
+          </div>
+
+          <div class="stock-toolbar__matched">
+            <span class="stock-toolbar__matchedLabel">Matched Found</span>
+            <span class="stock-toolbar__matchedValue">{{ MatchedCount }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pxds-tableWrap">
+      <table class="pxds-stockTable">
+      <thead>
+        <tr>
+          <th>SL.</th>
+      
+          <th (click)="sortCustomAlerts('stock_symbol')" style="cursor: pointer;">
+            Stock Name
+            <span *ngIf="sortColumnCustom === 'stock_symbol'">
+              {{ sortDirectionCustom === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortCustomAlerts('threshold')" style="cursor: pointer;">
+            Threshold
+            <span *ngIf="sortColumnCustom === 'threshold'">
+              {{ sortDirectionCustom === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortCustomAlerts('condition')" style="cursor: pointer;">
+            Condition
+            <span *ngIf="sortColumnCustom === 'condition'">
+              {{ sortDirectionCustom === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortCustomAlerts('created_at')" style="cursor: pointer;">
+            Date
+            <span *ngIf="sortColumnCustom === 'created_at'">
+              {{ sortDirectionCustom === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortCustomAlerts('message')" style="cursor: pointer;">
+            Message
+            <span *ngIf="sortColumnCustom === 'message'">
+              {{ sortDirectionCustom === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th>Action</th>
+        </tr>
+      </thead>
+
+        <tbody *ngIf="customAlertData?.length > 0; else noAlertRow">
+          <tr *ngFor="let item of customAlertData; let i = index;">
+            <td data-label="SL.">
+              <span class="pxds-slBadge">{{ i + 1 }}</span>
+            </td>
+
+            <td data-label="Stock Name" class="pxds-stockCell" (click)="ViewAnalytics(item.stock_tick)"
+              [attr.data-stock]="item.stock_symbol"
+              [ngClass]="{ 'pxds-stockCell--highlight': isHighlightedforCustomAlrt(item.stock_symbol) }">
+              <span class="pxds-stockName">{{ item.stock_symbol }}</span>
+            </td>
+
+            <td data-label="Threshold">
+              <span class="pxds-valueText">{{ item.threshold }}</span>
+            </td>
+
+            <td data-label="Condition">
+              <span class="pxds-conditionPill" [ngClass]="item.condition == 1 ? 'is-up' : 'is-down'">
+                {{ item.condition == 1 ? '>=' : '<=' }} </span>
+            </td>
+
+            <td data-label="Date">
+              <span class="pxds-dateText">{{ item.created_at | date:'dd-MMM-yyyy, hh:mm a' }}</span>
+            </td>
+
+            <td data-label="Message">
+              <span class="pxds-messagePill" [ngClass]="{
+                  'is-buy': (item.message || '').toLowerCase().includes('buy'),
+                  'is-sell': (item.message || '').toLowerCase().includes('sell')
+                }">
+                {{ item.message }}
+              </span>
+            </td>
+
+            <td data-label="Action" class="pxds-actionCell">
+              <button type="button" class="pxds-actionBtn pxds-actionBtn--edit" title="Edit"
+                (click)="editCustomAlert(item.id)">
+                <i class="fa fa-edit"></i>
+              </button>
+
+              <button type="button" class="pxds-actionBtn pxds-actionBtn--delete" title="Delete"
+                (click)="deleteCustomAlert(item.id)">
+                <i class="fa fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ng-template #noAlertRow>
+        <div class="pxds-emptyState">
+          <div class="pxds-emptyState__icon">
+            <i class="fa fa-bell-slash"></i>
+          </div>
+          <div class="pxds-emptyState__title">No alerts to display</div>
+          <div class="pxds-emptyState__text">Your custom alerts will appear here once created.</div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+
+
+
+  <div *ngIf="selectedTab === 'system'">
+
+    <div class="stock-toolbar">
+      <div class="stock-toolbar__row stock-toolbar__row--top">
+        <div class="stock-toolbar__filters">
+          <div class="stock-toolbar__searchWrap">
+            <span class="stock-toolbar__icon">
+              <i class="fas fa-search"></i>
+            </span>
+            <input type="text" class="stock-toolbar__input" placeholder="Search stock by name..."
+              [(ngModel)]="searchTextforSystemAlrt" (input)="onSearchInputforSystmAlrt(searchTextforSystemAlrt)" />
+          </div>
+          <div class="stock-toolbar__dateWrap">
+            <input class="stock-toolbar__dateInput" ngxDaterangepickerBootstrap
+              [(ngModel)]="selectedDateRangeforSystmAlrt" [showCustomRangeLabel]="true" [alwaysShowCalendars]="true"
+              [ranges]="ranges" [linkedCalendars]="true" [isInvalidDate]="isInvalidDate" [showClearButton]="true"
+              placeholder="Select Date Range..." [opens]="'left'" />
+          </div>
+          <button type="button" class="stock-toolbar__searchBtn" (click)="Search()">
+            <i class="fas fa-search"></i>
+            <span>Search</span>
+          </button>
+        </div>
+
+        <div class="stock-toolbar__bottom">
+          <div class="stock-toolbar__pagination">
+            <button class="stock-toolbar__navBtn" (click)="goToPreviousPage()"
+              [disabled]="getCurrentPageforSystmAlrt() === 1">
+              ‹ Prev
+            </button>
+
+            <div class="stock-toolbar__pages">
+              <ng-container *ngFor="let page of getPageNumbers()">
+                <button class="stock-toolbar__pageBtn" [class.active]="page === getCurrentPageforSystmAlrt()"
+                  (click)="goToPage(page)">
+                  {{ page }}
+                </button>
+              </ng-container>
+            </div>
+
+            <button class="stock-toolbar__navBtn stock-toolbar__navBtn--dark" (click)="goToNextPage()"
+              [disabled]="getCurrentPageforSystmAlrt() >= getTotalPagesforSystmAlert()">
+              Next ›
+            </button>
+          </div>
+
+          <div class="stock-toolbar__selectWrap">
+            <select class="stock-toolbar__select" [(ngModel)]="pageSizeforSystmAlrt" (change)="onPageSizeChange()">
+              <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+            </select>
+          </div>
+
+          <div class="stock-toolbar__matched">
+            <span class="stock-toolbar__matchedLabel">Matched Found</span>
+            <span class="stock-toolbar__matchedValue">{{ MatchedCount }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- new responsive code end -->
+
+    <div class="pxds-tableWrap">
+      <!-- <div class="pxds-tableCard"> -->
+      <!-- <div class="pxds-tableResponsive"> -->
+      <table class="pxds-stockTable">
+      <thead>
+        <tr>
+          <th>SL.</th>
+      
+          <th (click)="sortSystemAlerts('stock_symbol')" style="cursor: pointer;">
+            Stock
+            <span *ngIf="sortColumnSystem === 'stock_symbol'">
+              {{ sortDirectionSystem === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortSystemAlerts('exchange')" style="cursor: pointer;">
+            Exchange
+            <span *ngIf="sortColumnSystem === 'exchange'">
+              {{ sortDirectionSystem === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortSystemAlerts('timeframe')" style="cursor: pointer;">
+            Timeframe
+            <span *ngIf="sortColumnSystem === 'timeframe'">
+              {{ sortDirectionSystem === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortSystemAlerts('trigger_price')" style="cursor: pointer;">
+            Trigger Price
+            <span *ngIf="sortColumnSystem === 'trigger_price'">
+              {{ sortDirectionSystem === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortSystemAlerts('target_percentage')" style="cursor: pointer;">
+            Target(%)
+            <span *ngIf="sortColumnSystem === 'target_percentage'">
+              {{ sortDirectionSystem === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortSystemAlerts('threshold')" style="cursor: pointer;">
+            Threshold(%)
+            <span *ngIf="sortColumnSystem === 'threshold'">
+              {{ sortDirectionSystem === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortSystemAlerts('price_range_min')" style="cursor: pointer;">
+            Min
+            <span *ngIf="sortColumnSystem === 'price_range_min'">
+              {{ sortDirectionSystem === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortSystemAlerts('price_range_max')" style="cursor: pointer;">
+            Max
+            <span *ngIf="sortColumnSystem === 'price_range_max'">
+              {{ sortDirectionSystem === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortSystemAlerts('alert_type')" style="cursor: pointer;">
+            Type
+            <span *ngIf="sortColumnSystem === 'alert_type'">
+              {{ sortDirectionSystem === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortSystemAlerts('cooldown_minutes')" style="cursor: pointer;">
+            Cooldown
+            <span *ngIf="sortColumnSystem === 'cooldown_minutes'">
+              {{ sortDirectionSystem === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortSystemAlerts('created_at')" style="cursor: pointer;">
+            Created At
+            <span *ngIf="sortColumnSystem === 'created_at'">
+              {{ sortDirectionSystem === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th (click)="sortSystemAlerts('note')" style="cursor: pointer;">
+            Note
+            <span *ngIf="sortColumnSystem === 'note'">
+              {{ sortDirectionSystem === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+      
+          <th>Action</th>
+        </tr>
+      </thead>
+        <tbody>
+          <tr *ngFor="let item of filteredListData;let i = index;">
+            <td data-label="SL.">
+              <span class="pxds-slBadge">{{ i + 1 }}</span>
+            </td>
+            <td data-label="Stock Name" class="pxds-stockCell" id="stockCell" #stockCell
+              [attr.data-stock]="item.stock_symbol"
+              (click)="ViewGraph(item.stock_tick, item.created_at, item.EXP_NUM, item.alert_type, item.exchange, item.id, item.timeframe,item.trigger_price)"
+              data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+              [ngClass]="{ 'pxds-stockCell--highlight': isHighlightedforSystmAlrt(item.stock_symbol)}">
+              <span class="pxds-stockName">{{ item.stock_symbol }}</span>
+            </td>
+            <td data-label="Exchange"> <span class="pxds-valueText">{{item.exchange}}</span></td>
+            <td data-label="Timeframe">
+              <span class="pxds-valueText">
+                {{ item.timeframe == 1 ? 'Daily' :
+                item.timeframe == 2 ? '60 min' :
+                item.timeframe == 3 ? '15 min' :
+                item.timeframe == 25 ? '75 min' : item.timeframe }}
+              </span>
+            </td>
+
+            <td data-label="Trigger Price"><span class="pxds-valueText">{{item.trigger_price}}</span></td>
+            <td data-label="Target(%)"><span class="pxds-valueText">{{item.target_percentage}}</span></td>
+            <td data-label="Threshold"><span class="pxds-valueText">{{ item.threshold }}</span></td>
+            <td data-label="Min"><span class="pxds-valueText">{{item.price_range_min}}</span></td>
+            <td data-label="Max"><span class="pxds-valueText">{{item.price_range_max}}</span></td>
+            <td data-label="Alert Type"><span class="pxds-valueText">{{item.alert_type}}</span></td>
+            <td data-label="Cooldown min"><span class="pxds-valueText">{{item.cooldown_minutes}}</span></td>
+            <td data-label="Created At"><span class="pxds-valueText">{{item.created_at | date:'dd-MM-yyyy'}}</span></td>
+            <td data-label="Note"><span class="pxds-valueText">{{item.note}}</span></td>
+            <td hidden>{{item.timeframe }}</td>
+            <td hidden>{{item.stock_tick}}</td>
+            <td data-label="Action" class="pxds-actionCell">
+              <button type="button" class="pxds-actionBtn pxds-actionBtn--delete" title="Delete"
+                (click)="deleteAlert(item.id)">
+                <i class="fa fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <div *ngIf="filteredListData.length===0" style="padding-top: 20px;color: red;">No alerts to display </div>
+        </tbody>
+      </table>
+      <!-- </div> -->
+      <!-- </div> -->
+    </div>
+
+    <div class="table-container">
+
+    </div>
+
+
+    <!-- <div class="table-container">
+        <table class="stock-table fixed-header">
+          <thead>
+            <tr>
+              <th>SL.</th>
+              <th>Stock Name</th>
+              <th>Exchange</th>
+              <th>Timeframe</th>
+              <th>Trigger Price</th>
+              <th>Target(%)</th>
+              <th>Threshold(%)</th>
+              <th>Min</th>
+              <th>Max</th>
+              <th>Alert Type</th>
+              <th>Cooldown min</th>
+
+              <th>Created At</th>
+              <th>Note</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredListData;let i = index;">
+              <td>{{i+1}}</td>
+              <td style="cursor: pointer;" id="stockCell" #stockCell [attr.data-stock]="item.stock_symbol"
+                (click)="ViewGraph(item.stock_tick, item.created_at, item.EXP_NUM, item.alert_type, item.exchange, item.id, item.timeframe,item.trigger_price)"
+                data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                [ngStyle]="isHighlightedforSystmAlrt(item.stock_symbol) ? { 'background-color': '#c4c439'} : {}">
+                {{ item.stock_symbol }}
+              </td>
+              <td>{{item.exchange}}</td>
+              <td>
+                {{ item.timeframe == 1 ? 'Daily' :
+                item.timeframe == 2 ? '60 min' :
+                item.timeframe == 3 ? '15 min' :
+                item.timeframe == 25 ? '75 min' : item.timeframe }}
+              </td>
+
+              <td>{{item.trigger_price}}</td>
+              <td>{{item.target_percentage}}</td>
+              <td>{{item.threshold}}</td>
+              <td>{{item.price_range_min}}</td>
+              <td>{{item.price_range_max}}</td>
+              <td>{{item.alert_type}}</td>
+              <td>{{item.cooldown_minutes}}</td>
+              <td>{{item.created_at | date:'dd-MM-yyyy'}}</td>
+              <td>{{item.note}}</td>
+              <td hidden>{{item.timeframe }}</td>
+              <td hidden>{{item.stock_tick}}</td>
+              <td style="text-align: center;"><i class="fa fa-trash remove-icon" title="Delete"
+                  (click)="deleteAlert(item.id)"></i></td>
+            </tr>
+            <div *ngIf="filteredListData.length===0" style="padding-top: 20px;color: red;">No alerts to display </div>
+          </tbody>
+        </table>
+      </div> -->
+
+
+  </div>
+</div>
+<br>
+
+
+<!-- </div> -->
+
+
+<!-- MODAL FOR FULLSCREEN CHART-->
+<div class="modal" id="myModal" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div id="fullscreen-modal" class="modal-dialog modal-dialog-centered modal-fullscreen custom-modal"
+    style="max-width: 100%;height: 97%;">
+    <div class="modal-content">
+      <!-- new header -->
+      <header class="header">
+        <div class="logo2">{{SelectedStockName | uppercase}}<span class="logo-bar">||</span>{{alerttype | uppercase}}
+        </div>
+      </header>
+
+      <div class="sub-nav" style="background-color: #14203f;border: 1px solid black; border-radius: 2px;">
+        <!-- Left Side: Buttons -->
+        <div class="sub-nav-left">
+          <button class="ta-button-demo" (mouseenter)="openBar()" (mouseleave)="openBar()">
+            <img src="assets/image/settingIcon.png" class="button-icon">
+          </button>&nbsp;&nbsp;
+          <!-- <div *ngIf="SETUPREQ">
+          <button class="replay-button" (click)="autoReplay()"
+            *ngIf="activeMenu === 'Success' || activeMenu === 'Failed'" title="Bar Replay">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="yellow">
+              <path d="M11 8.5v7l-5.5-3.5L11 8.5zm7 0v7l-5.5-3.5L18 8.5z" />
+            </svg>
+          </button>
+          </div> -->
+        </div>
+
+        <!-- Right Side: OHLC Info -->
+        <div class="sub-nav-info">
+          <!-- <div style="color: white;" [ngClass]="CandleColor">
+            <span class="separated-item">Open: {{Open}}</span>
+            <span class="separated-item">High: {{High}}</span>
+            <span class="separated-item">Low: {{Low}}</span>
+            <span class="separated-item">Close: {{Close}}</span>
+          </div> -->
+        </div>
+      </div>
+
+
+      <button type="button" #closeButton class="btn-close" data-bs-dismiss="modal" (click)="CloseFullModal()"></button>
+      <div class="modal-body">
+        <div id="chart-container_new" style="width: 100%; height: 100%;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRADE SETTINGS LEFT BAR START -->
+<div id="leftBar" class="left-bar" (mouseenter)="openBar()" (mouseleave)="openBar()">
+  <div class="settingHeader">
+    <Span class="settings">Market Zones & Strategy</Span>
+  </div>
+
+  <div class="sub-nav" style="background-color: white">
+    <div class="sub-nav-links">
+      <a *ngIf="QualifiedZoneFlag">
+        <input type="checkbox" [(ngModel)]="selectedOptions['qualified_zones']"
+          (click)="checkboxClicked('qualified_zones')" id="qualified_zones" hidden>
+        <label for="qualified_zones" class="responsive-label">
+          <i class="fas fa-cogs" style="margin-right: 10px;color: #14203f;"></i> Qualified Zones
+        </label>
+
+      </a>
+      <!-- <a>
+        <input type="checkbox" [(ngModel)]="selectedOptions['all_zones']" (click)="checkboxClicked('all_zones')"
+          id="all_zones" hidden>
+        <label for="all_zones" class="responsive-label">
+          <i class="fas fa-globe" style="margin-right: 10px;color: #14203f;"></i> All Zones
+        </label>
+      </a> -->
+      <a>
+        <input type="checkbox" [(ngModel)]="selectedOptions['base_candle']" (click)="checkboxClicked('base_candle')"
+          id="base_candle" hidden>
+        <label for="base_candle" class="responsive-label">
+          <i class="fas fa-chart-line" style="margin-right: 10px;color: #14203f;"></i> Base Candle
+        </label>
+      </a>
+      <!-- <a>
+        <input type="checkbox" [(ngModel)]="selectedOptions['buy_sell_zone']" (click)="checkboxClicked('buy_sell_zone')"
+          id="buy_sell_zone" hidden>
+        <label for="buy_sell_zone" class="responsive-label">
+          <i class="fas fa-exchange-alt" style="margin-right: 10px;color: #14203f;"></i> Buy / Sell Zone
+        </label>
+      </a> -->
+      <a>
+        <input type="checkbox" [(ngModel)]="selectedOptions['bad_zone']" (click)="checkboxClicked('bad_zone')"
+          id="bad_zone" hidden>
+        <label for="bad_zone" class="responsive-label">
+          <i class="fas fa-times-circle" style="margin-right: 10px;color: #14203f;"></i> Bad Zone
+        </label>
+      </a>
+      <a *ngIf="QualifiedZoneFlag">
+        <input type="checkbox" [(ngModel)]="selectedOptions['overlap_evaluate']"
+          (click)="checkboxClicked('overlap_evaluate')" id="overlap_evaluate" hidden>
+        <label for="overlap_evaluate" class="responsive-label">
+          <i class="fas fa-check-circle" style="margin-right: 10px;color: #14203f;"></i> Overlap Evaluate
+        </label>
+      </a>
+      <a *ngIf="QualifiedZoneFlag">
+        <input type="checkbox" [(ngModel)]="selectedOptions['overlap_analyze']"
+          (click)="checkboxClicked('overlap_analyze')" id="overlap_analyze" hidden>
+        <label for="overlap_analyze" class="responsive-label">
+          <i class="fas fa-search" style="margin-right: 10px;color: #14203f;"></i> Overlap Analyze
+        </label>
+      </a>
+      <a *ngIf="QualifiedZoneFlag==false">
+        <input type="checkbox" [(ngModel)]="selectedOptions['optimized_buy_sell_zone']"
+          (click)="checkboxClicked('optimized_buy_sell_zone')" id="optimized_buy_sell_zone" hidden>
+        <label for="optimized_buy_sell_zone" class="responsive-label">
+          <i class="fas fa-search" style="margin-right: 10px;color: #14203f;"></i> Optimize Buy/Sell Zone
+        </label>
+      </a>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- Popup Alert for Adding-->
+<div class="price-alert-backdrop" *ngIf="showPriceAlert">
+  <div class="price-alert-modal">
+    <div class="pa-header">
+      <span>Price Alert</span>
+      <button class="pa-close" (click)="closePriceAlert()">×</button>
+    </div>
+    <form [formGroup]="PriceAlertForm" novalidate>
+      <div class="pa-body">
+        <div class="pa-row">
+          <label>Add Script<span class="required-star">*</span></label>
+          <ng-select class="scrip-name" title="Stocks" id="dropdown1" formControlName="stock_symbol" [items]="stockData"
+            bindLabel="stock_tick" bindValue="kite_symbol" [searchable]="true" [clearable]="true" [virtualScroll]="true"
+            [trackByFn]="trackByTick" [searchFn]="searchStocks"
+            [ngClass]="{ 'is-invalid': submitted && f['stock_symbol']?.errors }">
+            <ng-template ng-option-tmp let-item="item">
+              {{ item.stock_tick | uppercase }}
+              <small *ngIf="item.name"> — {{ item.name }}</small>
+            </ng-template>
+          </ng-select>
+        </div>
+
+        <div class="pa-row">
+          <label>Rate<span class="required-star">*</span></label>
+          <!-- <label><input title="Greater-Than" type="radio" value="true" name="condition" formControlName="condition" [ngClass]="{ 'is-invalid': submitted && f['condition']?.errors }" /> &gt;=</label>
+          <label><input title="Less-Than" type="radio" value="false" name="condition" formControlName="condition" [ngClass]="{ 'is-invalid': submitted && f['condition']?.errors }"/> &lt;=</label> -->
+
+          <div class="radio-group d-flex align-items-center"
+            [ngClass]="{ 'is-invalid': submitted && f['condition']?.errors }">
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" title="Greater-Than" type="radio" value="true" name="condition"
+                formControlName="condition" />
+              <label class="form-check-label">&gt;=</label>
+            </div>
+
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" title="Less-Than" type="radio" value="false" name="condition"
+                formControlName="condition" />
+              <label class="form-check-label">&lt;=</label>
+            </div>
+          </div>
+
+
+          <input type="number" title="Threshold" class="pa-input" placeholder="Threshold" formControlName="threshold"
+            [ngClass]="{ 'is-invalid': submitted && f['threshold']?.errors }" />
+        </div>
+
+        <div class="pa-row">
+          <label>Message</label>&nbsp;&nbsp;&nbsp;&nbsp;
+          <input type="text" title="Message" class="pa-input" placeholder="Message" formControlName="message" />
+        </div>
+      </div>
+      <div class="pa-right-buttons">
+        <button class="pa-btn" (click)="generateCustomAlerts()">Add</button>
+        <button class="pa-btn" (click)="resetAlert()">Reset</button>
+        <button class="pa-btn" (click)="closePriceAlert()">Close</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Popup Alert for Update-->
+<div class="price-alert-backdrop" *ngIf="showPriceAlertforUpdate">
+  <div class="price-alert-modal">
+    <div class="pa-header">
+      <span>Price Alert</span>
+      <button class="pa-close" (click)="closePriceAlertUpdate()">×</button>
+    </div>
+    <form [formGroup]="PriceAlertUpdateForm" novalidate>
+      <div class="pa-body">
+        <input type="hidden" class="form-control" formControlName="alert_id">
+        <div class="pa-row">
+          <label>Update Script<span class="required-star">*</span></label>
+          <input type="text" class="pa-input" formControlName="stock_symbol" readonly />
+        </div>
+
+        <div class="pa-row">
+          <label>Rate<span class="required-star">*</span></label>
+          <label><input type="radio" value="true" name="condition" formControlName="condition"
+              [ngClass]="{ 'is-invalid': submittedforedit && g['condition']?.errors }" /> &gt;=</label>
+          <label><input type="radio" value="false" name="condition" formControlName="condition"
+              [ngClass]="{ 'is-invalid': submittedforedit && g['condition']?.errors }" /> &lt;=</label>
+
+          <input type="number" class="pa-input" formControlName="threshold"
+            [ngClass]="{ 'is-invalid': submittedforedit && g['threshold']?.errors }" />
+        </div>
+
+        <div class="pa-row">
+          <label>Message</label>&nbsp;&nbsp;&nbsp;&nbsp;
+          <input type="text" class="pa-input" formControlName="message" />
+        </div>
+      </div>
+      <div class="pa-right-buttons">
+        <button class="pa-btn" (click)="EditCustomAlertDetails()">Update</button>
+        <button class="pa-btn" (click)="resetUpdateForm()">Reset</button>
+        <button class="pa-btn" (click)="closePriceAlertUpdate()">Close</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

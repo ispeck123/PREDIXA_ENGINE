@@ -1,0 +1,377 @@
+:root{
+  --side-w: 280px;
+  --side-collapsed: 78px;
+}
+.ml-sidenav{ width: var(--side-w); }
+.ml-sidenav.collapsed{ width: var(--side-collapsed); }
+
+
+/* overlay (mobile drawer) */
+.ml-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(2,6,23,.55);
+  z-index: 99;
+  /* backdrop-filter: blur(2px); */
+}
+
+/* sidenav container */
+.ml-sidenav{
+    
+  width: var(--side-w);
+  height: 100vh;
+  position: fixed;
+  top: 0; left: 0;
+
+  padding: 14px 12px;
+  color: var(--text);
+
+  /* richer gradient + subtle vignette */
+  background:
+    radial-gradient(1200px 700px at -20% -10%, rgba(75,87,255,.22), transparent 55%),
+    radial-gradient(900px 600px at 110% 20%, rgba(46,224,135,.10), transparent 55%),
+    linear-gradient(180deg, var(--bg1) 0%, #0c1426 40%, var(--bg2) 100%);
+
+  z-index: 100;
+  transition: width .18s ease, transform .18s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  border-right: 1px solid var(--stroke);
+  box-shadow: 14px 0 40px rgba(0,0,0,.25);
+}
+
+.ml-sidenav.collapsed{
+  width: var(--side-collapsed);
+}
+
+/* top area */
+.ml-top{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 8px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+/* brand row */
+.ml-brand{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ml-logo{
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 900;
+  letter-spacing: .5px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.25) inset;
+}
+
+.ml-text{ line-height: 1.1; }
+.ml-name{
+  font-weight: 1000;
+  letter-spacing: .6px;
+  font-size: 20px;
+}
+.ml-sub{
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* icon buttons */
+.ml-icon-btn{
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+.ml-icon-btn:hover{
+  background: rgba(255,255,255,.14);
+  border-color: rgba(255,255,255,.22);
+  transform: translateY(-1px);
+}
+
+.desktop-only{ display: inline-flex; }
+.mobile-only{ display: none; }
+
+/* menu list */
+.ml-menu{
+  list-style: none;
+  padding: 14px 6px 10px;
+  margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  flex: 1;                       /* ✅ take remaining height */
+  min-height: 0;                 /* ✅ REQUIRED for flex scroll */
+  overflow-y: auto;              /* ✅ enables scroll */
+  -webkit-overflow-scrolling: touch;
+}
+
+.ml-menu::-webkit-scrollbar{
+  width: 0;
+  height: 0;
+}
+
+.ml-menu{
+  scrollbar-width: none;
+}
+
+/* items */
+.ml-menu li{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+
+  padding: 5px 6px;
+  border-radius: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+
+  color: rgba(255,255,255,.92);
+  transition:
+    background .14s ease,
+    transform .14s ease,
+    box-shadow .14s ease,
+    color .14s ease;
+}
+
+/* icon alignment */
+.ml-menu li i{
+  width: 22px;
+  text-align: center;
+  font-size: 15px;
+  color: rgba(255,255,255,.90);
+}
+
+/* text */
+.ml-menu li span{
+  font-weight: 500;
+  letter-spacing: .15px;
+  font-size: 15px;
+}
+
+/* hover */
+.ml-menu li:hover{
+  background: rgba(255,255,255,.08);
+  transform: translateX(3px);
+}
+
+/* active (professional pill) */
+.ml-menu li.active{
+  background: linear-gradient(180deg, rgba(75,87,255,.95), rgba(75,87,255,.78));
+  box-shadow: 0 10px 24px rgba(75,87,255,.25);
+}
+.ml-menu li.active i,
+.ml-menu li.active span{
+  color: #fff;
+}
+
+/* logout style (less “ugly”, still noticeable) */
+.ml-menu li.danger{
+  margin-top: 10px;
+  background: rgba(248,113,113,.12);
+  border: 1px solid rgba(248,113,113,.18);
+}
+.ml-menu li.danger:hover{
+  background: rgba(248,113,113,.18);
+  border-color: rgba(248,113,113,.24);
+}
+
+/* footer */
+.ml-footer{
+  padding: 12px 10px 12px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.ml-footer img{
+  width: 100%;
+  max-height: 80px;
+  object-fit: contain;
+  opacity: .95;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.25));
+}
+
+.ml-foot-text{
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* FORCE sidenav dark background (override any white styles) */
+.ml-sidenav{
+  background:
+    radial-gradient(1200px 700px at -20% -10%, rgba(75,87,255,.22), transparent 55%),
+    radial-gradient(900px 600px at 110% 20%, rgba(46,224,135,.10), transparent 55%),
+    linear-gradient(180deg, #0f172a 0%, #0c1426 40%, #0b1220 100%) !important;
+
+  color: #fff !important;
+  border-right: 1px solid rgba(255,255,255,.08) !important;
+  box-shadow: 14px 0 40px rgba(0,0,0,.25) !important;
+}
+
+/* ensure items/icons remain white */
+.ml-menu li, .ml-menu li i, .ml-menu li span{
+  color: rgba(255,255,255,.92) !important;
+}
+
+/* active pill same */
+.ml-menu li.active{
+  background: linear-gradient(180deg, rgba(75,87,255,.95), rgba(75,87,255,.78)) !important;
+}
+
+/* ===== Responsive Mobile Drawer ===== */
+@media (max-width: 992px){
+
+  /* show hamburger on mobile */
+  .mobile-only{ display: inline-flex !important; }
+  .desktop-only{ display: none !important; }
+
+  /* sidebar behaves like drawer */
+  .ml-sidenav{
+    width: min(86vw, 320px);
+    transform: translateX(-105%);  /* hidden by default */
+    transition: transform .22s ease, width .18s ease;
+    border-radius: 0 18px 18px 0;
+  }
+
+  /* when opened */
+  .ml-sidenav.open{
+    transform: translateX(0);
+  }
+
+  /* ignore "collapsed" mode on mobile (always full drawer width) */
+  .ml-sidenav.collapsed{
+    width: min(86vw, 320px) !important;
+  }
+
+  /* overlay already exists; just ensure it's above page and below menu */
+  .ml-overlay{
+    z-index: 999;
+  }
+  .ml-sidenav{
+    z-index: 1000;
+  }
+
+  /* nicer tap targets on mobile */
+  .ml-menu li{
+    padding: 14px 14px;
+    border-radius: 14px;
+  }
+
+  .ml-menu li span{
+    font-size: 13px;
+  }
+
+  .ml-footer img{
+    max-height: 64px;
+  }
+}
+
+/* ===== Hamburger Button Style ===== */
+.ml-hamburger{
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(15,23,42,.92);
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(0,0,0,.20);
+  display: none; /* shown via media query */
+}
+.ml-hamburger i{
+  font-size: 16px;
+}
+
+
+/* =========================================================
+   RESPONSIVE FIX (MASTER LAYOUT)
+   ========================================================= */
+
+/* Make hamburger a true floating button (so it doesn't affect layout width) */
+@media (max-width: 992px) {
+  .ml-hamburger {
+    position: fixed !important;
+    top: 12px !important;
+    left: 12px !important;
+    z-index: 2000 !important;
+  }
+
+  /* prevent sideways scroll when drawer animates */
+  html, body {
+    overflow-x: hidden !important;
+  }
+}
+
+
+/* modified spinner code */
+/* Spinner overlay blur */
+.ngx-spinner-overlay {
+  background-color: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Spinner center card */
+.spinner-box {
+  background: rgba(255, 255, 255, 0.85);
+  padding: 24px 28px;
+  border-radius: 16px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Round buffering spinner */
+.custom-loader {
+  width: 52px;
+  height: 52px;
+  border: 5px solid #dce3ec;
+  border-top: 5px solid #007bff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Text */
+.spinner-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+/* spinner end */

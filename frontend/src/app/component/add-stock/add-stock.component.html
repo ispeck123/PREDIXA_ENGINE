@@ -1,0 +1,141 @@
+    <div class="section-header-container mb-4">
+      <h2 class="section-header">Add Stock</h2>
+    </div>
+
+<div class="px-form-strip-card">
+  <form [formGroup]="addStockForm" (ngSubmit)="submitStock()">
+    <div class="row g-3 align-items-end px-form-row">
+
+      <!-- Select Symbol -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="px-field">
+          <label class="px-label">Select Symbol</label>
+          <ng-select
+            class="px-ng-select"
+            [items]="symbolOptions"
+            bindLabel="item_text"
+            bindValue="item_id"
+            [searchable]="true"
+            [clearable]="true"
+            placeholder="Select symbol..."
+            formControlName="symbol"
+            dropdownPosition="bottom"
+            (change)="onSymbolChange($event)">
+          </ng-select>
+        </div>
+      </div>
+
+      <!-- Custom Stock Name -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="px-field">
+          <label class="px-label">Custom Stock Name</label>
+          <input
+            type="text"
+            class="form-control px-input"
+            formControlName="stock_name"
+            placeholder="Enter Custom Name"
+          />
+
+          <div
+            *ngIf="addStockForm.get('stock_name')?.touched && addStockForm.get('stock_name')?.invalid"
+            class="px-error-text"
+          >
+            <div *ngIf="addStockForm.get('stock_name')?.errors?.['required']">
+              Stock Name is required.
+            </div>
+            <div *ngIf="addStockForm.get('stock_name')?.errors?.['pattern']">
+              Special characters are not allowed.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Select Index -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="px-field">
+          <label class="px-label">Select Index</label>
+          <div class="px-multi-wrap">
+            <ng-multiselect-dropdown
+              #indexDropdown
+              class="px-multi-select"
+              [placeholder]="'Select indexes...'"
+              [data]="indexList"
+              [settings]="dropdownSettings"
+              formControlName="table_name"
+              (click)="onIndexDropdownOpen()">
+            </ng-multiselect-dropdown>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <button type="submit" class="btn px-save-btn">
+          Save
+        </button>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+
+
+    <!-- <div class="card shadow-sm">
+      <form [formGroup]="addStockForm" (ngSubmit)="submitStock()">
+        <div class="row">
+
+
+
+          <div class="col-md-3">
+            <label class="form-label">Select Symbol</label>
+            <ng-select [items]="symbolOptions" bindLabel="item_text" bindValue="item_id" [searchable]="true"
+              [clearable]="true" placeholder="Select symbol..." formControlName="symbol" dropdownPosition="bottom"
+              (change)="onSymbolChange($event)">
+            </ng-select>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Custom Stock Name</label>
+            <input type="text" class="form-control" formControlName="stock_name" placeholder="Enter Custom Name" />
+
+            <div *ngIf="addStockForm.get('stock_name')?.touched && addStockForm.get('stock_name')?.invalid"
+              class="text-danger mt-1" style="font-size: 13px;">
+              <div *ngIf="addStockForm.get('stock_name')?.errors?.['required']">
+                Stock Name is required.
+              </div>
+              <div *ngIf="addStockForm.get('stock_name')?.errors?.['pattern']">
+                Special characters are not allowed.
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Select Index</label>
+            <ng-multiselect-dropdown #indexDropdown [placeholder]="'Select indexes...'" [data]="indexList"
+              [settings]="dropdownSettings" formControlName="table_name" (click)="onIndexDropdownOpen()">
+            </ng-multiselect-dropdown>
+          </div>
+
+          <div class="col-md-3 mt-4">
+            <button type="submit" class="btn btn-primary" style="min-width: 200px;margin-top: 6px;">Save</button>
+          </div>
+        </div>
+      </form>
+
+    </div> -->
+
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

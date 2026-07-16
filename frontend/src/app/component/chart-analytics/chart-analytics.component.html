@@ -1,0 +1,1471 @@
+<div class="tab-wrapper">
+
+  <div class="tab-header">
+    <div class="tab-buttons">
+      <button class="tab-btn" [class.active]="activeTab === 'tab1'" (click)="activeTab = 'tab1'">
+        Scrip
+      </button>
+
+      <button class="tab-btn" [class.active]="activeTab === 'tab2'" (click)="activeTab = 'tab2'">
+        Charts
+      </button>
+    </div>
+
+    <div class="tab-right-text">
+     <span *ngIf="activeTab === 'tab2'"> {{ ((selectedStockId?.replaceAll('_', ' ')) || '') | titlecase }} </span><span  *ngIf="activeTab === 'tab1'"> Total Stocks : {{TotalStock}}</span>&nbsp;&nbsp;
+      <button type="button" (click)="openPopup()" class="trade-icon-btn" title="Check Price Percentage">
+        <img src="assets/image/execution.png" alt="Check Price" width="24" height="24">
+      </button>
+    </div>
+  </div>
+
+  <div class="tab-content">
+
+    <div class="custom-box" [hidden]="activeTab !== 'tab1'">
+            <div class="stock-panel">
+        <div class="stock-panel__top">
+          <div class="stock-panel__titleWrap">
+            <h3 class="stock-panel__title">All Stocks</h3>
+            <p class="stock-panel__subtitle">
+              Browse and search stocks from your full market list
+            </p>
+          </div>
+
+          <div class="stock-toolbar">
+            <div class="stock-search">
+              <input type="text" class="stock-search__input" placeholder="Search stock name..."
+                [(ngModel)]="searchstockText" (input)="onSearchChange()" />
+
+              <button class="stock-search__btn" (click)="clearSearch()" *ngIf="searchstockText">
+                Clear
+              </button>
+            </div>
+
+            <div class="filter-pill-group">
+              <button type="button" class="filter-pill" *ngFor="let item of filter"
+                [class.filter-pill--active]="selectedFilterId === item.id" (click)="selectFilter(item)">
+                {{ item.name }}
+              </button>
+
+              <div class="datetime-icon-wrap">
+                <button type="button" class="datetime-icon-btn" (click)="openDatePicker(dateTimeInput)"
+                  title="Select date and time">
+                  <i class="fa fa-calendar"></i>
+                </button>
+
+                <input #dateTimeInput type="datetime-local" class="hidden-datetime-input" formControlName="last_d_time"
+                  (input)="updateSelectedDate($event)" />
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="stock-list-wrap">
+          <div class="stock-row" *ngFor="let item of StockFullData; let i = index"
+            [class.stock-row--highlight]="isHighlightedStockList(item)" [attr.id]="'stock-row-' + i">
+            <div class="stock-row__left">
+              <div class="stock-row__avatar">
+                {{ getInitials(item.stock) }}
+              </div>
+
+              <div class="stock-row__info">
+                <div class="stock-row__name stock-row__name--clickable" (click)="selectStock(item)">
+                  {{ formatStockName(item.stock) }}
+                </div>
+                <div class="stock-row__meta">
+                  ID: {{ item.stock_id }}
+                </div>
+              </div>
+            </div>
+
+            <div class="stock-row__right">
+              <div class="stock-stat">
+                <span class="stock-stat__label">Price</span>
+                <span class="stock-stat__value">₹{{ item.price }}</span>
+              </div>
+
+              <div class="stock-stat">
+                <span class="stock-stat__label">Prev Close</span>
+                <span class="stock-stat__value">₹{{ item.prev_close }}</span>
+              </div>
+
+              <div class="stock-stat">
+                <span class="stock-stat__label">Day Change</span>
+                <span class="stock-stat__value" [ngClass]="{
+              'stock-stat__value--up': isPositive(item.day_change_percentage),
+              'stock-stat__value--down': isNegative(item.day_change_percentage)
+            }">
+                  {{ item.day_change }}
+                </span>
+              </div>
+
+              <div class="stock-stat">
+                <span class="stock-stat__label">Change %</span>
+                <span class="stock-badge" [ngClass]="{
+              'stock-badge--up': isPositive(item.day_change_percentage),
+              'stock-badge--down': isNegative(item.day_change_percentage)
+            }">
+                  {{ item.day_change_percentage }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+    </div>
+
+    <div class="custom-box" [hidden]="activeTab !== 'tab2'">
+       <div class="filter-pill-group-chart">
+        <button type="button" class="filter-pill" *ngFor="let item of filter"
+          [class.filter-pill--active]="selectedFilterId === item.id" (click)="selectFilterFromChart(item)">
+          {{ item.name }}
+        </button>
+        <div class="fc-datetime-picker-wrap">
+          <button type="button" class="fc-datetime-picker-btn" title="Select date and time">
+            <i class="fa fa-calendar"></i>
+          </button>
+        
+          <input #dateTimeInput type="datetime-local" class="fc-datetime-picker-input" formControlName="last_d_time"
+            (input)="updateSelectedDateOnChart($event)" />
+             
+        </div>
+        <div class="fc-date-display" *ngIf="selectedDate">
+              {{ selectedDate | date:'dd MMM yyyy, h:mm a' }}
+            </div>
+      </div>
+          <!-- <hr style="border: 1.5px solid #141E30;"> -->
+    <!-- FIRST LAYOUT -->
+    <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagfirst">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card" (click)="FullScreenMode('monthly','chart-container_new')" data-bs-toggle="modal"
+            data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{MonthlyLabel | uppercase}}</div>
+            <div id="monthly" style="width: 100%; height: 100%;"></div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card" style="height: 40vh;" (click)="FullScreenMode('weekly','chart-container_new')"
+            data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{WeeklyLabel | uppercase}}</div>
+            <div id="weekly" style="width: 100%; height: 100%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagfirst">
+      <div class="card" style="height: 40vh;" (click)="FullScreenMode('daily','chart-container_new')"
+        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+        <div class="labels">{{DailyLabel | uppercase}}</div>
+        <div id="daily" style="width: 100%; height: 100%;"></div>
+      </div>
+    </div>
+    <!-- FIRST LAYOUT END -->
+
+
+    <!-- SECOND LAYOUT -->
+    <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagsecond">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card" (click)="FullScreenMode('weekly','chart-container_new')" data-bs-toggle="modal"
+            data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{WeeklyLabel | uppercase}}</div>
+            <div id="weekly" style="width: 100%; height: 100%;"></div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card" style="height: 40vh;" (click)="FullScreenMode('daily','chart-container_new')"
+            data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{DailyLabel | uppercase}}</div>
+            <div id="daily" style="width: 100%; height: 100%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagsecond">
+          <div class="card" style="height: 40vh;" (click)="FullScreenMode('sixty','chart-container_new')"
+            data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{SixtyLabel | uppercase}}</div>
+            <div id="sixty" style="width: 100%; height: 100%;"></div>
+          </div>
+    </div>
+    <!-- SECOND LAYOUT END -->
+
+
+    <!-- THIRD LAYOUT -->
+    <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagthird">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card" (click)="FullScreenMode('daily','chart-container_new')" data-bs-toggle="modal"
+            data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{DailyLabel | uppercase}}</div>
+            <div id="daily" style="width: 100%; height: 100%;"></div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card" style="height: 40vh;" (click)="FullScreenMode('sixty','chart-container_new')"
+            data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{SixtyLabel | uppercase}}</div>
+            <div id="sixty" style="width: 100%; height: 100%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagthird">
+          <div class="card" style="height: 40vh;" (click)="FullScreenMode('fifteen','chart-container_new')"
+            data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{Fifteen_MinuteLabel | uppercase}}</div>
+            <div id="fifteen" style="width: 100%; height: 100%;"></div>
+          </div>
+    </div>
+    <!-- THIRD LAYOUT END -->
+
+
+      <!-- FOURTH LAYOUT -->
+    <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagfourth">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card" (click)="FullScreenMode('monthly','chart-container_new')" data-bs-toggle="modal"
+            data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{MonthlyLabel | uppercase}}</div>
+            <div id="monthly" style="width: 100%; height: 100%;"></div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card" style="height: 40vh;" (click)="FullScreenMode('weekly','chart-container_new')"
+            data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{WeeklyLabel | uppercase}}</div>
+            <div id="weekly" style="width: 100%; height: 100%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagfourth">
+      <div class="card" style="height: 40vh;" (click)="FullScreenMode('one_twenty_five','chart-container_new')"
+        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+        <div class="labels">{{One_Twenty_FiveLabel | uppercase}}</div>
+        <div id="one_twenty_five" style="width: 100%; height: 100%;"></div>
+      </div>
+    </div>
+    <!-- FOURTH LAYOUT END -->
+
+     <!-- FIFTH LAYOUT -->
+    <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagfifth">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card" (click)="FullScreenMode('weekly','chart-container_new')" data-bs-toggle="modal"
+            data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{WeeklyLabel | uppercase}}</div>
+            <div id="weekly" style="width: 100%; height: 100%;"></div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card" style="height: 40vh;" (click)="FullScreenMode('daily','chart-container_new')"
+            data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{DailyLabel | uppercase}}</div>
+            <div id="daily" style="width: 100%; height: 100%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagfifth">
+      <div class="card" style="height: 40vh;" (click)="FullScreenMode('one_twenty_five','chart-container_new')"
+        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+        <div class="labels">{{One_Twenty_FiveLabel | uppercase}}</div>
+        <div id="one_twenty_five" style="width: 100%; height: 100%;"></div>
+      </div>
+    </div>
+    <!-- FIFTH LAYOUT END -->
+
+     <!-- SIXTH LAYOUT -->
+    <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagsixth">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card" (click)="FullScreenMode('daily','chart-container_new')" data-bs-toggle="modal"
+            data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{DailyLabel | uppercase}}</div>
+            <div id="daily" style="width: 100%; height: 100%;"></div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card" style="height: 40vh;" (click)="FullScreenMode('one_twenty_five','chart-container_new')"
+            data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+            <div class="labels">{{One_Twenty_FiveLabel | uppercase}}</div>
+            <div id="one_twenty_five" style="width: 100%; height: 100%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagsixth">
+      <div class="card" style="height: 40vh;" (click)="FullScreenMode('twenty_five','chart-container_new')"
+        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+        <div class="labels">{{Twenty_FiveLabel | uppercase}}</div>
+        <div id="twenty_five" style="width: 100%; height: 100%;"></div>
+      </div>
+    </div>
+    <!-- SIXTH LAYOUT END -->
+
+     <!-- SEVENTH LAYOUT START -->
+      <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagseventh">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card" (click)="FullScreenMode('weekly','chart-container_new')" data-bs-toggle="modal"
+              data-bs-target="#myModal" title="Click for fullscreen">
+              <div class="labels">{{WeeklyLabel | uppercase}}</div>
+              <div id="weekly" style="width: 100%; height: 100%;"></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card" style="height: 40vh;" (click)="FullScreenMode('daily','chart-container_new')"
+              data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+              <div class="labels">{{DailyLabel | uppercase}}</div>
+              <div id="daily" style="width: 100%; height: 100%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12" class="chartcontainer" *ngIf="layoutFlagseventh">
+        <div class="card" style="height: 40vh;" (click)="FullScreenMode('seventy_five','chart-container_new')"
+          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for fullscreen">
+          <div class="labels">{{Seventy_FiveLabel | uppercase}}</div>
+          <div id="seventy_five" style="width: 100%; height: 100%;"></div>
+        </div>
+      </div>
+      <!-- SEVENTH LAYOUT END -->
+ 
+    </div>
+  </div>
+</div>
+
+
+
+        
+  <app-floating-modal #modalA title="PREDIXA™ Decision Snapshot" class="px-snapshot-modal" [width]="1200" [height]="680">
+   <div class="modal-body">
+    <div class="px-snapshot" *ngIf="PricePercentageData as snap">
+  
+      <!-- TOP SUMMARY -->
+      <div class="px-snapshot__summary">
+        <div class="px-snapshot__summary-row">
+          <div class="px-snapshot__summary-label">Bias:</div>
+          <div class="px-snapshot__summary-value">{{ snap.bias || '-' }}</div>
+        </div>
+  
+        <div class="px-snapshot__summary-row">
+          <div class="px-snapshot__summary-label">Permission:</div>
+          <div class="px-snapshot__summary-value">
+            Long:
+            <span class="px-state-pill" [ngClass]="snap.allow_long ? 'is-allowed' : 'is-blocked'">
+              {{ snap.allow_long ? 'Allowed' : 'Blocked' }}
+            </span>
+            |
+            Short:
+            <span class="px-state-pill" [ngClass]="snap.allow_short ? 'is-allowed' : 'is-blocked'">
+              {{ snap.allow_short ? 'Allowed' : 'Blocked' }}
+            </span>
+          </div>
+        </div>
+  
+        <div class="px-snapshot__summary-row">
+          <div class="px-snapshot__summary-label">Permitted Setup:</div>
+          <div class="px-snapshot__summary-value">{{ snap.permitted_setup || '-' }}</div>
+        </div>
+  
+        <div class="px-snapshot__summary-row">
+          <div class="px-snapshot__summary-label">Trade Type:</div>
+          <div class="px-snapshot__summary-value">
+            Long: {{ snap.trade_type_long || '-' }} | Short: {{ snap.trade_type_short || '-' }}
+          </div>
+        </div>
+      </div>
+  
+      <!-- THREE COLUMNS -->
+      <div class="px-snapshot__grid">
+  
+        <!-- E -->
+        <div class="px-snapshot__panel">
+          <div class="px-snapshot__panel-head">Evaluate (E)</div>
+  
+          <div class="px-snapshot__panel-body">
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Regime:</span>
+              <span class="px-regime-pill" [ngClass]="getRegimeClass(snap.result_E?.regime)">
+                {{ snap.result_E?.regime || '-' }}
+              </span>
+            </div>
+  
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Quadrant:</span>
+              <span>{{ snap.result_E?.quadrant || '-' }}</span>
+            </div>
+  
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Price % in Quadrant:</span>
+              <span>{{ formatPct(snap.result_E?.quadrant_price_pct) }}</span>
+            </div>
+  
+            <div class="px-rule-box">
+              <span class="px-rule-box__badge">RULE</span>
+              <span class="px-rule-box__text">{{ snap.result_E?.rule_applied || '-' }}</span>
+            </div>
+  
+            <div class="px-diagnosis">
+              <span class="px-snapshot__metric-label">Diagnosis:</span>
+              <span>{{ snap.result_E?.diagnosis || '-' }}</span>
+            </div>
+  
+            <div class="px-zone-block">
+              <div><strong>Nearest BZ:</strong> {{ getZoneLine(snap.result_E?.nearest_bz) }}</div>
+              <div class="px-zone-sub">{{ getZoneMetaLine(snap.result_E?.nearest_bz) }}</div>
+              <div><strong>Nearest SZ:</strong> {{ getZoneLine(snap.result_E?.nearest_sz) }}</div>
+              <div class="px-zone-sub" *ngIf="snap.result_E?.nearest_sz">{{ getZoneMetaLine(snap.result_E?.nearest_sz) }}
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- A -->
+        <div class="px-snapshot__panel">
+          <div class="px-snapshot__panel-head">Analyze (A)</div>
+  
+          <div class="px-snapshot__panel-body">
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Regime:</span>
+              <span class="px-regime-pill" [ngClass]="getRegimeClass(snap.result_A?.regime)">
+                {{ snap.result_A?.regime || '-' }}
+              </span>
+            </div>
+  
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Quadrant:</span>
+              <span>{{ snap.result_A?.quadrant || '-' }}</span>
+            </div>
+  
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Price % in Quadrant:</span>
+              <span>{{ formatPct(snap.result_A?.quadrant_price_pct) }}</span>
+            </div>
+  
+            <div class="px-rule-box">
+              <span class="px-rule-box__badge">RULE</span>
+              <span class="px-rule-box__text">{{ snap.result_A?.rule_applied || '-' }}</span>
+            </div>
+  
+            <div class="px-diagnosis">
+              <span class="px-snapshot__metric-label">Diagnosis:</span>
+              <span>{{ snap.result_A?.diagnosis || '-' }}</span>
+            </div>
+  
+            <div class="px-zone-block">
+              <div><strong>Nearest BZ:</strong> {{ getZoneLine(snap.result_A?.nearest_bz) }}</div>
+              <div class="px-zone-sub">{{ getZoneMetaLine(snap.result_A?.nearest_bz) }}</div>
+              <div><strong>Nearest SZ:</strong> {{ getZoneLine(snap.result_A?.nearest_sz) }}</div>
+              <div class="px-zone-sub" *ngIf="snap.result_A?.nearest_sz">{{ getZoneMetaLine(snap.result_A?.nearest_sz) }}
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- X -->
+        <div class="px-snapshot__panel">
+          <div class="px-snapshot__panel-head">Execute (X)</div>
+  
+          <div class="px-snapshot__panel-body">
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Regime:</span>
+              <span class="px-regime-pill" [ngClass]="getRegimeClass(snap.result_X?.regime)">
+                {{ snap.result_X?.regime || '-' }}
+              </span>
+            </div>
+  
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Quadrant:</span>
+              <span>{{ snap.result_X?.quadrant || '-' }}</span>
+            </div>
+  
+            <div class="px-snapshot__metric">
+              <span class="px-snapshot__metric-label">Price % in Quadrant:</span>
+              <span>{{ formatPct(snap.result_X?.quadrant_price_pct) }}</span>
+            </div>
+  
+            <div class="px-rule-box">
+              <span class="px-rule-box__badge">RULE</span>
+              <span class="px-rule-box__text">{{ snap.result_X?.rule_applied || '-' }}</span>
+            </div>
+  
+            <div class="px-diagnosis">
+              <span class="px-snapshot__metric-label">Diagnosis:</span>
+              <span>{{ snap.result_X?.diagnosis || '-' }}</span>
+            </div>
+  
+            <div class="px-zone-block">
+              <div><strong>Nearest BZ:</strong> {{ getZoneLine(snap.result_X?.nearest_bz) }}</div>
+              <div class="px-zone-sub">{{ getZoneMetaLine(snap.result_X?.nearest_bz) }}</div>
+              <div><strong>Nearest SZ:</strong> {{ getZoneLine(snap.result_X?.nearest_sz) }}</div>
+              <div class="px-zone-sub" *ngIf="snap.result_X?.nearest_sz">{{ getZoneMetaLine(snap.result_X?.nearest_sz) }}
+              </div>
+            </div>
+          </div>
+        </div>
+  
+      </div>
+    </div>
+    </div>
+  </app-floating-modal>
+
+
+  <!-- MODAL FOR FULLSCREEN CHART-->
+  <div class="modal Fullmodal" id="myModal" data-bs-backdrop="static" data-bs-keyboard="false"
+    (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+    <div class="modal-dialog modal-dialog-centered modal-fullscreen custom-modal" style="max-width: 100%;height: 97%;">
+      <div class="modal-content">
+
+
+        <div class="drawer px-order-drawer" *ngIf="showCreateOrderModal">
+          <div class="drawer-body px-order-drawer__body">
+            <form class="form-card px-order-form" [formGroup]="fincreateform" novalidate>
+
+              <div class="drawer-header px-order-form__header">
+                <label class="px-order-form__title">Create Order</label>
+                <button type="button" class="close-btn-order px-order-form__close"
+                  (click)="closeCreateOrderPanel()">×</button>
+              </div>
+
+              <div class="form-group px-order-form__group">
+                <b><label>Select Stock <span style="color: red;">*</span></label></b>
+                <select class="form-control px-order-input"
+                  [ngClass]="{ 'is-invalid': submitted && g['stock_tick'].errors }" disabled>
+                  <option value="" disabled selected>--Select--</option>
+                  <option *ngFor="let stock of stockData" [selected]="stock.stock_tick == selectedStockId">
+                    {{ stock.stock_tick | uppercase }}
+                  </option>
+                </select>
+                <div *ngIf="submitted && g['stock_tick'].errors" class="invalid-feedback">
+                  <div *ngIf="g['stock_tick'].errors['required']">
+                    <span style="color:red">Stock Name is required</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group px-order-form__group">
+                <b><label for="dropdown1">Order Type <span style="color: red;">*</span></label></b>
+                <select class="form-control px-order-input" id="dropdown1" formControlName="order_type"
+                  [ngClass]="{ 'is-invalid': submitted && g['order_type'].errors }" (change)="onOrderTypeChange()"
+                  autocomplete="off" style="appearance: auto;">
+                  <option value="" disabled selected>--Select Order Type--</option>
+                  <option *ngIf="SETUPTYPE === 'BUY'" value="Buy">Buy</option>
+                  <option *ngIf="SETUPTYPE === 'SELL'" value="Sell">Sell</option>
+                </select>
+                <div *ngIf="submitted && g['order_type'].errors" class="invalid-feedback">
+                  <div *ngIf="g['order_type'].errors['required']">
+                    <span style="color:red">order Name is required</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rowMessage px-order-form__row">
+                <div class="form-group px-order-form__group">
+                  <b><label for="purchasedPrice">Purchased Price</label></b>
+                  <input type="number" class="form-control px-order-input" id="purchasedPrice"
+                    formControlName="entry_price" [ngClass]="{ 'is-invalid': submitted && g['entry_price'].errors }"
+                    autocomplete="off">
+                  <div *ngIf="submitted && g['entry_price'].errors" class="invalid-feedback">
+                    <div *ngIf="g['entry_price'].errors['required']">
+                      <span style="color:red">Purchased Price is required</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group px-order-form__group">
+                  <b><label for="stoplossPrice">Stoploss Price</label></b>
+                  <input type="number" class="form-control px-order-input" id="stoplossPrice"
+                    formControlName="stoploss_price" [ngClass]="{ 'is-invalid': submitted && g['stoploss_price'].errors }"
+                    autocomplete="off">
+                  <div *ngIf="submitted && g['stoploss_price'].errors" class="invalid-feedback">
+                    <div *ngIf="g['stoploss_price'].errors['required']">
+                      <span style="color:red">Stoploss Price is required</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group px-order-form__group">
+                  <b><label for="targetPrice">Target Price</label></b>
+                  <input type="number" class="form-control px-order-input" id="targetPrice" formControlName="target_price"
+                    [ngClass]="{ 'is-invalid': submitted && g['target_price'].errors }" autocomplete="off">
+                  <div *ngIf="submitted && g['target_price'].errors" class="invalid-feedback">
+                    <div *ngIf="g['target_price'].errors['required']">
+                      <span style="color:red">Target Price is required</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group px-order-form__group">
+                <b><label for="stockquantity">Stock Quantity</label></b>
+                <input type="number" class="form-control px-order-input" id="stockquantity"
+                  formControlName="stock_quantity" [ngClass]="{ 'is-invalid': submitted && g['stock_quantity'].errors }"
+                  autocomplete="off">
+                <div *ngIf="submitted && g['stock_quantity'].errors" class="invalid-feedback">
+                  <div *ngIf="g['stock_quantity'].errors['required']">
+                    <span style="color:red">Target Price is required</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group px-order-form__group">
+                <!-- <b><label for="dropdown1"> Selected Date :&nbsp; {{selectedDate | date: 'yyyy-MM-dd HH:mm:ss' }}</label></b> -->
+              </div>
+
+              <div class="px-order-form__actions">
+                <button type="button" class="form-control submit-btn px-order-btn px-order-btn--demo" (click)="create()">
+                  Submit
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+        <!--  FOR side panel MANUALLY INPUT OF ENTRY/STOPLOSS/TARGET LINE-->
+        <div class="drawer px-order-drawer" *ngIf="showCreateOrderModalForMAnnual">
+          <div class="drawer-body px-order-drawer__body">
+            <form class="form-card px-order-form" [formGroup]="fincreateformForMannualSetup" novalidate>
+
+              <div class="drawer-header px-order-form__header">
+                <label class="px-order-form__title">Create Order</label>
+                <button type="button" class="close-btn-order px-order-form__close"
+                  (click)="closeCreateOrderPanelforMannual()">×</button>
+              </div>
+
+              <div class="form-group px-order-form__group">
+                <label><b>Select Stock <span style="color: red;">*</span></b></label>
+                <select class="form-control px-order-input"
+                  [ngClass]="{ 'is-invalid': submittedForMannual && k['stock_tick'].errors }" disabled>
+                  <option value="" disabled selected>--Select--</option>
+                  <option *ngFor="let stock of stockData" [selected]="stock.stock_tick == selectedStockId">
+                    {{ stock.stock_tick | uppercase }}
+                  </option>
+                </select>
+                <div *ngIf="submittedForMannual && k['stock_tick'].errors" class="invalid-feedback">
+                  <div *ngIf="k['stock_tick'].errors['required']">
+                    <span style="color:red">*This field is required</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group px-order-form__group">
+                <b><label for="dropdown1">Order Type <span style="color: red;">*</span></label></b>
+                <select class="form-control px-order-input" id="dropdown1" formControlName="order_type"
+                  [ngClass]="{ 'is-invalid': submittedForMannual && k['order_type'].errors }"
+                  (change)="onOrderTypeChange()" autocomplete="off" style="appearance: auto;">
+                  <option value="" disabled selected>--Select Order Type--</option>
+                  <option value="Buy">Buy</option>
+                  <option value="Sell">Sell</option>
+                </select>
+                <div *ngIf="submittedForMannual && k['order_type'].errors" class="invalid-feedback">
+                  <div *ngIf="k['order_type'].errors['required']">
+                    <span style="color:red">*This field is required</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rowMessage px-order-form__row">
+                <div class="form-group px-order-form__group">
+                  <b><label for="purchasedPrice">Purchased Price</label></b>
+                  <input type="number" class="form-control px-order-input" id="purchasedPrice"
+                    formControlName="entry_price"
+                    [ngClass]="{ 'is-invalid': submittedForMannual && k['entry_price'].errors }" autocomplete="off">
+                  <div *ngIf="submittedForMannual && k['entry_price'].errors" class="invalid-feedback">
+                    <div *ngIf="k['entry_price'].errors['required']">
+                      <span style="color:red">*This field is required</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group px-order-form__group">
+                  <b><label for="stoplossPrice">Stoploss Price</label></b>
+                  <input type="number" class="form-control px-order-input" id="stoplossPrice"
+                    formControlName="stoploss_price"
+                    [ngClass]="{ 'is-invalid': submittedForMannual && k['stoploss_price'].errors }" autocomplete="off">
+                  <div *ngIf="submittedForMannual && k['stoploss_price'].errors" class="invalid-feedback">
+                    <div *ngIf="k['stoploss_price'].errors['required']">
+                      <span style="color:red">*This field is required</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group px-order-form__group">
+                  <b><label for="targetPrice">Target Price</label></b>
+                  <input type="number" class="form-control px-order-input" id="targetPrice" formControlName="target_price"
+                    [ngClass]="{ 'is-invalid': submittedForMannual && k['target_price'].errors }" autocomplete="off">
+                  <div *ngIf="submittedForMannual && k['target_price'].errors" class="invalid-feedback">
+                    <div *ngIf="k['target_price'].errors['required']">
+                      <span style="color:red">*This field is required</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group px-order-form__group">
+                <b><label for="stockquantity">Stock Quantity</label></b>
+                <input type="number" class="form-control px-order-input" id="stockquantity"
+                  formControlName="stock_quantity"
+                  [ngClass]="{ 'is-invalid': submittedForMannual && k['stock_quantity'].errors }" autocomplete="off">
+                <div *ngIf="submittedForMannual && k['stock_quantity'].errors" class="invalid-feedback">
+                  <div *ngIf="k['stock_quantity'].errors['required']">
+                    <span style="color:red">*This field is required</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group px-order-form__group">
+                <!-- <b><label for="dropdown1"> Selected Date :&nbsp; {{selectedDate | date: 'yyyy-MM-dd HH:mm:ss' }}</label></b> -->
+              </div>
+
+              <div class="px-order-form__actions">
+                <button type="button" class="form-control submit-btn px-order-btn px-order-btn--demo"
+                  (click)="createForMannualSetup()">
+                  Submit
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+       <!-- new premium header -->
+        <header class="trade-header">
+          <div class="trade-header__left">
+            <button class="trade-header__settings" (mouseenter)="handleSettingsEnter()"
+              (mouseleave)="handleSettingsLeave()" (click)="toggleLeftBar()" type="button" aria-label="Settings">
+              <img src="assets/image/settingIcon.png" class="trade-header__settings-icon" alt="Settings">
+            </button>
+
+            <div class="trade-header__ohlc" [ngClass]="CandleColor">
+              <span class="trade-header__ohlc-item">Open: {{ Open }}</span>
+              <span class="trade-header__ohlc-item">High: {{ High }}</span>
+              <span class="trade-header__ohlc-item">Low: {{ Low }}</span>
+              <span class="trade-header__ohlc-item">Close: {{ Close }}</span>
+            </div>
+          </div>
+
+          <div class="trade-header__right">
+            <button type="button" class="trade-header__action trade-header__action--icon" (click)="openPopup()"
+              title="Check Price Percentage">
+              <img src="assets/image/execution_white.png" alt="Check Price" width="18" height="18">
+            </button>
+
+            <div class="trade-tools">
+
+              <button class="trade-btn entry-btn" [class.active]="activeChartDrawingTool === 'entryPrice'"
+                [disabled]="tradeLinePlaced.entry" (click)="selectChartDrawingTool('entryPrice')" title="Entry Price">
+                <i class="fas fa-sign-in-alt"></i>
+                Entry
+              </button>
+              
+              <button class="trade-btn target-btn" [class.active]="activeChartDrawingTool === 'targetPrice'"
+                [disabled]="tradeLinePlaced.target" (click)="selectChartDrawingTool('targetPrice')" title="Target Price">
+                <i class="fas fa-bullseye"></i>
+                Target
+              </button>
+              
+              <button class="trade-btn stoploss-btn" [class.active]="activeChartDrawingTool === 'stoplossPrice'"
+                [disabled]="tradeLinePlaced.stoploss" (click)="selectChartDrawingTool('stoplossPrice')" title="Stoploss Price">
+                <i class="fas fa-shield-alt"></i>
+                Stoploss
+              </button>
+
+                <!-- <div class="manual-zone-draw-wrapper">
+              <button type="button" class="manual-zone-draw-btn manual-zone-draw-btn-buy"
+                [class.active]="activeManualZoneType === 'BUY'" (click)="startBuyZoneDrawing($event)" title="Draw Buy Zone">
+                <div class="manual-zone-draw-mini-chart">
+                  <div class="manual-zone-draw-box manual-zone-draw-box-green"></div>
+            
+                  <span class="manual-zone-draw-candle manual-zone-draw-green manual-zone-draw-c1"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-green manual-zone-draw-c2"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-green manual-zone-draw-c3"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-blue manual-zone-draw-c4"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-blue manual-zone-draw-c5"></span>
+                </div>
+              </button>
+            
+              <button type="button" class="manual-zone-draw-btn manual-zone-draw-btn-sell"
+                [class.active]="activeManualZoneType === 'SELL'" (click)="startSellZoneDrawing($event)" title="Draw Sell Zone">
+                <div class="manual-zone-draw-mini-chart">
+                  <div class="manual-zone-draw-box manual-zone-draw-box-orange"></div>
+            
+                  <span class="manual-zone-draw-candle manual-zone-draw-orange manual-zone-draw-c1"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-orange manual-zone-draw-c2"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-red manual-zone-draw-c3"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-red manual-zone-draw-c4"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-red manual-zone-draw-c5"></span>
+                </div>
+              </button>
+            </div> -->
+
+            <div class="tt-chart-tool-wrapper">
+              <button type="button" class="tt-chart-tool-main-btn" (click)="toggleChartDrawingToolMenu($event)"
+                title="Drawing Tools">
+                <i class="fas fa-pencil-ruler"></i>
+              </button>
+            </div>
+
+            <div class="tt-chart-tool-popup" *ngIf="showChartDrawingToolMenu" [ngStyle]="chartDrawingToolPopupStyle">
+              <button type="button" [class.active]="activeChartDrawingTool === 'select'" (click)="selectChartDrawingTool('select')">
+                <i class="fas fa-mouse-pointer"></i>
+                Select / Move
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'vertical'"
+                (click)="selectChartDrawingTool('vertical')">
+                <i class="fas fa-arrows-alt-v"></i>
+                Vertical Line
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'horizontal'"
+                (click)="selectChartDrawingTool('horizontal')">
+                <i class="fas fa-grip-lines"></i>
+                Horizontal Line
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'trendline'"
+                (click)="selectChartDrawingTool('trendline')">
+                <i class="fas fa-slash"></i>
+                Free Line
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'text'" (click)="selectChartDrawingTool('text')">
+                <i class="fas fa-font"></i>
+                Text
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'longPosition'"
+                (click)="selectChartDrawingTool('longPosition')">
+                <i class="fas fa-chart-line"></i>
+                Long Position
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'shortPosition'"
+                (click)="selectChartDrawingTool('shortPosition')">
+                <i class="fas fa-chart-line"></i>
+                Short Position
+              </button>
+            </div>
+
+            </div>
+            <button class="trade-header__action" (click)="getCustomMOdelPrediction()"
+              [class.disabled]="!EntryPrice || !TargetPrice || !StoplossPrice">PREDICTION</button>
+            <button class="trade-header__action" *ngIf="createBtnFlgForMannualSetup"
+              (click)="openCreateOrderPanelforMannual()"
+              [class.disabled]="!EntryPrice || !TargetPrice || !StoplossPrice">CREATE ORDER</button>
+            <button class="trade-header__action" *ngIf="TimeFrame==1 && FullScreenModeValue=='daily' && CreateButtonFlag"
+              (click)="openCreateOrderPanel()">CREATE ORDER</button>
+            <button class="trade-header__action" (click)="toggleChartInversion()" title="Invert"> <i
+                class="fas fa-sync-alt"></i></button>
+          </div>
+
+          <div class="trade-header__mobile-tools">
+            <button type="button" class="trade-header__mobile-menu-btn" (click)="toggleMobileTradeMenu()"
+              aria-label="Open actions menu">
+              ☰
+            </button>
+          </div>
+
+          <button type="button" #closeButton class="btn-close trade-header__close" data-bs-dismiss="modal"
+            (click)="CloseFullModal()" aria-label="Close"></button>
+        </header>
+
+            <!-- TRADINGVIEW STYLE LEFT DRAWING TOOLBAR -->
+            <aside class="tv-left-drawing-toolbar" *ngIf="TrackFullScreenMode">
+            
+              <!-- Select / Move -->
+              <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'select'"
+                (click)="selectChartDrawingTool('select')" title="Select / Move">
+                <i class="fas fa-mouse-pointer"></i>
+              </button>
+            
+              <!-- Vertical Line -->
+              <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'vertical'"
+                (click)="selectChartDrawingTool('vertical')" title="Vertical Line">
+                <i class="fas fa-arrows-alt-v"></i>
+              </button>
+            
+              <!-- Horizontal Line -->
+              <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'horizontal'"
+                (click)="selectChartDrawingTool('horizontal')" title="Horizontal Line">
+                <i class="fas fa-grip-lines"></i>
+              </button>
+            
+              <!-- Free Line -->
+              <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'trendline'"
+                (click)="selectChartDrawingTool('trendline')" title="Free Line">
+                <i class="fas fa-slash"></i>
+              </button>
+            
+              <!-- Rectangle -->
+              <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'rectangle'"
+                (click)="selectChartDrawingTool('rectangle')" title="Rectangle">
+                <span class="tv-left-rectangle-icon"></span>
+              </button>
+            
+              <!-- Text -->
+              <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'text'"
+                (click)="selectChartDrawingTool('text')" title="Text">
+                <i class="fas fa-font"></i>
+              </button>
+            
+              <div class="tv-left-tool-separator"></div>
+            
+              <!-- Long Position -->
+              <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'longPosition'"
+                (click)="selectChartDrawingTool('longPosition')" title="Long Position">
+                <span class="tv-left-position-icon tv-left-position-icon-long">L</span>
+              </button>
+            
+              <!-- Short Position -->
+              <button type="button" class="tv-left-tool-btn" [class.active]="activeChartDrawingTool === 'shortPosition'"
+                (click)="selectChartDrawingTool('shortPosition')" title="Short Position">
+                <span class="tv-left-position-icon tv-left-position-icon-short">S</span>
+              </button>
+            
+              <div class="tv-left-tool-separator"></div>
+            
+              <button type="button" class="tv-left-tool-btn tv-left-zone-btn-buy" [class.active]="activeManualZoneType === 'BUY'"
+                (click)="startBuyZoneDrawing($event)" title="Draw Buy Zone">
+                <span class="tv-left-zone-mini">
+                  <span class="tv-left-zone-box tv-left-zone-box-buy"></span>
+                  <span class="tv-left-zone-candle tv-left-zone-candle-green c1"></span>
+                  <span class="tv-left-zone-candle tv-left-zone-candle-green c2"></span>
+                  <span class="tv-left-zone-candle tv-left-zone-candle-blue c3"></span>
+                </span>
+              </button>
+            
+              <button type="button" class="tv-left-tool-btn tv-left-zone-btn-sell" [class.active]="activeManualZoneType === 'SELL'"
+                (click)="startSellZoneDrawing($event)" title="Draw Sell Zone">
+                <span class="tv-left-zone-mini">
+                  <span class="tv-left-zone-box tv-left-zone-box-sell"></span>
+                  <span class="tv-left-zone-candle tv-left-zone-candle-orange c1"></span>
+                  <span class="tv-left-zone-candle tv-left-zone-candle-red c2"></span>
+                  <span class="tv-left-zone-candle tv-left-zone-candle-red c3"></span>
+                </span>
+              </button>
+            
+              <div class="tv-left-tool-separator"></div>
+            
+              <!-- Delete Selected Drawing -->
+              <button type="button" class="tv-left-tool-btn tv-left-tool-btn-danger" (click)="deleteActiveDrawingFromLeftToolbar()"
+                title="Delete Selected Drawing">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            
+            </aside>
+            <!-- TOOL SETTINGS SIDE PANEL -->
+
+            <!-- TOOL SETTINGS SIDE PANEL -->
+            
+            <div class="ctv-drawing-style-panel" *ngIf="selectedChartDrawing">
+              <div class="ctv-style-header">
+                <div>
+                  <strong>Drawing Properties</strong>
+                  <span>{{ selectedChartDrawing.type }}</span>
+                </div>
+            
+                <button type="button" class="ctv-style-close" (click)="selectedChartDrawing = null" title="Close">
+                  ×
+                </button>
+              </div>
+            
+              <div class="ctv-style-body">
+                <!-- Common color -->
+                <div class="ctv-style-row">
+                  <label>Color</label>
+                  <input type="color" [value]="selectedChartDrawing.color || '#2563eb'"
+                    (input)="onSelectedDrawingColorChange($event)" />
+                </div>
+            
+                <!-- Line width -->
+                <div class="ctv-style-row" *ngIf="!isSelectedTextDrawing()">
+                  <label>Width</label>
+                  <select [value]="selectedChartDrawing.lineWidth || 1" (change)="onSelectedDrawingLineWidthChange($event)">
+                    <option *ngFor="let width of drawingLineWidths" [value]="width">
+                      {{ width }} px
+                    </option>
+                  </select>
+                </div>
+            
+                <!-- Line style -->
+                <div class="ctv-style-row" *ngIf="!isSelectedTextDrawing()">
+                  <label>Style</label>
+                  <select [value]="selectedChartDrawing.lineStyle || 'solid'" (change)="onSelectedDrawingLineStyleChange($event)">
+                    <option *ngFor="let style of drawingLineStyles" [value]="style">
+                      {{ style }}
+                    </option>
+                  </select>
+                </div>
+            
+                <!-- Text settings -->
+                <ng-container *ngIf="isSelectedTextDrawing()">
+                  <div class="ctv-style-row ctv-style-row-full">
+                    <label>Text</label>
+                    <input type="text" [value]="selectedChartDrawing.text || ''" (input)="onSelectedTextChange($event)"
+                      placeholder="Enter text" />
+                  </div>
+            
+                  <div class="ctv-style-row">
+                    <label>Font Size</label>
+                    <select [value]="selectedChartDrawing.fontSize || 13" (change)="onSelectedTextFontSizeChange($event)">
+                      <option [value]="11">11 px</option>
+                      <option [value]="12">12 px</option>
+                      <option [value]="13">13 px</option>
+                      <option [value]="14">14 px</option>
+                      <option [value]="16">16 px</option>
+                      <option [value]="18">18 px</option>
+                      <option [value]="20">20 px</option>
+                      <option [value]="24">24 px</option>
+                    </select>
+                  </div>
+            
+                  <div class="ctv-style-row">
+                    <label>Background</label>
+                    <input type="color" [value]="selectedChartDrawing.backgroundColor || '#ffffff'"
+                      (input)="onSelectedTextBackgroundChange($event)" />
+                  </div>
+            
+                  <div class="ctv-style-actions">
+                    <button type="button" class="ctv-style-action-btn" [class.active]="selectedChartDrawing.fontWeight === 'bold'"
+                      (click)="toggleSelectedTextBold()">
+                      Bold
+                    </button>
+            
+                    <button type="button" class="ctv-style-action-btn" (click)="clearSelectedTextBackground()">
+                      Clear BG
+                    </button>
+                  </div>
+                </ng-container>
+            
+                <!-- Long / Short settings -->
+                <ng-container *ngIf="isSelectedPositionDrawing()">
+                  <div class="ctv-position-settings">
+                    <div class="ctv-style-row">
+                      <label>Target</label>
+                      <input type="color" [value]="selectedChartDrawing.targetColor || '#10b981'"
+                        (input)="onPositionTargetColorChange($event)" />
+                    </div>
+            
+                    <div class="ctv-style-row">
+                      <label>Stop</label>
+                      <input type="color" [value]="selectedChartDrawing.stopColor || '#f43f5e'"
+                        (input)="onPositionStopColorChange($event)" />
+                    </div>
+            
+                    <div class="ctv-style-row">
+                      <label>Entry</label>
+                      <input type="color" [value]="selectedChartDrawing.entryColor || '#14b8a6'"
+                        (input)="onPositionEntryColorChange($event)" />
+                    </div>
+            
+                    <div class="ctv-style-row ctv-style-row-full">
+                      <label>Opacity</label>
+                      <input type="range" min="0.05" max="0.8" step="0.05" [value]="selectedChartDrawing.fillOpacity || 0.25"
+                        (input)="onPositionOpacityChange($event)" />
+                    </div>
+            
+                    <button type="button" class="ctv-style-action-btn" [class.active]="selectedChartDrawing.showLabels !== false"
+                      (click)="togglePositionLabels()">
+                      Labels
+                    </button>
+                  </div>
+                </ng-container>
+            
+                <!-- Common actions -->
+                <div class="ctv-style-footer">
+                  <button type="button" class="ctv-style-action-btn" [class.active]="selectedChartDrawing.locked"
+                    (click)="toggleSelectedDrawingLock()">
+                    {{ selectedChartDrawing.locked ? 'Unlock' : 'Lock' }}
+                  </button>
+            
+                  <button type="button" class="ctv-style-action-btn" (click)="duplicateSelectedChartDrawing()">
+                    Duplicate
+                  </button>
+            
+                  <button type="button" class="ctv-style-action-btn danger" (click)="deleteSelectedChartDrawingFromPanel()">
+                    Delete
+                  </button>
+                </div>
+            
+                <div class="ctv-style-row" *ngIf="isSelectedRectangleDrawing()">
+                  <label>Fill Opacity</label>
+                  <input type="range" min="0.05" max="0.8" step="0.05" [value]="selectedChartDrawing.fillOpacity || 0.18"
+                    (input)="onPositionOpacityChange($event)" />
+                </div>
+              </div>
+            </div>
+
+            <!-- mobile right drawer -->
+            <div class="trade-mobile-panel" [class.open]="showMobileTradeMenu">
+              <div class="trade-mobile-panel__header">
+                <span>Actions</span>
+                <button type="button" class="trade-mobile-panel__close" (click)="closeMobileTradeMenu()">×</button>
+              </div>
+            
+              <div class="trade-mobile-panel__body">
+                <button type="button" class="trade-mobile-panel__btn" (click)="openPopup(); closeMobileTradeMenu()">
+                  Check Price Percentage
+                </button>
+                <button type="button" class="trade-mobile-panel__btn" *ngIf="createBtnFlgForMannualSetup"
+                  (click)="openCreateOrderPanelforMannual() ; closeMobileTradeMenu()"
+                  [class.disabled]="!EntryPrice || !TargetPrice || !StoplossPrice">
+                  Create Order
+                </button>
+                <button type="button" class="trade-mobile-panel__btn"
+                  (click)="enableLinePlacement('entry') ; closeMobileTradeMenu()" [class.disabled]="!entryEnabled"
+                  title="Add Entry">
+                  Entry
+                </button>
+                <button type="button" class="trade-mobile-panel__btn"
+                  (click)="enableLinePlacement('stoploss') ; closeMobileTradeMenu()" [class.disabled]="!stoplossEnabled"
+                  title="Add Stoploss">
+                  Stoploss
+                </button>
+                <button type="button" class="trade-mobile-panel__btn"
+                  (click)="enableLinePlacement('target') ; closeMobileTradeMenu()" [class.disabled]="!targetEnabled"
+                  title="Add Target">
+                  Target
+                </button>
+                <button type="button" class="trade-mobile-panel__btn" (click)="getCustomMOdelPrediction()  ; closeMobileTradeMenu()"
+                  [class.disabled]="!EntryPrice || !TargetPrice || !StoplossPrice">
+                  Prediction
+                </button>
+                <button type="button" class="trade-mobile-panel__btn" (click)="toggleChartInversion() ; closeMobileTradeMenu()"
+                  title="Invert">
+                  Invert
+                </button>
+              </div>
+            </div>
+
+        <!-- mobile backdrop -->
+        <div class="trade-mobile-backdrop" *ngIf="showMobileTradeMenu" (click)="closeMobileTradeMenu()">
+        </div>
+
+        <!-- mobile right drawer -->
+        <div class="trade-mobile-panel" [class.open]="showMobileTradeMenu">
+          <div class="trade-mobile-panel__header">
+            <span>Actions</span>
+            <button type="button" class="trade-mobile-panel__close" (click)="closeMobileTradeMenu()">×</button>
+          </div>
+
+          <div class="trade-mobile-panel__body">
+            <button type="button" class="trade-mobile-panel__btn" (click)="openPopup(); closeMobileTradeMenu()">
+              Check Price Percentage
+            </button>
+            <button type="button" class="trade-mobile-panel__btn" *ngIf="createBtnFlgForMannualSetup"
+              (click)="openCreateOrderPanelforMannual() ; closeMobileTradeMenu()"
+              [class.disabled]="!EntryPrice || !TargetPrice || !StoplossPrice">
+              Create Order
+            </button>
+            <button type="button" class="trade-mobile-panel__btn"
+              (click)="enableLinePlacement('entry') ; closeMobileTradeMenu()" [class.disabled]="!entryEnabled"
+              title="Add Entry">
+              Entry
+            </button>
+            <button type="button" class="trade-mobile-panel__btn"
+              (click)="enableLinePlacement('stoploss') ; closeMobileTradeMenu()" [class.disabled]="!stoplossEnabled"
+              title="Add Stoploss">
+              Stoploss
+            </button>
+            <button type="button" class="trade-mobile-panel__btn"
+              (click)="enableLinePlacement('target') ; closeMobileTradeMenu()" [class.disabled]="!targetEnabled"
+              title="Add Target">
+              Target
+            </button>
+
+             <div class="manual-zone-draw-wrapper">
+              <!-- Buy Zone Button -->
+              <button type="button" class="manual-zone-draw-btn manual-zone-draw-btn-buy"
+                [class.active]="activeManualZoneType === 'BUY'" (click)="startBuyZoneDrawing($event)" title="Draw Buy Zone">
+                <div class="manual-zone-draw-mini-chart">
+                  <div class="manual-zone-draw-box manual-zone-draw-box-green"></div>
+            
+                  <span class="manual-zone-draw-candle manual-zone-draw-green manual-zone-draw-c1"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-green manual-zone-draw-c2"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-green manual-zone-draw-c3"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-blue manual-zone-draw-c4"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-blue manual-zone-draw-c5"></span>
+                </div>
+              </button>
+            
+              <!-- Sell Zone Button -->
+              <button type="button" class="manual-zone-draw-btn manual-zone-draw-btn-sell"
+                [class.active]="activeManualZoneType === 'SELL'" (click)="startSellZoneDrawing($event)" title="Draw Sell Zone">
+                <div class="manual-zone-draw-mini-chart">
+                  <div class="manual-zone-draw-box manual-zone-draw-box-orange"></div>
+            
+                  <span class="manual-zone-draw-candle manual-zone-draw-orange manual-zone-draw-c1"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-orange manual-zone-draw-c2"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-red manual-zone-draw-c3"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-red manual-zone-draw-c4"></span>
+                  <span class="manual-zone-draw-candle manual-zone-draw-red manual-zone-draw-c5"></span>
+                </div>
+              </button>
+            </div>
+
+            <div class="tt-chart-tool-wrapper">
+              <button type="button" class="tt-chart-tool-main-btn" (click)="toggleChartDrawingToolMenu($event)"
+                title="Drawing Tools">
+                <i class="fas fa-pencil-ruler"></i>
+              </button>
+            </div>
+
+            <div class="tt-chart-tool-popup" *ngIf="showChartDrawingToolMenu" [ngStyle]="chartDrawingToolPopupStyle">
+              <button type="button" [class.active]="activeChartDrawingTool === 'select'" (click)="selectChartDrawingTool('select')">
+                <i class="fas fa-mouse-pointer"></i>
+                Select / Move
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'vertical'"
+                (click)="selectChartDrawingTool('vertical')">
+                <i class="fas fa-arrows-alt-v"></i>
+                Vertical Line
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'horizontal'"
+                (click)="selectChartDrawingTool('horizontal')">
+                <i class="fas fa-grip-lines"></i>
+                Horizontal Line
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'trendline'"
+                (click)="selectChartDrawingTool('trendline')">
+                <i class="fas fa-slash"></i>
+                Free Line
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'text'" (click)="selectChartDrawingTool('text')">
+                <i class="fas fa-font"></i>
+                Text
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'longPosition'"
+                (click)="selectChartDrawingTool('longPosition')">
+                <i class="fas fa-chart-line"></i>
+                Long Position
+              </button>
+
+              <button type="button" [class.active]="activeChartDrawingTool === 'shortPosition'"
+                (click)="selectChartDrawingTool('shortPosition')">
+                <i class="fas fa-chart-line"></i>
+                Short Position
+              </button>
+            </div>
+
+            <button type="button" class="trade-mobile-panel__btn"
+              (click)="getCustomMOdelPrediction()  ; closeMobileTradeMenu()"
+              [class.disabled]="!EntryPrice || !TargetPrice || !StoplossPrice">
+              Prediction
+            </button>
+            <button type="button" class="trade-mobile-panel__btn"
+              (click)="toggleChartInversion() ; closeMobileTradeMenu()" title="Invert">
+              Invert
+            </button>
+          </div>
+        </div>
+
+         <div class="modal-body tv-chart-body">
+          <div #chart_container_new id="chart-container_new" style="width: 100%; height: 100%;"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- MODAL END -->
+
+  <!-- PREDICTION PANEL START -->
+  <div *ngIf="isNotificationVisible" class="px-prediction-toast" id="custom-notification">
+    <div class="px-prediction-toast__accent"></div>
+
+    <div class="px-prediction-toast__inner">
+      <div class="px-prediction-toast__header">
+        <div class="px-prediction-toast__titleWrap">
+          <div class="px-prediction-toast__title">Prediction</div>
+          <div class="px-prediction-toast__badge">Signal</div>
+        </div>
+
+        <button (click)="closeNotification()" class="px-prediction-toast__close" aria-label="Close">
+          ×
+        </button>
+      </div>
+
+      <div class="px-prediction-toast__body">
+        <div class="px-prediction-toast__prediction">
+          {{ ModelPrediction }}
+        </div>
+
+        <div class="px-prediction-toast__reason">
+          <span class="px-prediction-toast__reason-label">Reason</span>
+          <span class="px-prediction-toast__reason-text">{{ TradeSetupReason }}</span>
+        </div>
+      </div>
+
+      <div class="px-prediction-toast__footer" *ngIf="ViewSetUpAnywayFlag">
+        <button type="button"
+                (click)="ViewSetupAnyway()"
+                [disabled]="isDisabled"
+                class="px-prediction-toast__btn">
+          View Setup Anyway
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- PREDICTION PANEL END -->
+
+  <!-- TRADE SETTINGS LEFT BAR START -->
+  <div id="leftBar" class="px-leftbar" [class.px-leftbar--open]="isLeftBarOpen" (mouseenter)="openBar(true)"
+    (mouseleave)="openBar(false)">
+
+    <div class="px-leftbar__header">
+      <span class="px-leftbar__title">Market Zones &amp; Strategy</span>
+      <button type="button" class="px-leftbar__close" (click)="openBar(false)" aria-label="Close panel">
+        ×
+      </button>
+    </div>
+
+    <div class="px-leftbar__body">
+      <div class="px-leftbar__links">
+
+        <div *ngIf="suggestion" class="px-leftbar__item">
+          <input type="checkbox" [(ngModel)]="selectedOptions['qualified_zones']"
+            (click)="checkboxClicked('qualified_zones')" id="qualified_zones" hidden>
+          <label for="qualified_zones" class="px-leftbar__label px-leftbar__label--primary">
+            <i class="fas fa-cogs"></i>
+            <span>Qualified Zones</span>
+          </label>
+        </div>
+
+        <div class="px-leftbar__item">
+          <input type="checkbox" [(ngModel)]="selectedOptions['gap_up_down']" (click)="checkboxClicked('gap_up_down')"
+            id="gap_up_down" hidden>
+          <label for="gap_up_down" class="px-leftbar__label">
+            <i class="fas fa-cogs"></i>
+            <span>Gap(UP/DOWN)</span>
+          </label>
+        </div>
+
+        <div class="px-leftbar__item">
+          <input type="checkbox" [(ngModel)]="selectedOptions['all_zones']" (click)="checkboxClicked('all_zones')"
+            id="all_zones" hidden>
+          <label for="all_zones" class="px-leftbar__label">
+            <i class="fas fa-globe"></i>
+            <span>All Zones</span>
+          </label>
+        </div>
+
+        <div class="px-leftbar__item">
+          <input type="checkbox" [(ngModel)]="selectedOptions['base_candle']" (click)="checkboxClicked('base_candle')"
+            id="base_candle" hidden>
+          <label for="base_candle" class="px-leftbar__label">
+            <i class="fas fa-chart-line"></i>
+            <span>Base Candle</span>
+          </label>
+        </div>
+
+        <!-- <div class="px-leftbar__item">
+          <input type="checkbox" [(ngModel)]="selectedOptions['buy_sell_zone']" (click)="checkboxClicked('buy_sell_zone')"
+            id="buy_sell_zone" hidden>
+          <label for="buy_sell_zone" class="px-leftbar__label">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Buy / Sell Zone</span>
+          </label>
+        </div> -->
+
+        <div class="px-leftbar__item">
+          <input type="checkbox" [(ngModel)]="selectedOptions['bad_zone']" (click)="checkboxClicked('bad_zone')"
+            id="bad_zone" hidden>
+          <label for="bad_zone" class="px-leftbar__label px-leftbar__label--danger">
+            <i class="fas fa-times-circle"></i>
+            <span>Bad Zone</span>
+          </label>
+        </div>
+
+           <div *ngIf="suggestion" class="px-leftbar__item">
+        <input type="checkbox" [(ngModel)]="selectedOptions['htf_zone']"
+          (click)="checkboxClicked('htf_zone')" id="htf_zone" hidden>
+        <label for="htf_zone" class="px-leftbar__label px-leftbar__label--success">
+          <i class="fas fa-check-circle"></i>
+          <span>HTF Zone</span>
+        </label>
+      </div>
+<!-- 
+        <div *ngIf="suggestion" class="px-leftbar__item">
+          <input type="checkbox" [(ngModel)]="selectedOptions['overlap_evaluate']"
+            (click)="checkboxClicked('overlap_evaluate')" id="overlap_evaluate" hidden>
+          <label for="overlap_evaluate" class="px-leftbar__label px-leftbar__label--success">
+            <i class="fas fa-check-circle"></i>
+            <span>Overlap Evaluate</span>
+          </label>
+        </div>
+
+        <div *ngIf="suggestion" class="px-leftbar__item">
+          <input type="checkbox" [(ngModel)]="selectedOptions['overlap_analyze']"
+            (click)="checkboxClicked('overlap_analyze')" id="overlap_analyze" hidden>
+          <label for="overlap_analyze" class="px-leftbar__label">
+            <i class="fas fa-search"></i>
+            <span>Overlap Analyze</span>
+          </label>
+        </div> -->
+
+        <div class="px-leftbar__item">
+          <input type="checkbox" [(ngModel)]="selectedOptions['optimized_buy_sell_zone']"
+            (click)="checkboxClicked('optimized_buy_sell_zone')" id="optimized_buy_sell_zone" hidden>
+          <label for="optimized_buy_sell_zone" class="px-leftbar__label px-leftbar__label--warn">
+            <i class="fas fa-search"></i>
+            <span>Optimize Buy/Sell Zone</span>
+          </label>
+        </div>
+
+        <div *ngIf="suggestion" class="px-leftbar__item">
+          <input type="checkbox" [(ngModel)]="selectedOptions['setup']" (click)="checkboxClicked('setup')" id="setup"
+            hidden>
+          <label for="setup" class="px-leftbar__label">
+            <i class="fas fa-tools"></i>
+            <span>Trade Setup</span>
+          </label>
+        </div>
+
+        <div class="px-leftbar__item" *ngIf="dropdownShow">
+          <div class="px-leftbar__toggleWrap">
+            <button type="button" class="px-leftbar__toggleBtn px-leftbar__toggleBtn--buy" (click)="setupType('BUY')">
+              <i class="fas fa-arrow-up"></i>
+              <span>BUY</span>
+            </button>
+
+            <button type="button" class="px-leftbar__toggleBtn px-leftbar__toggleBtn--sell" (click)="setupType('SELL')">
+              <i class="fas fa-arrow-down"></i>
+              <span>SELL</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="px-leftbar__backdrop" *ngIf="isLeftBarOpen" (click)="openBar(false)"></div>
+
+
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

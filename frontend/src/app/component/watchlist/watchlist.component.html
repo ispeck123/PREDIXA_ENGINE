@@ -1,0 +1,159 @@
+<div class="wl-shell">
+  <div class="wl-card">
+
+    <!-- Header -->
+    <div class="wl-head">
+      <div class="wl-title">
+        <div class="wl-h">Watchlist</div>
+        <div class="wl-s">Live prices • NSE • Total: <b>{{ totalStocks }}</b></div>
+      </div>
+
+      <div class="wl-controls">
+        <div class="wl-search">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search stock…" [(ngModel)]="searchText" (input)="onSearchChange()" />
+        </div>
+
+        <div class="wl-pagesize">
+          <span>Rows</span>
+          <select [ngModel]="pageSize" (ngModelChange)="changePageSize($event)">
+            <option [ngValue]="5">5</option>
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Head (desktop) -->
+    <div class="wl-grid wl-grid-head">
+      <button class="wl-th" (click)="toggleSort('stock')">
+        Stock
+        <i class="fas fa-sort"></i>
+      </button>
+
+      <button class="wl-th right" (click)="toggleSort('price')">
+        Price
+        <i class="fas fa-sort"></i>
+      </button>
+
+      <div class="wl-th right">Prev Close</div>
+
+      <button class="wl-th right" (click)="toggleSort('day_change_percentage')">
+        Change %
+        <i class="fas fa-sort"></i>
+      </button>
+
+      <div class="wl-th right">Change</div>
+      <div class="wl-th actions">Actions</div>
+    </div>
+
+    <!-- Loading -->
+    <div class="wl-loading" *ngIf="isLoading">
+      <div class="wl-skel" *ngFor="let x of [1,2,3,4,5,6]"></div>
+    </div>
+
+    <!-- Body -->
+    <div class="wl-body" *ngIf="!isLoading">
+
+      <div *ngIf="!isLoading && (isNoData || WatchlistData?.length === 0)" class="wl-empty">
+        <div class="wl-empty-title">No Data Found</div>
+        <div class="wl-empty-sub">
+          {{ errorMsg || 'Try a different keyword.' }}
+        </div>
+
+        <button *ngIf="serverSearchKey" class="btn ghost" (click)="clearSearch()">
+          Clear Search
+        </button>
+      </div>
+
+
+      <div class="wl-row wl-grid" *ngFor="let stock of WatchlistData" [class.wl-highlight]="stock.__highlight" #wlRow>
+        <div class="wl-td sym" (click)="ViewAnalytics(stock.stock)">
+          <div class="sym-top">{{ stock.stock | uppercase }}</div>
+          <div class="sym-sub">ID: {{ stock.stock_id }} • WL: {{ stock.watchlist_id }}</div>
+        </div>
+
+        <div class="wl-td right price">
+          {{ stock.price | number:'1.2-2' }}
+        </div>
+
+        <div class="wl-td right muted">
+          {{ stock.prev_close | number:'1.2-2' }}
+        </div>
+
+        <div class="wl-td right">
+          <span class="pill" [ngClass]="getChangeClass(stock)">
+            {{ stock.day_change_percentage > 0 ? '+' : '' }}{{ stock.day_change_percentage | number:'1.2-2' }}%
+          </span>
+        </div>
+
+        <div class="wl-td right muted">
+          {{ stock.day_change }}
+        </div>
+
+        <div class="wl-td actions">
+          <button class="btn mini analytics-btn" (click)="ViewAnalytics(stock.stock)" title="Analytics">
+            <i class="fas fa-chart-line"></i>
+          </button>
+        
+          <button class="btn mini danger" (click)="removeFromWatchlist(stock.watchlist_id)" title="Remove">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="wl-pager" *ngIf="totalPages > 1">
+
+        <button class="btn ghost" (click)="goToPage(1)" [disabled]="pageNo === 1">
+          <i class="fas fa-angle-double-left"></i>
+        </button>
+
+        <button class="btn ghost" (click)="prevPage()" [disabled]="pageNo <= 1">
+          <i class="fas fa-chevron-left"></i>
+          Prev
+        </button>
+
+        <div class="wl-pages">
+          <button *ngFor="let p of getVisiblePages()" class="pg" [class.active]="p === pageNo" [disabled]="p === '...'"
+            (click)="onPageClick(p)">
+            {{ p }}
+          </button>
+        </div>
+
+        <button class="btn ghost" (click)="nextPage()" [disabled]="pageNo >= totalPages">
+          Next
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <button class="btn ghost" (click)="goToPage(totalPages)" [disabled]="pageNo === totalPages">
+          <i class="fas fa-angle-double-right"></i>
+        </button>
+
+        <div class="wl-jump">
+          <span>Go to</span>
+          <input type="number" min="1" [max]="totalPages" placeholder="10" [(ngModel)]="jumpToPageInput"
+            (keydown.enter)="jumpToPage()" />
+          <button class="btn ghost" (click)="jumpToPage()">Go</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

@@ -1,0 +1,1552 @@
+
+.controls {
+    display: flex;
+    gap: 10px;
+  }
+  .btn {
+    background: #00416A;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  /* Orders Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+  }
+  th {
+    background: #00416A;
+    color: white;
+  }
+  .completed {
+    color: green;
+  }
+  .pending {
+    color: orange;
+  }
+  .view {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  
+  .dashboard-container {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  
+  .sidebar {
+    width: 250px;
+    height: 100vh; /* Full height of viewporft */
+    /* background: linear-gradient(135deg, #141E30 0%, #243B55 100%); */
+    background: #303f4a;
+    padding: 20px;
+    color: white; /* Ensures text is readable on dark background */
+    position: fixed; /* Fixes sidebar position */
+    top: 0;
+    left: 0;
+    overflow: hidden; /* Prevents scrolling */
+  }
+  
+  
+  
+  .sidebar h2 {
+    margin-bottom: 20px;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar ul li {
+    padding: 10px;
+    margin: 5px 0;
+    cursor: pointer;
+  }
+  
+  .sidebar ul .active {
+    background: #3b66ff;
+    color: white;
+    border-radius: 5px;
+  }
+  
+  .user-profile {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .user-profile img {
+    width: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  /* Main Content */
+  .main-content {
+    margin-left: 250px; /* Push content to the right of the sidebar */
+    padding: 20px;
+    width: calc(100% - 250px); /* Ensure it takes the remaining space */
+    min-height: 100vh; /* Full height */
+    background: #f5f5f5; /* Light background for better contrast */
+  }
+  
+  
+  .logo {
+    width: 80px;
+    height: auto; 
+    float: right;  
+  }
+  
+  .menu-bar {
+    display: flex;
+    justify-content: center;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 10px;
+  }
+  
+  .tab-menu {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .tab-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .tab-item.active {
+    border-bottom: 3px solid #007bff;
+    font-weight: bold;
+    color: #007bff;
+  }
+  
+      
+      .logo {
+        width: 80px;
+        height: auto; 
+        float: right;  
+      }
+  
+      .logo2 {
+       font-size: 25px;
+        height: auto; 
+        float: right;  
+      }
+  
+      nav{
+          height: 100%;
+      }
+       
+      .navbar
+      {
+          background-image:linear-gradient(to right,#37517e,#103c89) ;
+      }
+  
+  .content-container {
+      display: flex;
+      align-items: center; /* Vertically center-align the content */
+      background-color:#1D252C;
+    }
+    .content-container {
+      display: flex;
+      align-items: center; /* Vertically center-align the content */;
+    }
+    
+    .logo {
+      width: 80px; /* Increase the width to adjust the logo size */
+      height: auto; /* Maintain aspect ratio */
+      float: right;
+       /* Adjust spacing between logo and text as needed */
+      
+    }
+    
+    .text {
+      margin-top: 10px;
+      color: white;
+      font-size: 40px; /* Adjust the font size as needed */
+      float: right;
+    }
+  
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+  }
+  
+  .my-component-background {
+      background-color: #fff;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .content-container {
+      display: flex;
+      align-items: center;
+  }
+  
+  .logo {
+      margin-right: 10px;
+  }
+  
+  .text {
+      margin: 0;
+  }
+  
+  table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+  }
+  
+  th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+  }
+  
+  th {
+      background-color: #4CAF50;
+      color: white;
+  }
+  .back-button {
+      background-color: #3498db;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-bottom: 20px; /* Adjust as needed */
+  }
+  
+  .back-button:hover {
+      background-color: #2980b9;
+  }
+  
+  .update-button {
+      background-color: #3498db;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-bottom: 20px; /* Adjust as needed */
+  }
+  
+  .update-button:hover {
+      background-color: #2980b9;
+  }
+  
+  #tradingview-widget-container {
+      height: 80vh;
+    }
+  
+    .btn-close {
+      padding: 10px;
+      background-color: #eae1e0; /* Light background color */
+      border: none; /* Remove border */
+      cursor: pointer; /* Pointer cursor on hover */
+      position: absolute; /* Position it absolutely */
+      top: 10px; 
+      right: 10px; 
+      font-weight: bold; 
+      transition: background-color 0.3s ease; 
+      color: blue;
+      font-size: 1.5rem;
+    }
+    
+    .btn-close:hover {
+      background-color: #e0e0e0; /* Darker background on hover */
+    }
+  
+    .custom-modal .modal-content {
+      border: 4px solid black; /* Set the border width and color */
+    }
+  
+  
+    
+  .custom-modal .modal-content {
+    border: 4px solid black; /* Set the border width and color */
+  }
+  
+    .content-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo {
+      width: 80px;
+      height: auto; 
+      float: right;  
+    }
+    
+    nav{
+        height: 100%;
+    }
+     
+    .navbar
+    {
+        background-image:linear-gradient(to right,#37517e,#103c89) ;
+    }
+  
+    .card{
+      max-height: 100%;
+      cursor: pointer;
+    }
+  
+    .chartcontainer{
+      padding: 5px;
+    }
+  
+  
+  .modal-title{
+    margin-top: 10px; /* Add space above the element */
+    margin-bottom: 10px; /* Add space below the element */
+    letter-spacing: 2px;
+  }
+  
+  .fullscreen-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 2;
+      overflow: hidden;
+    }
+  
+    .labels{
+      padding-top: 5px;
+      padding-left: 15px;
+    }
+  
+    .radio-row {
+      display: flex;
+      align-items: center;
+      padding: 5px;
+      padding-top: 15px;
+  }
+  
+  .radio-row label {
+      margin-right: 20px; /* Adjust spacing between radio buttons */
+      cursor: pointer;
+  }
+  
+  .radio-row input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ccc;
+      border-radius: 50%;
+      outline: none;
+      cursor: pointer;
+      margin-right: 8px; /* Adjust spacing between radio buttons */
+  }
+  
+  /* Style the radio buttons when checked */
+  .radio-row input[type="radio"]:checked {
+      background-color: #007bff;
+      border-color: #007bff;
+  }
+  
+  /* Style the radio buttons' inner circle */
+  .radio-row input[type="radio"]:checked::before {
+      content: "";
+      display: block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #fff;
+  }
+  
+  .green {
+    color: green;
+  }
+  
+  .red {
+    color: red;
+  }
+  
+  
+  
+  .btn-close {
+    padding: 10px;
+    background-color: #eae1e0; /* Light background color */
+    border: none; /* Remove border */
+    cursor: pointer; /* Pointer cursor on hover */
+    position: absolute; /* Position it absolutely */
+    top: 10px; 
+    right: 10px; 
+    font-weight: bold; 
+    transition: background-color 0.3s ease; 
+    color: blue;
+    font-size: 1.5rem;
+  }
+  
+  .btn-close:hover {
+    background-color: #e0e0e0; /* Darker background on hover */
+  }
+  
+  
+  .radio-inputs {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 0.5rem;
+    /* background-color: #EEE; */
+    /* box-sizing: border-box; */
+    /* box-shadow: 0 0 0px 1px rgba(0, 0, 0, 0.06); */
+    /* padding-top: 0.5rem;
+    padding-left:0.5rem;
+    padding-right:0.5rem; */
+    width: 100%;
+    font-size: 16px;
+    /* padding: 5px; */
+  }
+  
+  .radio-inputs .radio {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+  
+  .radio-inputs .radio input {
+    display: none;
+  }
+  
+  .radio-inputs .radio .name {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    border: none;
+    padding: .5rem 0;
+    color: rgba(51, 65, 85, 1);
+    transition: all .15s ease-in-out;
+    height: 100%;
+    border: 2px solid black;
+  }
+  
+  .radio-inputs .radio input:checked + .name {
+    background-color: #6693e9;
+    font-weight: 600;
+    height: 100%;
+    color:white
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  .label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .toggle-wrapper {
+    display: flex;
+    align-items: center;
+  }
+  
+  .label-text {
+    margin: 0 10px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .toggle {
+    position: relative;
+    width: 50px;
+    height: 25px;
+  }
+  
+  .toggle-state {
+    display: none;
+  }
+  
+  .indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ccc;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .indicator:before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 21px;
+    height: 21px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+  }
+  
+  .toggle-state:checked + .indicator {
+    background-color: #4caf50;
+  }
+  
+  .toggle-state:checked + .indicator:before {
+    transform: translateX(25px);
+  }
+  
+  
+  /* Dropdown styles */
+  
+  .dropdown {
+    max-width: 13em;
+    margin: 80px auto 0;
+    position: relative;
+    width: 100%;
+  }
+  .dropdown-btn {
+    background: #1d1f24;
+    font-size: 18px;
+    width: 100%;
+    border: none;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.7em 0.5em;
+    border-radius: 0.5em;
+    cursor: pointer;
+  }
+  .arrow {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #fff;
+    transition: transform ease-in-out 0.3s;
+  }
+  .dropdown-content {
+    list-style: none;
+    position: absolute;
+    top: 3.2em;
+    width: 100%;
+  }
+  .dropdown-content li {
+    background: #2f3238;
+    border-radius: 0.5em;
+  }
+  .dropdown-content li:hover {
+    background: #1d1f24;
+  }
+  .dropdown-content li a {
+    display: block;
+    padding: 0.7em 0.5em;
+    color: #fff;
+    margin: 0.1em 0;
+    text-decoration: none;
+  }
+  
+  .modal-dialog-centered{
+    height: 500px;
+  }
+  
+  .bold-hr {
+    border: none;
+    height: 3px; /* Adjust the height to make it "bold" */
+    background-color: black; /* Change color as needed */
+    padding: none;
+  }
+  
+  /* Apply a consistent hover effect for dropdown items */
+  .dropdown-item {
+    transition: background-color 0.3s ease; /* Smooth transition effect */
+    border-bottom: 1px solid #343a40; /* Add a separating line */
+  }
+  
+  .dropdown-item:hover {
+    background-color: #5f9fe3; /* Hover color (adjust as needed) */
+    color: white; /* Text color on hover */
+  }
+  
+  /* Remove border from the last dropdown item */
+  .dropdown-item:last-child {
+    border-bottom: none;
+  }
+  
+  
+  @keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+  }
+  
+  .blinkingtext {
+    animation: blink 1s infinite;
+    color: red; /* Optional: Set the color to red for the alert effect */
+  }
+  
+  
+  
+  
+  .checkbox-tabs {
+    display: flex;
+    gap: 10px; /* Space between the tabs */
+  }
+  
+  .checkbox-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* Adjust width as needed */
+    height: 40px; /* Adjust height as needed */
+    border: 2px solid #ddd; /* Border color */
+    border-radius: 4px; /* Rounded corners */
+    background-color: #bcbbbb; /* Background color */
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background-color 0.3s, border-color 0.3s;
+    position: relative; /* To ensure the span stays within the tab */
+    color: rgb(146, 3, 3);
+    border-color:rgb(146, 3, 3);
+  }
+  
+  .checkbox-tab:hover{
+    background-color: #007bff;
+    color: white; 
+    border-color: black;
+  }
+  
+  .checkbox-tab .name {
+    font-size: clamp(8px, 1vw, 14px); /* Dynamically adjusts between 12px and 16px */
+    overflow: hidden;
+    padding: 5px;
+    font-weight: bold; 
+  }
+  
+  .checkbox-tab.selected {
+    border-color: #007bff; /* Active border color */
+    background-color: #007bff; /* Active background color */
+    color: white; /* Text color when selected */
+  }
+  
+  .checkbox-tab input[type="checkbox"] {
+    display: none; /* Hide the actual checkbox */
+  }
+  
+  .checkbox-tab .name {
+    font-size: 14px; /* Font size */
+    font-weight: bold; /* Font weight */
+    pointer-events: none; /* Prevents text selection affecting click */
+  }
+  
+  .form-row {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Adds spacing between elements */
+  }
+  
+  
+  /* Style the input field */
+  input[ngxDaterangepickerBootstrap] {
+    padding: 5px; /* Padding inside the input */
+    font-size: 16px; /* Make the font size slightly larger */
+    border: 1px solid #ccc; /* Light gray border */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: border-color 0.3s ease; /* Smooth transition for border color */
+    height: 38px;
+  }
+  
+  /* Add a hover effect */
+  input[ngxDaterangepickerBootstrap]:hover {
+    border-color: #007bff; /* Change border color on hover */
+  }
+  
+  /* Add a focus effect */
+  input[ngxDaterangepickerBootstrap]:focus {
+    border-color: #007bff; /* Highlighted border on focus */
+    outline: none; /* Remove default outline */
+    box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.5); /* Glow effect on focus */
+  }
+  
+  /* Container for the datepicker */
+  .daterangepicker {
+    border-radius: 8px; /* Rounded corners for the picker */
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow around picker */
+    font-size: 14px; /* Slightly larger text inside the picker */
+    background-color: #fff; /* Ensure white background */
+    padding: 10px; /* Padding inside the picker */
+  }
+  
+  /* Style the buttons in the date picker */
+  .daterangepicker .ranges li {
+    padding: 8px 10px; /* Spacing around each range option */
+    border-radius: 4px; /* Rounded corners for buttons */
+    transition: background-color 0.3s ease;
+  }
+  
+  .daterangepicker .ranges li:hover {
+    background-color: #c0b9b9; /* Light background on hover */
+  }
+  
+  /* Style the calendar part */
+  .daterangepicker .calendar-table td.available {
+    background-color: #f8f9fa; /* Light background for available dates */
+    border-radius: 50%; /* Make dates circular */
+    text-align: center; /* Center align text */
+    transition: background-color 0.3s ease;
+  }
+  
+  .daterangepicker .calendar-table td.available:hover {
+    background-color: #007bff; /* Change background on hover */
+    color: white; /* Change text color on hover */
+  }
+  
+  /* Highlight selected dates */
+  .daterangepicker .calendar-table td.active {
+    background-color: #007bff !important;
+    color: white;
+    border-radius: 50%;
+  }
+  
+  /* Style the clear button */
+  .clear-button {
+    background-color: #dc3545; /* Red background */
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .clear-button:hover {
+    background-color: #c82333; /* Darker red on hover */
+  }
+  
+  .tr{
+    cursor: pointer;
+  }
+  
+  
+  
+  .calender-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: white;
+  }
+  
+  .calendar-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding-top: 20px;
+  }
+  
+  .filters {
+    display: flex;
+    gap: 2px; /* Add space between dropdowns */
+  }
+  
+  .filters select {
+    padding: 5px;
+    font-size: 14px;
+    width: 200px; 
+  }
+  
+  .select-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .logo-bar {
+    color: #4CAF50;
+    padding: 10px;
+  }
+  
+  .navbar a {
+    margin-right: 20px;
+    font-size: 14px;
+    color: #333;
+    text-decoration: none;
+  }
+  
+  .navbar a:hover {
+    color: #007bff;
+  }
+  
+  .search-container {
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .search-container input {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 400px;
+  }
+  
+  .actions {
+    padding-right: 42px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .actions a {
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px 15px;
+    border-radius: 4px;
+    color: #333;
+  }
+  
+  .order {
+    border: 1px solid #007bff;
+    color: #007bff;
+    cursor: pointer;
+  }
+  
+  .update {
+    border: 1px solid #007bff;
+    color: #007bff;
+    cursor: pointer;
+  }
+  
+  
+  .sub-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .sub-nav a {
+    margin-right: 15px;
+    font-size: 14px;
+    color: #333;
+    text-decoration: none;
+  }
+  
+  .sub-nav a:hover {
+    color: #007bff;
+  }
+  
+  .sub-nav-links {
+    display: flex;
+  }
+  .sub-nav-links a {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px;
+    color: #333;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  
+  .sub-nav-links input[type="checkbox"] {
+    display: none;
+  }
+  
+  .sub-nav-links label {
+    cursor: pointer;
+    color: #333;
+    font-size: 14px;
+  }
+  
+  .sub-nav-links label:hover {
+    text-decoration: underline;
+  }
+  
+  .sub-nav-links label.selected {
+    font-weight: bold;
+    color: #007bff;
+  }
+  
+  /* .sub-nav-links input[type="checkbox"]:checked + label {
+    color: #007bff;
+    font-weight: bold;
+  } */
+  
+  .sub-nav-links input[type="checkbox"]:checked + label {
+    color: #007bff; /* Color for selected state */
+    font-weight: bold;
+    position: relative;
+  }
+  
+  .sub-nav-links input[type="checkbox"]:checked + label::before,
+  .sub-nav-links input[type="checkbox"]:checked + label::after {
+    content: '['; /* Left bracket */
+    position: absolute;
+    color: #007bff; /* Matching color for the selected state */
+  }
+  
+  .sub-nav-links input[type="checkbox"]:checked + label::after {
+    content: ']'; /* Right bracket */
+  }
+  
+  .sub-nav-links input[type="checkbox"]:checked + label::before {
+    left: -12px; /* Position the left bracket */
+  }
+  
+  .sub-nav-links input[type="checkbox"]:checked + label::after {
+    right: -12px; /* Position the right bracket */
+  }
+  
+  .sub-nav-info {
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    gap: 15px;
+  }
+  
+  .sub-nav-info b {
+    font-weight: 600;
+  }
+  
+  .border-container {
+    border: 1px solid #ddd; /* Light gray border */
+    padding: 5px; /* Add padding for some space inside the border */
+    border-radius: 5px; /* Optional: Rounded corners */
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  
+  /* Position the notification at the bottom-right corner */
+  .custom-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #28a745; /* Green background */
+    color: white; /* White text */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 9999; /* Ensure it's on top of other elements */
+    width: 400px; /* Adjust width as needed */
+  }
+  
+  .custom-notification .notification-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .custom-notification button:hover {
+    color: blue;
+  }
+  
+  /* Optionally add an animation for sliding the notification in */
+  .custom-notification {
+    animation: slide-in 0.5s ease-in-out;
+  }
+  
+  .notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  
+  @keyframes slide-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  
+  
+  
+  /* table css */
+  
+  
+  
+  
+  /* Container for Scrollable Table */
+  .table-container {
+    width: 100%; /* Full width of the window */
+    overflow-x: auto; /* Horizontal scrolling for narrow screens */
+    margin: 20px 0;
+  }
+  
+  /* General Table Styles */
+  .table {
+    width: 100%; /* Ensures the table spans the container */
+    border-collapse: collapse;
+    font-size: 16px;
+    text-align: left;
+    table-layout: auto; /* Allows flexible column width */
+  }
+  
+  /* Header Styles */
+  .table thead th {
+    background-color: #f4f4f4;
+    color: #333;
+    font-weight: bold;
+    padding: 10px;
+    border-bottom: 2px solid #ddd;
+    text-align: center;
+    word-wrap: break-word; /* Allows breaking of long text */
+    white-space: normal; /* Enables wrapping if needed */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adds "..." for truncated text */
+    vertical-align: middle; /* Centers text vertically */
+  }
+  
+  /* Body Styles */
+  .table tbody tr {
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .table tbody td {
+    padding: 8px;
+    text-align: center;
+    word-wrap: break-word; /* Breaks long text */
+    white-space: normal; /* Allows wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adds "..." for overflow text */
+  }
+  
+  /* Hover Effects */
+  .table tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  /* Borders */
+  .table th, .table td {
+    border: 1px solid #ddd;
+  }
+  
+  /* Responsive Headers */
+  @media (max-width: 768px) {
+    .table thead {
+      display: none; /* Hide table headers for small screens */
+    }
+    .table tbody td {
+      display: block;
+      text-align: right;
+      padding-left: 50%;
+      position: relative;
+    }
+    .table tbody td:before {
+      content: attr(data-label);
+      position: absolute;
+      left: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+  }
+  
+  
+  
+  .left-bar {
+    position: fixed;
+    left: -250px; 
+    width: 250px;
+    background-color: white;
+    color: white;
+    padding: 10px;
+    transition: left 0.3s ease;
+    z-index: 999999;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box; 
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.9);
+    overflow-y: auto;
+  }
+  
+  .left-bar.open {
+    left: 0; 
+  } 
+  
+   
+  
+  .ta-button-demo {
+    background-color: #7f1d1d; /* Dark background for a professional look */
+    color: #ffffff; /* White text for contrast */
+    border: 1px solid black; /* Subtle green border for a trading feel */
+    border-radius: 5px; /* Smooth corners */
+    padding: 2px 20px; /* Comfortable size */
+    font-size: 14px; /* Readable font size */
+    font-weight: bold; /* Emphasized text */
+    cursor: pointer; /* Pointer cursor for interaction hint */
+    transition: all 0.3s ease; /* Smooth hover effect */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  }
+  
+  
+  .ta-button-demo img.button-icon {
+    width: 18px; /* Set width for the image */
+    height: 18px; /* Set height for the image */
+    object-fit: contain; /* Ensures the image fits without distortion */
+  }
+  
+  
+  .ta-button-demo:hover {
+    background-color: #9d2f2f; /* Highlighted green background on hover */
+    color: white; /* Contrasting text color */
+    border: 1px solid #ffffff; /* Brighter border on hover */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Enhanced shadow on hover */
+  }
+  
+  .sub-nav-info {
+    display: flex;
+    font-size: clamp(0.8rem, 1vw, 1rem); /* Dynamically adjust font size */
+    white-space: nowrap; /* Prevent wrapping */
+    flex-shrink: 0; 
+    text-align: right;
+    gap: 5px; 
+  }
+  
+  .sub-nav-info b {
+    font-weight: 600;
+  }
+  
+  .sub-nav-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .separated-item {
+    margin-right: 10px; /* Spacing between items */
+    padding-right: 10px;
+  }
+  
+  .separated-item:not(:last-child) {
+    border-right: 2px solid #ccc; /* Light gray line separator */
+    padding-right: 15px; /* Space between the text and the separator */
+  }
+  .settingHeader{
+    padding: 10px;
+  }
+  
+  
+  .settings{
+    display: block; /* Makes the span behave like a block element */
+    text-align: center; /* Centers the text */
+    margin: 0 auto; /* Optional, to center it if it's inside a container */
+    font-size: 1rem;
+    color:black;
+    font-weight: bold;
+  }
+  .sub-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .sub-nav a {
+    margin-right: 15px;
+    font-size: 14px;
+    color: #333;
+    text-decoration: none;
+  }
+  
+  .sub-nav a:hover {
+    color: #007bff;
+  }
+  
+  .sub-nav-links {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    gap: 10px; /* Add spacing between menu items */
+  }
+  
+  .sub-nav-links a {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px;
+    color: #333;
+    text-decoration: none;
+    color: #333;
+    white-space: nowrap; 
+    flex-shrink: 1;
+  }
+  
+  .sub-nav-links input[type="checkbox"] {
+    display: none;
+  }
+  
+  .sub-nav-links label.selected {
+    font-weight: bold;
+    color: #007bff;
+  }
+  
+  
+  .sub-nav-links input[type="checkbox"]:checked + label {
+    color: #6c1515; /* Color for selected state */
+    font-weight: bold;
+    position: relative;
+  }
+  
+  .sub-nav-links input[type="checkbox"]:checked + label::before,
+  .sub-nav-links input[type="checkbox"]:checked + label::after {
+    content: '['; /* Left bracket */
+    position: absolute;
+    color: #7b2626; /* Matching color for the selected state */
+  }
+  
+  .sub-nav-links input[type="checkbox"]:checked + label::after {
+    content: ']'; /* Right bracket */
+  }
+  
+  .sub-nav-links input[type="checkbox"]:checked + label::before {
+    left: -12px; /* Position the left bracket */
+  }
+  
+  .sub-nav-links input[type="checkbox"]:checked + label::after {
+    right: -12px; /* Position the right bracket */
+  }
+  
+  .sub-nav-info {
+    display: flex;
+    font-size: clamp(0.8rem, 1vw, 1rem); /* Dynamically adjust font size */
+    white-space: nowrap; /* Prevent wrapping */
+    flex-shrink: 0; 
+    text-align: right;
+    gap: 5px; 
+  }
+  
+  .sub-nav-info b {
+    font-weight: 600;
+  }
+  
+
+  
+  .candles {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* Align candles to the bottom */
+    gap: 5px; /* Space between candles */
+    margin-bottom: 10px;
+    height: 75px; /* Max height of the candle container */
+  }
+  
+  .candle {
+    width: 15px;
+    background-color: green;
+    transition: background-color 0.3s ease, height 0.3s ease;
+  }
+  
+  .loading-text {
+    font-size: 1.2rem;
+    color: #333;
+    text-align: center;
+  }
+  
+  .wick {
+    width: 2px; /* Wick width */
+    background-color: green;
+    transition: background-color 0.3s ease, height 0.3s ease;
+  }
+  
+  .candle-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align everything to the left */
+  }
+  
+  .back-button {
+    background-color: #1e1648;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+  
+  .form-container {
+    width: 100%;
+    max-width: 600px; /* Adjust width as needed */
+  }
+  
+  form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+  }
+  
+  
+  .search-btn {
+    background: #1e1648;
+    color: white;
+    width: 100%;
+    height: 45px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .search-btn:hover {
+    background: #141036;
+  }
+
+  .menu-bar {
+    
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.menu-btn {
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.menu-btn:hover {
+    background-color: #e0e0e0; /* Hover background color */
+}
+
+.menu-btn.active {
+    background-color: #007bff; /* Active background color (blue) */
+    color: white; /* White text color for contrast */
+    border-color: #007bff; /* Match border color to background */
+}
+
+.menu-content {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fefefe;
+}
+
+.watchlist-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  height: 90vh;   
+  overflow-y: auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.watchlist-header h5 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: #1c1c1c;
+}
+
+.watchlist-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.watchlist-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.watchlist-item:last-child {
+  border-bottom: none;
+}
+
+.stock-symbol {
+  font-weight: 300;
+  text-transform: uppercase;
+  font-size: 18px;
+  color: #333;
+}
+
+.watchlist-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-btn {
+  font-size: 14px;           /* Increased font */
+  padding: 8px 14px;         /* Increased padding */
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.analytics-btn {
+  background-color: #e7f1ff;
+  border-color: #91caff;
+  color: #0366d6;
+}
+
+.analytics-btn:hover {
+  background-color: #d0e7ff;
+}
+
+.delete-btn {
+  background-color: #ffe7e7;
+  border-color: #ffb4b4;
+  color: #c82333;
+}
+
+.delete-btn:hover {
+  background-color: #ffcccc;
+}
+
+.watchlist-empty {
+  text-align: center;
+  color: #d9534f;
+  font-weight: 500;
+  padding-top: 12px;
+}
+
+.iframe-wrapper {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 80px); /* Adjust based on header height */
+    margin-top: 20px; /* spacing below the header */
+    overflow: hidden;
+  }
+  
+  .responsive-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  
+
+  .nav-logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #4ade80;
+}
+
+
+/* modified spinner code */
+/* Spinner overlay blur */
+.ngx-spinner-overlay {
+  background-color: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Spinner center card */
+.spinner-box {
+  background: rgba(255, 255, 255, 0.85);
+  padding: 24px 28px;
+  border-radius: 16px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Round buffering spinner */
+.custom-loader {
+  width: 52px;
+  height: 52px;
+  border: 5px solid #dce3ec;
+  border-top: 5px solid #007bff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Text */
+.spinner-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+/* spinner end */

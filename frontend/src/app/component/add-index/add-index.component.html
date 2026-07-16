@@ -1,0 +1,123 @@
+<div class="section-header-container">
+  <h2 class="section-header">Add Index</h2>
+</div>
+
+<form [formGroup]="addIndexForm" (ngSubmit)="submitIndex()">
+  <div class="col-md-12">
+    <div class="row">
+
+      <div class="px-form-strip">
+        <div class="row g-3 align-items-end px-form-row">
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="px-field">
+              <label for="index_name" class="px-field__label">Index Name</label>
+              <input id="index_name" type="text" class="form-control px-field__control" formControlName="index_name"
+                placeholder="Enter Index Name" />
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="px-field">
+              <label for="symbol" class="px-field__label">Symbol</label>
+              <input id="symbol" type="text" class="form-control px-field__control" formControlName="symbol"
+                placeholder="Enter Symbol" />
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="px-field">
+              <label for="exchange" class="px-field__label">Exchange Name</label>
+              <select id="exchange" class="form-control px-field__control px-field__select"
+                formControlName="exchange_id">
+                <option value="" disabled selected>Select Exchange</option>
+                <option *ngFor="let exchange of exchangeList" [value]="exchange.exchange_id">
+                  {{ exchange.exchange_name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 col-lg-3">
+            <button type="submit" class="btn px-save-btn">
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-table-shell">
+        <div class="table-responsive px-table-scroll">
+          <table class="table px-theme-table">
+            <thead>
+              <tr>
+                <th class="px-col-sl">SL.</th>
+
+                <th class="px-sortable" (click)="sortData('index_name')">
+                  <span>Index Name</span>
+                  <span class="px-sort-arrow" *ngIf="sortColumn === 'index_name'">
+                    {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </th>
+
+                <th class="px-sortable" (click)="sortData('y_finance')">
+                  <span>Y-Finance</span>
+                  <span class="px-sort-arrow" *ngIf="sortColumn === 'y_finance'">
+                    {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </th>
+
+                <th class="px-sortable px-col-status" (click)="sortData('is_active')">
+                  <span>Status</span>
+                  <span class="px-sort-arrow" *ngIf="sortColumn === 'is_active'">
+                    {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </th>
+              </tr>
+            </thead>
+
+            <ng-container *ngIf="!isLoading">
+              <tbody>
+                <tr *ngFor="let item of paginatedStockList; let i = index">
+                  <td class="px-col-sl">
+                    <span class="px-sl-badge">
+                      {{ (currentPage - 1) * itemsPerPage + i + 1 }}
+                    </span>
+                  </td>
+
+                  <td class="px-cell-index">
+                    {{ item.index_name | uppercase }}
+                  </td>
+
+                  <td class="px-cell-yf">
+                    {{ item.y_finance }}
+                  </td>
+
+                  <td class="px-cell-status">
+                    <span class="px-status-pill"
+                      [ngClass]="(item.is_active == '1' || item.is_active == 1) ? 'is-active' : 'is-inactive'">
+                      {{ item.is_active == '1' || item.is_active == 1 ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </ng-container>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

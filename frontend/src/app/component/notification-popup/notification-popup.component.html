@@ -1,0 +1,16 @@
+<div class="popup-box" #popup>
+    <div class="popup-header" (mousedown)="startDrag($event)">
+      <span>Price Alert Triggered</span>
+      <button class="close-btn" (click)="onCloseClicked(id)">×</button>
+    </div>
+  
+    <div class="popup-body">{{ message }}</div>
+  
+    <div class="popup-footer">
+      <button class="popup-btn" (click)="openChart(stock_tick)">Chart</button>
+      <button class="popup-btn" (click)="seen(id)">Close</button>
+    </div>
+  </div>
+  
+
+  

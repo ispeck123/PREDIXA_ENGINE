@@ -1,0 +1,143 @@
+<div class="px-news-page">
+
+  <div class="px-news-tabsbar">
+    <ul class="px-news-tabs">
+      <li class="px-news-tabs__item">
+        <a class="px-news-tabs__link"
+           [class.active]="activeTab === 'News'"
+           (click)="SwitchMasterMenu('News')">
+          News
+        </a>
+      </li>
+      <li class="px-news-tabs__item">
+        <a class="px-news-tabs__link"
+           [class.active]="activeTab === 'trendingNews'"
+           (click)="SwitchMasterMenu('trendingNews')">
+          Trending News
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- NEWS TAB -->
+  <div *ngIf="activeTab === 'News'" class="px-news-panel">
+    <div class="px-news-toolbar">
+      <div class="px-news-toolbar__title">
+        Latest Market News
+      </div>
+
+      <div class="px-news-pagination">
+        <button class="px-news-pagebtn px-news-pagebtn--nav"
+                (click)="changePage(currentPage - 1)"
+                [disabled]="currentPage === 1">
+          ‹
+        </button>
+
+        <button *ngFor="let page of [].constructor(totalPages); let i = index"
+                (click)="changePage(i + 1)"
+                class="px-news-pagebtn"
+                [class.active]="currentPage === i + 1">
+          {{ i + 1 }}
+        </button>
+
+        <button class="px-news-pagebtn px-news-pagebtn--nav"
+                (click)="changePage(currentPage + 1)"
+                [disabled]="currentPage === totalPages">
+          ›
+        </button>
+      </div>
+    </div>
+
+    <div class="px-news-list">
+      <div *ngFor="let news of paginatedNews; let i = index" class="px-news-card">
+        <a [href]="news.link"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="px-news-card__link">
+
+          <div class="px-news-card__content">
+            <div class="px-news-card__text">
+              <h4 class="px-news-card__title">{{ news.title }}</h4>
+              <p class="px-news-card__meta">{{ news.published | date: 'MMM d, y, hh:mm a' }}</p>
+            </div>
+
+            <div class="px-news-card__media" *ngIf="news.logo">
+              <img [src]="news.logo" alt="news image" class="px-news-card__image" />
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRENDING TAB -->
+  <div *ngIf="activeTab === 'trendingNews'" class="px-news-panel">
+    <div class="px-news-toolbar">
+      <div class="px-news-toolbar__title">
+        AI Trending News Signals
+      </div>
+
+      <div class="px-news-pagination">
+        <button class="px-news-pagebtn px-news-pagebtn--nav"
+                (click)="changePageForTrending(currentPageForTrending - 1)"
+                [disabled]="currentPageForTrending === 1">
+          ‹
+        </button>
+
+        <button *ngFor="let page of [].constructor(totalPagesForTrendingNews); let i = index"
+                (click)="changePageForTrending(i + 1)"
+                class="px-news-pagebtn"
+                [class.active]="currentPageForTrending === i + 1">
+          {{ i + 1 }}
+        </button>
+
+        <button class="px-news-pagebtn px-news-pagebtn--nav"
+                (click)="changePageForTrending(currentPageForTrending + 1)"
+                [disabled]="currentPageForTrending === totalPagesForTrendingNews">
+          ›
+        </button>
+      </div>
+    </div>
+
+    <div class="px-news-list">
+      <div *ngFor="let news of paginatedTrendingNews; let i = index" class="px-news-card px-news-card--signal">
+        <div class="px-news-card__content px-news-card__content--signal">
+          <div class="px-news-card__text">
+
+            <div class="tooltip-container px-news-tooltip-wrap">
+              <h4 class="px-news-card__title">{{ news.reasoning }}</h4>
+
+              <div class="tooltip-box px-news-tooltip-box">
+                <p><strong>Sentiment :</strong> {{ news.sentiment }}</p>
+                <p><strong>Suggestion :</strong> {{ news.suggested_trade }}</p>
+                <p><strong>Confidence Level :</strong> {{ news.confidence_level }}</p>
+              </div>
+            </div>
+
+            <div class="px-news-signal-meta">
+              <span class="px-news-chip px-news-chip--price">{{ news.target_price_zone }}</span>
+              <span class="px-news-chip px-news-chip--stock">{{ news.stock_name }}</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

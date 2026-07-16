@@ -1,0 +1,103 @@
+@font-face {
+    font-family: 'TiltNeon';
+    src: url(./assets/fonts/TiltNeon-Regular.ttf);
+  }
+  @import 'ngx-toastr/toastr';
+  
+  .fontcss{
+  font-family: 'TiltNeon';
+}
+
+@import "~@ng-select/ng-select/themes/default.theme.css";
+@import 'sweetalert2/dist/sweetalert2.min.css';
+
+
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+:root{
+  --side-w: 250px;
+}
+
+
+/* Desktop: leave space for sidenav */
+.main-content{
+  margin-left: var(--side-w);
+  width: calc(100% - var(--side-w));
+  min-height: 100vh;
+  padding: 10px;
+}
+
+/* Mobile: full width */
+@media (max-width: 992px){
+  .main-content{
+    margin-left: 0 !important;
+    width: 100% !important;
+     padding: 10px;
+  }
+  
+}
+
+.ng-dropdown-panel .ng-dropdown-panel-items {
+  max-height: 500px !important;
+}
+
+.ng-select .ng-select-container {
+  padding: 6px 12px;
+}
+
+
+/* ===== SweetAlert PRO theme ===== */
+.swal-pro-popup{
+  border-radius: 18px !important;
+  padding: 18px 18px 16px !important;
+  box-shadow: 0 18px 40px rgba(16,24,40,.18) !important;
+}
+
+.swal-pro-title{
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: #0f1f3d !important;
+}
+
+.swal-pro-actions{
+  gap: 10px !important;
+  margin-top: 14px !important;
+}
+
+.swal-pro-confirm{
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  background: linear-gradient(180deg,#ef4444 0%, #dc2626 100%) !important;
+  box-shadow: 0 10px 18px rgba(239,68,68,.20) !important;
+}
+
+.swal-pro-cancel{
+  border: 1px solid #e7ebf3 !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  font-weight: 900 !important;
+  color: #0f1f3d !important;
+  background: #fff !important;
+}
+
+/* Mobile: stack buttons full width */
+@media (max-width: 480px){
+  .swal-pro-actions{
+    flex-direction: column-reverse !important; /* confirm closer to thumb */
+    align-items: stretch !important;
+  }
+  .swal-pro-confirm,
+  .swal-pro-cancel{
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+

@@ -1,0 +1,587 @@
+  .dashboard-container {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  
+  .sidebar {
+    width: 250px;
+    height: 100vh; /* Full height of viewporft */
+    background: linear-gradient(135deg, #141E30 0%, #243B55 100%);
+    padding: 20px;
+    color: white; /* Ensures text is readable on dark background */
+    position: fixed; /* Fixes sidebar position */
+    top: 0;
+    left: 0;
+    overflow: hidden; /* Prevents scrolling */
+  }
+  
+  
+  
+  .sidebar h2 {
+    margin-bottom: 20px;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar ul li {
+    padding: 10px;
+    margin: 5px 0;
+    cursor: pointer;
+  }
+  
+  .sidebar ul .active {
+    background: #3b66ff;
+    color: white;
+    border-radius: 5px;
+  }
+  
+  .user-profile {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .user-profile img {
+    width: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  /* Main Content */
+  .main-content {
+    margin-left: 250px; /* Push content to the right of the sidebar */
+    padding: 20px;
+    width: calc(100% - 250px); /* Ensure it takes the remaining space */
+    min-height: 100vh; /* Full height */
+    background: #f5f5f5; /* Light background for better contrast */
+  }
+  
+  
+  .logo {
+    width: 80px;
+    height: auto; 
+    float: right;  
+  }
+  
+  .menu-bar {
+    display: flex;
+    justify-content: center;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 10px;
+  }
+
+    .sidebar-logo {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 200px;
+    text-align: center;
+  }
+  
+  .sidebar-logo img {
+    width: 100%;
+    max-height: 70px;
+    object-fit: contain;
+  }
+  
+
+
+
+
+
+
+
+/* ================= RESET ================= */
+*{ box-sizing:border-box; margin:0; padding:0; }
+:host{ display:block; }
+
+/* ================= THEME ================= */
+:root{
+  --bg:#f4f6f9;
+  --card:#ffffff;
+  --line:#e5e7eb;
+
+  --text:#111827;
+  --muted:#6b7280;
+
+  --blue:#2563eb;
+  --green:#16a34a;
+  --red:#dc2626;
+  --amber:#f59e0b;
+
+  --radius:6px;
+  --radius-sm:4px;
+}
+
+/* ================= PAGE ================= */
+.rom{
+  min-height:100vh;
+  padding:16px 20px;
+  background:var(--bg);
+  color:var(--text);
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;
+}
+
+/* ================= TOP BAR ================= */
+.rom-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:14px;
+}
+
+.rom-title{ font-size:18px; font-weight:700; }
+.rom-sub{ font-size:12px; color:var(--muted); margin-top:4px; }
+
+.rom-tools{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+/* ================= INPUTS ================= */
+.rom-input{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius-sm);
+  padding:8px 10px;
+  font-size:13px;
+  width:100%;
+}
+
+.rom-input--sm{ width:160px; }
+
+.rom-input:focus{
+  outline:none;
+  border-color:var(--blue);
+}
+
+/* ================= SEARCH ================= */
+.rom-search{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-sm);
+  min-width:320px;
+  max-width:100%;
+}
+
+.rom-input--search{
+  border:none;
+  background:transparent;
+  padding:4px;
+}
+
+.rom-ico{ color:var(--muted);font-size: 30px; }
+.rom-x{ border:none; background:transparent; cursor:pointer; }
+
+/* ================= BUTTONS ================= */
+.rom-btn{
+  padding:8px 12px;
+  font-size:13px;
+  font-weight:600;
+  border-radius:4px;
+  border:1px solid var(--line);
+  background:#fff;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.rom-btn--primary{
+  background:var(--blue);
+  border-color:var(--blue);
+  color:#fff;
+}
+
+.rom-btn--danger{
+  background:#fff;
+  border-color:var(--red);
+  color:var(--red);
+}
+
+/* ================= METRICS ================= */
+.rom-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.rom-metric{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:10px 12px;
+}
+
+.rom-metric .k{
+  font-size:11px;
+  color:var(--muted);
+  text-transform:uppercase;
+  font-weight:600;
+}
+
+.rom-metric .v{
+  font-size:16px;
+  font-weight:700;
+  margin-top:4px;
+}
+
+/* ================= DRAWER ================= */
+.rom-drawer{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  margin-bottom:14px;
+}
+
+.rom-drawer-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  background:#f9fafb;
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+
+.rom-drawer-body{ padding:12px; }
+.rom-drawer-meta{ font-size:12px; color:var(--muted); }
+
+/* ================= PILLS ================= */
+.rom-pill{
+  font-size:11px;
+  padding:4px 8px;
+  border-radius:4px;
+  border:1px solid var(--line);
+  font-weight:600;
+}
+
+.p-new{ color:var(--blue); }
+.p-mod{ color:var(--amber); }
+.p-alert{ color:var(--green); }
+
+/* ================= NOTES ================= */
+.rom-hint,
+.rom-note{
+  font-size:12px;
+  padding:8px 10px;
+  background:#f9fafb;
+  border:1px solid var(--line);
+  border-radius:var(--radius-sm);
+  color:#374151;
+  margin-bottom:10px;
+}
+
+/* ================= FORM GRID ================= */
+.rom-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+
+.rom-field span{
+  font-size:11px;
+  font-weight:600;
+  color:var(--muted);
+  margin-bottom:4px;
+  display:block;
+}
+
+.rom-field--full{ grid-column:1/-1; }
+
+/* ================= CONFIRM ================= */
+.rom-confirm{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border:1px solid var(--red);
+  background:#fff5f5;
+  border-radius:var(--radius);
+  margin-bottom:14px;
+  flex-wrap:wrap;
+}
+
+.rom-confirm-title{ font-weight:700; }
+.rom-confirm-sub{ font-size:12px; color:var(--muted); }
+
+/* ================= CARD ================= */
+.rom-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+}
+
+.rom-card-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  background:#f9fafb;
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+
+.rom-card-title{ font-weight:700; }
+.rom-chip{
+  font-size:12px;
+  padding:4px 8px;
+  border-radius:999px;
+  background:#f3f4f6;
+  border:1px solid var(--line);
+}
+
+/* ================= TABLE ================= */
+.rom-table-wrap{
+  overflow-x:auto;
+  max-height:calc(100vh - 320px);
+}
+
+.rom-table{
+  width:100%;
+  min-width:1050px;
+  border-collapse:collapse;
+}
+
+.rom-table thead th{
+  background:#c6c8cb;
+  font-size:11px;
+  text-transform:uppercase;
+  padding:10px;
+  border-bottom:1px solid var(--line);
+  color:#374151;
+}
+
+.rom-table tbody td{
+  padding:10px;
+  font-size:13px;
+  border-bottom:1px solid var(--line);
+}
+
+.rom-table tbody tr:hover{ background:#f8fafc; }
+
+/* ================= HELPERS ================= */
+.num{ text-align:right; }
+.right{ text-align:right; }
+.muted{ color:var(--muted); }
+.tiny{ font-size:11px; }
+
+/* ================= SYMBOL ================= */
+.rom-symbol .s1{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.rom-symbol .s2{
+  display:flex;
+  gap:6px;
+  margin-top:4px;
+  flex-wrap:wrap;
+}
+
+/* ================= TAGS ================= */
+.rom-tag{
+  font-size:11px;
+  padding:3px 6px;
+  border-radius:999px;
+  background:#f3f4f6;
+  border:1px solid var(--line);
+}
+
+/* ================= SIDE / STATE ================= */
+.rom-pill2.buy{ color:var(--green); font-weight:700; }
+.rom-pill2.sell{ color:var(--red); font-weight:700; }
+
+.rom-state[data-s="PENDING"]{ color:#92400e; font-weight:600; }
+.rom-state[data-s="ACTIVE"]{ color:var(--green); font-weight:600; }
+.rom-state[data-s="COMPLETED"]{ color:var(--muted); font-weight:600; }
+
+/* ================= ACTIONS ================= */
+.rom-actions{
+  display:flex;
+  gap:6px;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+}
+
+.rom-mini{
+  padding:4px 8px;
+  font-size:12px;
+  border-radius:4px;
+  border:1px solid var(--line);
+  background:#fff;
+  cursor:pointer;
+}
+
+.rom-mini--danger{ color:var(--red); border-color:var(--red); }
+.rom-mini--ghost{ color:var(--muted); }
+
+
+/* FORCE borders for all form controls inside this page */
+.rom input,
+.rom select,
+.rom textarea{
+  border: 1px solid #cbd5e1 !important;
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  outline: none !important;
+  box-shadow: none !important;
+  color: #0f172a !important;
+}
+
+/* Make disabled still look like inputs (not blank) */
+.rom input:disabled,
+.rom select:disabled,
+.rom textarea:disabled{
+  background: #f8fafc !important;
+  border-color: #dbe3ef !important;
+  color: #64748b !important;
+  cursor: not-allowed;
+  opacity: 1 !important;  /* important: some CSS sets opacity low */
+}
+
+/* Better focus ring */
+.rom input:focus,
+.rom select:focus,
+.rom textarea:focus,
+.rom input:focus-visible,
+.rom select:focus-visible,
+.rom textarea:focus-visible{
+  border-color: rgba(37,99,235,.70) !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.15) !important;
+}
+
+/* If bootstrap removes borders for .form-control or inputs, override it */
+.rom .form-control{
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: none !important;
+}
+
+
+/* =====================================================
+   RESPONSIVE BREAKPOINTS
+===================================================== */
+
+/* ===== TABLET ===== */
+@media (max-width: 1024px){
+  .rom-metrics{ grid-template-columns:repeat(2,1fr); }
+  .rom-grid{ grid-template-columns:repeat(2,1fr); }
+  .rom-search{ min-width:240px; }
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 640px){
+  .rom{ padding:12px; }
+
+  .rom-top{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .rom-tools{
+    width:100%;
+    justify-content:flex-start;
+  }
+
+  .rom-search{
+    width:100%;
+    min-width:100%;
+  }
+
+  .rom-input--sm{
+    width:100%;
+  }
+
+  .rom-metrics{
+    grid-template-columns:1fr;
+  }
+
+  .rom-grid{
+    grid-template-columns:1fr;
+  }
+
+  .rom-confirm,
+  .rom-card-head,
+  .rom-drawer-head{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .rom-actions{
+    justify-content:flex-start;
+  }
+
+  .rom-table{
+    min-width:900px;
+  }
+}
+
+
+
+/* modified spinner code */
+/* Spinner overlay blur */
+.ngx-spinner-overlay {
+  background-color: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Spinner center card */
+.spinner-box {
+  background: rgba(255, 255, 255, 0.85);
+  padding: 24px 28px;
+  border-radius: 16px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Round buffering spinner */
+.custom-loader {
+  width: 52px;
+  height: 52px;
+  border: 5px solid #dce3ec;
+  border-top: 5px solid #007bff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Text */
+.spinner-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+/* spinner end */

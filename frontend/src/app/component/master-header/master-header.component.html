@@ -1,0 +1,1780 @@
+<!-- New dropdown Nav design Nabonita -->
+<div class="hm-header">
+  <div class="header">
+    <div class="hdr-left">
+      <button class="hdr-hamburger" *ngIf="isMobile" (click)="toggleSidenav()" aria-label="Open menu">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div class="hdr-welcome">
+        <span class="hdr-kicker">WELCOME :</span>
+        <span class="hdr-user">{{ UserName | uppercase }}</span>
+      </div>
+      <a href="javascript:void(0)" class="ohlc-link" (click)="openOhlcPanel()">
+        Get OHLC
+      </a>
+    </div>
+
+    <div class="hdr-right">
+
+      <div class="trade-scope-wrapper" (click)="$event.stopPropagation()">
+        <button type="button" class="trade-scope-link" (click)="toggleTradeScope()"
+          [attr.aria-expanded]="showTradeScope">
+
+          Trade Scope
+          <span class="scope-arrow" [class.scope-arrow-up]="showTradeScope">⌄</span>
+        </button>
+
+        <div class="trade-scope-popup" *ngIf="showTradeScope">
+          <div class="trade-scope-title">Trading Scope</div>
+
+          <div class="trade-scope-loading" *ngIf="isTradeScopeLoading">
+            Loading...
+          </div>
+
+          <div class="trade-scope-error" *ngIf="!isTradeScopeLoading && tradeScopeError">
+            {{ tradeScopeError }}
+          </div>
+
+          <div class="scope-market-row" *ngFor="let item of tradeScopeData">
+
+            <span class="scope-market-name">{{ item.market }}</span>
+
+            <div class="scope-actions">
+              <span *ngFor="let action of item.actions" class="scope-action" [ngClass]="action.toLowerCase()">
+
+                {{ action }}
+              </span>
+            </div>
+          </div>
+
+          <div class="trade-scope-empty"
+            *ngIf="!isTradeScopeLoading && !tradeScopeError && tradeScopeData.length === 0">
+
+            No trade scope available.
+          </div>
+        </div>
+      </div>
+
+      <div class="hdr-status">
+        <span [class]="isMarketOpen ? 'status-circle open' : 'status-circle closed'"></span>
+        <span class="hdr-statusText">{{ marketStatus | uppercase }}</span>
+      </div>
+
+      <div class="hdr-timer" *ngIf="idleTimeout.sessionTimeLeft > 0">
+        {{ idleTimeout.formattedTime }}
+      </div>
+
+      <button class="notification-box" (click)="viewNotificationPanel()" aria-label="Notifications">
+        <img src="assets/image/bell.png" class="bell-img" />
+        <span class="badge" *ngIf="totalNotificationCount > 0">{{ totalNotificationCount }}</span>
+      </button>
+    </div>
+  </div>
+
+
+
+  <div class="menu-dropdown-card" [class.open]="activeMenu" [attr.data-open]="activeMenu ? 'true' : 'false'">
+    <div class="menu-dropdown-content">
+      <ng-container [ngSwitch]="activeMenu">
+        <div>
+
+
+          <div class="exchanges-container">
+
+            <!-- <div class="exchange-box" *ngFor="let exch of StockExchanges" (click)="$event.stopPropagation()" (mouseenter)="activeExchange = exch.exchange_id;
+              (exch.exchange_name !== 'MCX' && exch.exchange_name !== 'NSEFO') ? fetchIndexes(exch.exchange_id) : null"
+            (mouseleave)="activeExchange = null">
+
+            <div [ngSwitch]="exch.exchange_name" class="logo-wrapper">
+              <img *ngSwitchCase="'NSE'" src="assets/image/nse.png" class="exchange-logo-nse" alt="NSE" />
+              <img *ngSwitchCase="'BSE'" src="assets/image/bse.png" class="exchange-logo-bse" alt="BSE" />
+              <img *ngSwitchCase="'MCX'" src="assets/image/mcx.png" class="exchange-logo-mcx" alt="MCX" />
+              <img *ngSwitchCase="'NSEFO'" src="assets/image/nsefo.png" class="exchange-logo-nsefo" alt="NSEFO" />
+              <img *ngSwitchCase="'NASDAQ'" src="assets/image/nasdaq.png" class="exchange-logo-nasdaq" alt="NASDAQ" />
+              <img *ngSwitchCase="'NYSE'" src="assets/image/nyse1.png" class="exchange-logo-nyse" alt="NYSE" />
+            </div>
+
+            <div class="subdata-popup" *ngIf="exch.exchange_name === 'MCX' && activeExchange === exch.exchange_id"
+              style="padding: 0 16px;">
+
+           
+              <div class="subitem headerMCX"
+                style="display: flex; justify-content: space-between; font-weight: bold; padding: 6px 0;">
+                <div class="symbol" style="flex:1">Symbol</div>
+                <div style="flex:1; text-align:center;">NEAR</div>
+                <div style="flex:1; text-align:center;">NEXT</div>
+                <div style="flex:1; text-align:center;">FAR</div>
+              </div>
+
+            
+              <div class="subitem" *ngFor="let row of mcxFuturesList; trackBy: trackBySymbol"
+                style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:6px 0;">
+
+                <div class="symbol" style="flex:1">{{ row.symbol }}</div>
+
+                <div style="flex:1; text-align:center;">
+                  <button *ngIf="row.near" (click)="onFutureDateClick(row.symbol, row.near ,row.id)"
+                    [disabled]="isExpiryWithinDays(row.near, 5)" class="expiry-btn">
+                    {{ row.near }}
+                  </button>
+                </div>
+
+                <div style="flex:1; text-align:center;">
+                  <button *ngIf="row.next" (click)="onFutureDateClick(row.symbol, row.next,row.id )"
+                    [disabled]="isExpiryWithinDays(row.next, 5)" class="expiry-btn">
+                    {{ row.next }}
+                  </button>
+                </div>
+
+                <div style="flex:1; text-align:center;">
+                  <button *ngIf="row.far" (click)="onFutureDateClick(row.symbol, row.far,row.id )"
+                    [disabled]="isExpiryWithinDays(row.far, 5)" class="expiry-btn">
+                    {{ row.far }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          
+            <div class="subdata-popup" *ngIf="exch.exchange_name === 'NSEFO' && activeExchange === exch.exchange_id">
+              <div class="subitem" (click)="openModalA()">NEAR | NEXT | FAR <span style="color: green;">[ FUTURES
+                  ]</span></div>
+            </div>
+
+           
+            <div class="subdata-popup"
+              *ngIf="activeExchange === exch.exchange_id && exch.exchange_name !== 'MCX' && exch.exchange_name !== 'NSEFO'">
+              <div class="subitem" *ngFor="let idx of indexes[exch.exchange_id]"
+                (click)="fetchStocks(idx.index.index_id)">
+                {{ idx.index.index_name }}
+              </div>
+            </div>
+
+          </div> -->
+
+
+
+            <!-- NEW CODE  -->
+
+
+            <div class="exchange-box" *ngFor="let exch of StockExchanges" (click)="mobileOpenExchange(exch, $event)"
+              (mouseenter)="onExchangeEnter(exch)" (mouseleave)="onExchangeLeave()">
+
+              <div [ngSwitch]="exch.exchange_name" class="logo-wrapper">
+                <img *ngSwitchCase="'NSE'" src="assets/image/nse.png" class="exchange-logo-nse" alt="NSE" />
+                <img *ngSwitchCase="'BSE'" src="assets/image/bse.png" class="exchange-logo-bse" alt="BSE" />
+                <img *ngSwitchCase="'MCX'" src="assets/image/mcx.png" class="exchange-logo-mcx" alt="MCX" />
+                <img *ngSwitchCase="'NSEFO'" src="assets/image/nsefo.png" class="exchange-logo-nsefo" alt="NSEFO" />
+                <img *ngSwitchCase="'NASDAQ'" src="assets/image/nasdaq.png" class="exchange-logo-nasdaq" alt="NASDAQ" />
+                <img *ngSwitchCase="'NYSE'" src="assets/image/nyse1.png" class="exchange-logo-nyse" alt="NYSE" />
+              </div>
+
+              <div class="subdata-popup" *ngIf="exch.exchange_name === 'MCX' && activeExchange === exch.exchange_id"
+                style="padding: 0 16px;" (click)="$event.stopPropagation()">
+
+
+                <div class="subitem headerMCX"
+                  style="display: flex; justify-content: space-between; font-weight: bold; padding: 6px 0;">
+                  <div class="symbol" style="flex:1">Symbol</div>
+                  <div style="flex:1; text-align:center;">NEAR</div>
+                  <div style="flex:1; text-align:center;">NEXT</div>
+                  <div style="flex:1; text-align:center;">FAR</div>
+                </div>
+
+
+                <div class="subitem" *ngFor="let row of mcxFuturesList; trackBy: trackBySymbol"
+                  style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:6px 0;">
+
+                  <div class="symbol" style="flex:1">{{ row.symbol }}</div>
+
+                  <div style="flex:1; text-align:center;">
+                    <button *ngIf="row.near" (click)="onFutureDateClick(row.symbol, row.near ,row.id)"
+                      [disabled]="isExpiryWithinDays(row.near, 5)" class="expiry-btn">
+                      {{ row.near }}
+                    </button>
+                  </div>
+
+                  <div style="flex:1; text-align:center;">
+                    <button *ngIf="row.next" (click)="onFutureDateClick(row.symbol, row.next,row.id )"
+                      [disabled]="isExpiryWithinDays(row.next, 5)" class="expiry-btn">
+                      {{ row.next }}
+                    </button>
+                  </div>
+
+                  <div style="flex:1; text-align:center;">
+                    <button *ngIf="row.far" (click)="onFutureDateClick(row.symbol, row.far,row.id )"
+                      [disabled]="isExpiryWithinDays(row.far, 5)" class="expiry-btn">
+                      {{ row.far }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="subdata-popup premium-popup"
+                *ngIf="exch.exchange_name === 'NSEFO' && activeExchange === exch.exchange_id">
+                <div class="futures-header">
+                  <span class="futures-title">Futures Contracts</span>
+                  <span class="futures-badge">NSEFO</span>
+                </div>
+
+                <div class="futures-btn-group">
+                  <button type="button" class="futures-btn near-btn" (click)="openFuturesType('near')">
+                    <span class="btn-label">NEAR</span>
+                    <span class="btn-sub">Current Expiry</span>
+                  </button>
+
+                  <button type="button" class="futures-btn next-btn" (click)="openFuturesType('next')">
+                    <span class="btn-label">NEXT</span>
+                    <span class="btn-sub">Next Expiry</span>
+                  </button>
+
+                  <button type="button" class="futures-btn far-btn" (click)="openFuturesType('far')">
+                    <span class="btn-label">FAR</span>
+                    <span class="btn-sub">Far Expiry</span>
+                  </button>
+                </div>
+              </div>
+
+
+              <div class="subdata-popup"
+                *ngIf="activeExchange === exch.exchange_id && exch.exchange_name !== 'MCX' && exch.exchange_name !== 'NSEFO'"
+                (click)="$event.stopPropagation()">
+                <div class="subitem" *ngFor="let idx of indexes[exch.exchange_id]"
+                  (click)="fetchStocks(idx.index.index_id)">
+                  {{ idx.index.index_name }}
+                </div>
+              </div>
+
+            </div>
+
+
+
+            <button class="change-btn" type="submit" (click)="viewLiquidStockPanel()">Liquid Stock </button>
+          </div>
+        </div>
+
+      </ng-container>
+
+    </div>
+  </div>
+</div>
+
+<!-- New dropdown Nav design Nabonita end-->
+
+
+
+
+
+<!-- Modal Container -->
+<div class="modal fade" id="futuresModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  aria-labelledby="futuresModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" style="font-family: sans-serif; font-size: 14px;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="futuresModalLabel">Change Scrip</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+          style="filter: invert(1);"></button>
+
+      </div>
+      <div class="modal-body">
+
+        <ul class="nav nav-tabs mb-3">
+          <li class="nav-item"><a class="nav-link active">Derivatives</a></li>
+        </ul>
+
+        <div class="row mb-3">
+          <div class="col-md-2">
+            <label>Exchange :</label>
+            <select class="form-control form-control-sm">
+              <option>NSEFO</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label>Scrip :</label>
+            <select class="form-control form-control-sm" #id [(ngModel)]="selectedScrip">
+              <option value="" disabled selected>Select Scrip</option>
+              <option *ngFor="let item of ScripData" [value]="item">{{item}}</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label>Expiry :</label>
+            <select class="form-control form-control-sm">
+              <option>ALL</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label>Month :</label>
+            <select class="form-control form-control-sm">
+              <option>All</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label>Year :</label>
+            <select class="form-control form-control-sm">
+              <option>All</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label>Instrument :</label>
+            <select class="form-control form-control-sm">
+              <option>Futures</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Show Button -->
+        <div class="mb-3 text-end">
+          <button class="btn btn-primary btn-sm" (click)="ShowFuturesData()">Show</button>
+        </div>
+
+
+        <!-- Table -->
+        <table class="table table-bordered table-sm">
+          <thead class="thead-light">
+            <tr>
+              <th style="width: 40px;"><input type="checkbox" /></th>
+              <th>Exchange</th>
+              <th>Scrip Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let list of FutureListOption">
+              <td><input type="checkbox" /></td>
+              <td>{{ list.exchange }}</td>
+              <td>{{ list.symbol }} {{ list.expiry_date | date: 'dd-MMM-yyyy' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Footer Row -->
+        <div class="text-right pr-2">
+          <small><strong>Number Of Selected Scrip : 0</strong></small>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- floating modal code for ctrl+O -->
+<!-- <app-floating-modal #modalA title="Futures" [top]="100" [left]="100" [width]="850" [height]="450">
+  <div class="modal-body">
+
+    <ul class="nav nav-tabs mb-3">
+      <li class="nav-item"><a class="nav-link active">Derivatives</a></li>
+    </ul>
+
+ 
+    <div class="row mb-3 form-section">
+      <div class="col-md-4">
+        <label class="form-label">Exchange :</label>
+        <select class="form-control form-control-sm custom-select">
+          <option>NSEFO</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Scrip :</label>
+        <ng-select id="dropdown2" [items]="ScripData" bindLabel="" [searchable]="true" [clearable]="true"
+          placeholder="--Select Scrip--" [(ngModel)]="selectedScrip" [ngClass]="{'error-outline': isScripInvalidFlag}"
+          (change)="OnChangeScrip()">
+
+   
+          <ng-template ng-option-tmp let-item="item">
+            {{ item | uppercase }}
+          </ng-template>
+        </ng-select>
+
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Instrument :</label>
+        <select class="form-control form-control-sm custom-select">
+          <option>Futures</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mb-3 text-end">
+      <button class="btn btn-primary btn-sm" (click)="ShowFuturesData()">Show Expiries</button>
+    </div>
+
+    <table class="table table-bordered table-sm">
+      <thead class="thead-light">
+        <tr>
+          <th style="width: 40px;"></th>
+          <th>Exchange</th>
+          <th>Scrip Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let list of FutureListOption; let i = index" (click)="selectFutureOption(list)"
+          [class.selected-row]="selectedFutureOption === list" [class.expired-row]="isExpiryNear(list.expiry_date)">
+          <td>
+            <input type="radio" name="futureOption" [value]="list" [(ngModel)]="selectedFutureOption"
+              (change)="onRadioChange(list)" [disabled]="isExpiryNear(list.expiry_date)" />
+          </td>
+          <td>{{ list.exchange }}</td>
+          <td>{{ list.symbol }} {{ list.expiry_date | date: 'dd-MMM-yyyy' }}
+            <span class="expiry-tag" [ngClass]="{
+          'tag-near': list.expiryTier === 'NEAR',
+          'tag-next': list.expiryTier === 'NEXT',
+          'tag-far':  list.expiryTier === 'FAR'
+        }">
+              {{ list.expiryTier }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+
+
+    </table>
+
+
+    <div class="text-right pr-2" *ngIf="selectedFutureOption">
+      <button class="btn btn-primary btn-sm" (click)="ShowCharts()">View Chart</button>
+    </div>
+  </div>
+</app-floating-modal> -->
+
+
+<app-floating-modal #modalA title="Futures" [top]="100" [left]="100" [width]="1200" [height]="650">
+  <div class="modal-body">
+    <div class="fc-page">
+      <div class="fc-card">
+        <div class="fc-card__header">
+          <div class="fc-card__titleWrap">
+            <h2>All Future Contracts</h2>
+            <p>Browse and search stocks from your futures market list</p>
+          </div>
+
+          <div class="fc-toolbar">
+            <div class="fc-date-display" *ngIf="selectedFutureDate">
+              {{ selectedFutureDate | date:'dd MMM yyyy, h:mm a' }}
+            </div>
+            <div class="fc-date-only">
+              <input type="datetime-local" class="fc-date-only__input" formControlName="last_d_time"
+                (input)="updateSelectedDate($event)" />
+
+              <i class="fa fa-calendar fc-date-only__icon"></i>
+            </div>
+
+
+            <div class="fc-search">
+              <i class="fa fa-search"></i>
+              <input type="text" [(ngModel)]="stockSearchText" (input)="onSearchStock()"
+                placeholder="Search stock name..." />
+
+              <button *ngIf="stockSearchText" type="button" class="fc-search__clear" (click)="clearSearch()">
+                <i class="fa fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="fc-tableHead">
+          <div class="fc-headCell" (click)="sortBy('symbol')">
+            Stock
+            <i class="fa" [ngClass]="getSortIcon('symbol')"></i>
+          </div>
+
+          <div class="fc-headCell" (click)="sortBy('expiry_date')">
+            Expiry
+            <i class="fa" [ngClass]="getSortIcon('expiry_date')"></i>
+          </div>
+
+          <div class="fc-headCell" (click)="sortBy('price')">
+            Price
+            <i class="fa" [ngClass]="getSortIcon('price')"></i>
+          </div>
+
+          <div class="fc-headCell" (click)="sortBy('prev_close')">
+            Prev Close
+            <i class="fa" [ngClass]="getSortIcon('prev_close')"></i>
+          </div>
+
+          <div class="fc-headCell" (click)="sortBy('day_change')">
+            Day Change
+            <i class="fa" [ngClass]="getSortIcon('day_change')"></i>
+          </div>
+
+          <div class="fc-headCell" (click)="sortBy('day_change_percentage')">
+            Change %
+            <i class="fa" [ngClass]="getSortIcon('day_change_percentage')"></i>
+          </div>
+        </div>
+
+        <div class="fc-list" *ngIf="futureContractList?.length; else noDataTpl">
+          <div #stockRow class="fc-row" *ngFor="let item of futureContractList; trackBy: trackByStock"
+            [class.fc-row--highlight]="highlightedStock === item?.symbol">
+
+            <div class="fc-col fc-col--stock" data-label="Stock">
+              <div class="fc-stock" (click)="onRowClick(item)">
+                <div class="fc-stock__avatar">
+                  {{ getInitials(item?.symbol) }}
+                </div>
+
+                <div class="fc-stock__info">
+                  <h3>{{ item?.symbol || '-' }}</h3>
+                  <p>ID: {{ item?.id || '-' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="fc-col fc-col--expiry" data-label="Expiry">
+              <!-- <label>Expiry</label> -->
+              <div class="fc-value">{{ item?.expiry_date || '-' }}</div>
+            </div>
+
+            <div class="fc-col" data-label="Price">
+              <!-- <label>Price</label> -->
+              <div class="fc-value fc-value--strong">₹{{ item?.price ?? '-' }}</div>
+            </div>
+
+            <div class="fc-col" data-label="Prev Close">
+              <!-- <label>Prev Close</label> -->
+              <div class="fc-value fc-value--strong">₹{{ item?.prev_close ?? '-' }}</div>
+            </div>
+
+            <div class="fc-col" data-label="Day Change">
+              <!-- <label>Day Change</label> -->
+              <div class="fc-value" [ngClass]="{
+              'is-positive': isPositiveChange(item?.day_change),
+              'is-negative': !isPositiveChange(item?.day_change)
+            }">
+                {{ item?.day_change || '-' }}
+              </div>
+            </div>
+
+            <div class="fc-col" data-label="Change %">
+              <!-- <label>Change %</label> -->
+              <div class="fc-pill" [ngClass]="{
+              'fc-pill--positive': isPositiveChange(item?.day_change_percentage),
+              'fc-pill--negative': !isPositiveChange(item?.day_change_percentage)
+            }">
+                {{ item?.day_change_percentage || '-' }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noDataTpl>
+          <div class="fc-empty">
+            <div class="fc-empty__icon">
+              <i class="fa fa-chart-line"></i>
+            </div>
+            <h3>No stocks available</h3>
+            <p>Your future contract list is empty.</p>
+          </div>
+        </ng-template>
+
+      </div>
+    </div>
+
+  </div>
+</app-floating-modal>
+
+<!-- floating modal code for ctrl+O end-->
+
+<!-- floating modal code for ctrl+L -->
+<app-floating-modal #modalE title="Price Alert" [top]="350" [left]="410" [width]="850" [height]="530">
+  <div class="modal-body">
+    <!-- Tabs -->
+    <!-- <ul class="nav nav-tabs mb-3">
+      <li class="nav-item"><a class="nav-link active">Set Alert</a></li>
+    </ul> -->
+    <!-- Filter Row -->
+    <div class="row mb-3 form-section">
+      <form [formGroup]="PriceAlertForm" novalidate>
+        <div class="pa-body">
+          <div class="pa-row">
+            <label>Add Script<span class="required-star">*</span></label>
+            <ng-select class="scrip-name" title="Stocks" id="dropdown1" formControlName="stock_symbol"
+              [items]="stockData" bindLabel="stock_tick" bindValue="kite_symbol" [searchable]="true" [clearable]="true"
+              [virtualScroll]="true" [trackByFn]="trackByTick" [searchFn]="searchStocks"
+              [ngClass]="{ 'is-invalid': submitted && f['stock_symbol']?.errors }">
+              <ng-template ng-option-tmp let-item="item">
+                {{ item.stock_tick | uppercase }}
+                <small *ngIf="item.name"> — {{ item.name }}</small>
+              </ng-template>
+            </ng-select>
+          </div>
+
+          <div class="pa-row">
+            <label>Rate<span class="required-star">*</span></label>
+            <!-- <label><input title="Greater-Than" type="radio" value="true" name="condition" formControlName="condition"
+                          [ngClass]="{ 'is-invalid': submitted && f['condition']?.errors }" /> &gt;=</label>
+                      <label><input title="Less-Than" type="radio" value="false" name="condition" formControlName="condition"
+                          [ngClass]="{ 'is-invalid': submitted && f['condition']?.errors }" /> &lt;=</label> -->
+
+            <div class="radio-group d-flex align-items-center"
+              [ngClass]="{ 'is-invalid': submitted && f['condition']?.errors }">
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" title="Greater-Than" type="radio" value="true" name="condition"
+                  formControlName="condition" />
+                <label class="form-check-label">&gt;=</label>
+              </div>
+
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" title="Less-Than" type="radio" value="false" name="condition"
+                  formControlName="condition" />
+                <label class="form-check-label">&lt;=</label>
+              </div>
+            </div>
+            <div *ngIf="submitted && f['condition'].errors" class="invalid-feedback">
+              <div *ngIf="f['condition'].errors['required']"><span style="color:red"></span>
+              </div>
+            </div>
+
+            <input type="number" title="Threshold" placeholder="Threshold" class="pa-input" formControlName="threshold"
+              [ngClass]="{ 'is-invalid': submitted && f['threshold']?.errors }" />
+          </div>
+
+          <div class="pa-row">
+            <label>Message</label>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="text" class="pa-input" placeholder="Message" formControlName="message" title="Message" />
+          </div>
+        </div>
+        <div class="pa-right-buttons">
+          <button class="pa-btn" (click)="generateCustomAlerts()">Add</button>
+          <button class="pa-btn" (click)="resetAlert()">Reset</button>
+          <button class="pa-btn" (click)="closePriceAlert()">Close</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Table -->
+    <table class="table table-bordered table-sm">
+      <thead class="thead-light">
+        <tr>
+          <th>SL.</th>
+          <th>Stock Name</th>
+          <th>Threshold</th>
+          <th>Condition</th>
+          <th>Date</th>
+          <th>Message</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of customAlertData;let i = index;">
+          <td>{{i+1}}</td>
+          <td (click)="ViewAnalytics(item.stock_symbol)" [attr.data-stock]="item.stock_symbol" style="cursor: pointer;">
+            {{item.stock_symbol}}</td>
+          <td>{{item.threshold}}</td>
+          <td>{{ item.condition == 1 ? '>=' : '<=' }}</td>
+          <td>{{ item.created_at | date:'dd-MMM-yyyy, hh:mm a' }}</td>
+          <td>{{item.message}}</td>
+        </tr>
+        <div *ngIf="customAlertData.length===0" style="padding-top: 20px;color: red;">No alerts to display </div>
+      </tbody>
+    </table>
+    <a href="/alerts" style="float: right;text-decoration: underline;">See more...</a>
+    <br>
+  </div>
+</app-floating-modal>
+<!-- floating modal code for ctrl+L end-->
+
+<app-floating-modal #CustomScreener title="Custom Stock Screener" [top]="100" [left]="100" [width]="1050"
+  [height]="700">
+  <div class="modal-body">
+    <div class="calendar-container mb-3">
+      <h3 class="fw-bold">List of Stocks</h3>
+    </div>
+
+    <!-- Top Controls -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 10px;">
+      <!-- Pagination Controls -->
+      <div class="pagination-container d-flex align-items-center gap-2 flex-wrap">
+        <button class="btn btn-sm btn-outline-primary" (click)="goToPreviousPage()" [disabled]="getCurrentPage() === 1">
+          ‹ Prev
+        </button>
+
+        <ng-container *ngFor="let page of getPageNumbers()">
+          <button class="btn btn-sm btn-outline-secondary" [class.active]="page === getCurrentPage()"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        </ng-container>
+
+        <button class="btn btn-sm btn-outline-primary" (click)="goToNextPage()"
+          [disabled]="getCurrentPage() >= getTotalPages()">
+          Next ›
+        </button>
+
+        <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSize"
+          (change)="onPageSizeChange()">
+          <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+        </select>
+
+        <span class="ms-2 fw-semibold">| Matched: {{ MatchedCount }}</span>
+      </div>
+
+      <!-- Search -->
+      <div class="flex-grow-1" style="max-width: 300px;">
+        <input type="text" #searchInput id="searchInput" class="form-control" placeholder="Search stock by name..."
+          [(ngModel)]="searchText" (input)="onSearchInput(searchText)" />
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="table table-hover table-bordered align-middle text-center">
+        <thead class="table-light">
+          <tr>
+            <th>SL.</th>
+            <th (click)="sortData('stock')" style="cursor: pointer;">
+              Stock
+              <span *ngIf="sortColumn === 'stock'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+            </th>
+            <th (click)="sortData('price')" style="cursor: pointer;">
+              Price - CMP
+              <span *ngIf="sortColumn === 'price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+            </th>
+            <th (click)="sortData('day_change')" style="cursor: pointer;">
+              Day Change
+              <span *ngIf="sortColumn === 'day_change'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+            </th>
+            <th (click)="sortData('day_change_percentage')" style="cursor: pointer;">
+              Change (%)
+              <span *ngIf="sortColumn === 'day_change_percentage'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+            </th>
+            <th>Execute Time Frame</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container>
+            <tr *ngFor="let item of filteredListData; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td [attr.data-stock]="item.stock" style="cursor: pointer;"
+                [ngStyle]="isHighlighted(item.stock) ? { 'background-color': '#fff6b2' } : {}"
+                (click)="executeTimeFrame(item.stock, '1', item.stock_id)">
+                {{ item.stock }}
+              </td>
+              <td>{{ item.price }}</td>
+              <td [ngClass]="getTextColor(item.day_change)">
+                {{ item.day_change }}
+              </td>
+              <td [ngClass]="getTextColor(item.day_change_percentage)">
+                {{ item.day_change_percentage }}
+              </td>
+              <td class="justify-content-center gap-1">
+                <button class="btn btn-sm btn-outline-primary"
+                  (click)="executeTimeFrame(item.stock, '1', item.stock_id)">D</button>
+                <button class="btn btn-sm btn-outline-secondary"
+                  (click)="executeTimeFrame(item.stock, '2', item.stock_id)">60/75 Min</button>
+                <button class="btn btn-sm btn-outline-success"
+                  (click)="executeTimeFrame(item.stock, '3', item.stock_id)">15 Min</button>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+
+      <div *ngIf="IsLoadingVisible" class="text-center my-3 text-muted">
+        <span class="fw-semibold">LOADING STOCKS</span><span>.</span><span>.</span><span>.</span>
+      </div>
+    </div>
+  </div>
+
+</app-floating-modal>
+
+
+<div class="np-right-panel" [class.is-open]="showPanelForLiquidStock">
+  <div class="liquid-drawer__header">
+    <div class="liquid-drawer__titleWrap">
+      <span class="liquid-drawer__icon">📝</span>
+      <div>
+        <h3 class="liquid-drawer__title">Most Liquid Stock</h3>
+        <p class="liquid-drawer__sub">Near / Next / Far expiries</p>
+      </div>
+    </div>
+    <div class="liquid-drawer__header-actions">
+      <button class="liquid-drawer__exportBtn" (click)="downloadExcel()"
+        [disabled]="!liquidStockList || liquidStockList.length === 0">
+        Export Excel
+      </button>
+
+      <button class="liquid-drawer__close" (click)="closePanel()" aria-label="Close">×</button>
+    </div>
+    <!-- <button class="liquid-drawer__close" (click)="closePanel()" aria-label="Close">×</button> -->
+  </div>
+
+  <div class="liquid-drawer__body">
+    <div *ngIf="isLoading" class="liquid-drawer__loading">
+      <div class="liquid-drawer__spinner"></div>
+      <p class="liquid-drawer__loadingText">Loading data...</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="liquid-drawer__tableWrap">
+      <table class="liquid-drawer__table">
+        <thead>
+          <tr>
+            <th class="liquid-drawer__th">Symbol</th>
+
+            <th class="liquid-drawer__th liquid-drawer__th--sortable" (click)="sortByVolume()">
+              <span>Avg Volume (Month)</span>
+              <span class="liquid-drawer__sortIcon" *ngIf="sortDirection === 'asc'">▲</span>
+              <span class="liquid-drawer__sortIcon" *ngIf="sortDirection === 'desc'">▼</span>
+            </th>
+
+            <th class="liquid-drawer__th liquid-drawer__th--exp">
+              <div class="liquid-drawer__expHead">
+                <span>NEAR</span>
+                <span>NEXT</span>
+                <span>FAR</span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr class="liquid-drawer__row" *ngFor="let list of liquidStockList">
+            <td class="liquid-drawer__td liquid-drawer__symbol">{{ list.symbol }}</td>
+            <td class="liquid-drawer__td liquid-drawer__volume">{{ list.avg_qty }}</td>
+
+            <td class="liquid-drawer__td">
+              <div class="liquid-drawer__expBtns">
+                <button class="liquid-drawer__expBtn" *ngFor="let date of list.expiry_dates"
+                  (click)="showChart(list.symbol, date)">
+                  {{ date }}
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="liquidStockList?.length === 0">
+            <td colspan="3" class="liquid-drawer__empty">
+              No data available.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<div class="np-overlay" *ngIf="showPanelForNotification" (click)="closeNotificationPanel()"></div>
+
+<div class="np-right-panel is-open" *ngIf="showPanelForNotification">
+  <div class="np-panel-header">
+    <div class="np-header-left">
+      <span class="np-header-icon">🔔</span>
+      <div>
+        <h3 class="np-panel-subtitle" style="color: white !important;">Notifications</h3>
+        <p class="np-panel-subtitle">Latest alerts & stock updates</p>
+      </div>
+    </div>
+
+    <button class="np-close-btn" (click)="closeNotificationPanel()" aria-label="Close">×</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="np-panel-tabs">
+    <button class="np-tab-btn" [class.np-active]="activeTab === 'alert'" (click)="setTab('alert')">
+      <span>Alert</span>
+      <span class="np-badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
+    </button>
+
+    <button class="np-tab-btn" [class.np-active]="activeTab === 'stock'" (click)="setTab('stock')">
+      <span>Stock</span>
+      <span class="np-badge" *ngIf="StocknotificationCount > 0">{{ StocknotificationCount }}</span>
+    </button>
+  </div>
+
+  <div class="stock-actions" *ngIf="activeTab === 'stock'">
+    <button class="read-all-btn read-all-btn--sm" (click)="ReadAll()">
+      Read All
+    </button>
+  </div>
+
+  <div class="np-panel-content">
+    <div *ngFor="let n of activeList; trackBy: trackByNotif" class="np-notification-card"
+      [ngClass]="{ 'np-unread': !n.read, 'np-read': n.read }" (click)="onNotificationClick(n)">
+
+      <span class="np-type-pill" [ngClass]="n.alertType === 'BUY' ? 'np-buy' : 'np-sell'">
+        {{ n.alertType }}
+      </span>
+
+      <span class="np-type-pill np-tf-pill">
+        {{ getTimeframeLabel(n) }}
+      </span>
+
+      <div class="np-notif-text">{{ n.fullText }}</div>
+
+      <div class="np-notif-meta">
+        <span class="np-dot" [ngClass]="!n.read ? 'np-dot-unread' : 'np-dot-read'"></span>
+        <span>{{ n.read ? 'Read' : 'Unread' }}</span>
+      </div>
+
+      <span class="np-view-pill" (click)="$event.stopPropagation(); onViewClick(n)">
+        View
+      </span>
+    </div>
+
+    <div class="np-empty-state" *ngIf="activeList?.length === 0">
+      <div class="np-empty-icon">📭</div>
+      <div class="np-empty-title">No notifications</div>
+      <div class="np-empty-sub">You're all caught up.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Notification side panel code end-->
+
+
+<div *ngFor="let p of popups" class="popup-overlay">
+  <app-notification-popup [message]="p.message" [id]="p.id" [stock_tick]="p.stock_tick" (close)="closePopup(p.id)">
+  </app-notification-popup>
+</div>
+
+
+
+<!-- OHLC SIDE PANEL -->
+<!-- backdrop -->
+<!-- <div class="ohlc-backdrop" *ngIf="isOhlcPanelOpen" (click)="closeOhlcPanel()">
+</div>
+
+<div class="ohlc-panel" [class.ohlc-panel--open]="isOhlcPanelOpen">
+  <div class="ohlc-panel__header">
+    <div>
+      <h3>OHLC Details</h3>
+      <p>View open, high, low, close information</p>
+    </div>
+
+    <button type="button" class="ohlc-panel__close" (click)="closeOhlcPanel()">
+      <i class="fa fa-times"></i>
+    </button>
+  </div>
+
+  <div class="ohlc-panel__body">
+    <div class="ohlc-card">
+
+      <div class="ohlc-tabs">
+        <button type="button" class="ohlc-tab-btn" [class.active]="activeOhlcTab === 'NSE'" (click)="setOhlcTab('NSE')">
+          NSE
+        </button>
+
+        <button type="button" class="ohlc-tab-btn" [class.active]="activeOhlcTab === 'MCX'" (click)="setOhlcTab('MCX')">
+          MCX
+        </button>
+
+        <button type="button" class="ohlc-tab-btn" [class.active]="activeOhlcTab === 'NSEFO'"
+          (click)="setOhlcTab('NSEFO')">
+          NSEFO
+        </button>
+      </div>
+
+      <form *ngIf="activeOhlcTab === 'NSE'" [formGroup]="nseForm" novalidate>
+        <div class="container">
+          <div class="form-row-custom">
+
+            <div class="form-group-custom">
+              <b>
+                <label>Select Stock <span style="color:red">*</span></label>
+              </b>
+
+              <ng-select formControlName="tick" [items]="stockData" bindLabel="stock_tick" [searchable]="true"
+                [clearable]="true" [virtualScroll]="true" [trackByFn]="trackByTick" [searchFn]="searchStocks"
+                placeholder="--Select--" [ngClass]="{ 'is-invalid': submittedNSE && nseH['tick']?.errors }">
+
+                <ng-template ng-option-tmp let-item="item">
+                  {{ item.stock_tick | uppercase }}
+                  <small *ngIf="item.name"> — {{ item.name }}</small>
+                </ng-template>
+              </ng-select>
+
+              <div *ngIf="submittedNSE && nseH['tick']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nseH['tick']?.errors?.['required']" style="color:red">
+                  Stock Name is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>Filter <span style="color:red">*</span></label>
+              </b>
+
+              <select class="form-control" formControlName="time_frame" style="appearance: auto;"
+                [ngClass]="{ 'is-invalid': submittedNSE && nseH['time_frame']?.errors }">
+                <option value="" disabled>--Select--</option>
+                <option [value]="1">Monthly - Weekly - Daily</option>
+                <option [value]="2">Weekly - Daily - 60</option>
+                <option [value]="3">Daily - 75 - 60 - 15</option>
+                <option [value]="4">Monthly - Weekly - 125</option>
+                <option [value]="5">Weekly - Daily - 125</option>
+                <option [value]="6">Daily - 125 - 25</option>
+                <option [value]="25">Weekly - Daily - 75</option>
+              </select>
+
+              <div *ngIf="submittedNSE && nseH['time_frame']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nseH['time_frame']?.errors?.['required']" style="color:red">
+                  Filter is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>Start Date <span style="color:red">*</span></label>
+              </b>
+
+              <input type="date" class="form-control" formControlName="start_date"
+                [ngClass]="{ 'is-invalid': submittedNSE && nseH['start_date']?.errors }" />
+
+              <div *ngIf="submittedNSE && nseH['start_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nseH['start_date']?.errors?.['required']" style="color:red">
+                  Start Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>End Date <span style="color:red">*</span></label>
+              </b>
+
+              <input type="date" class="form-control" formControlName="end_date"
+                [ngClass]="{ 'is-invalid': submittedNSE && nseH['end_date']?.errors }" />
+
+              <div *ngIf="submittedNSE && nseH['end_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nseH['end_date']?.errors?.['required']" style="color:red">
+                  End Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom form-group-custom--actions">
+              <label class="action-label-space"></label>
+              <div class="trade-action-group">
+                <button type="button" class="trade-submit-btn" (click)="getOHLCdataNSE()">
+                  Download Excel
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </form>
+
+      <form *ngIf="activeOhlcTab === 'MCX'" [formGroup]="mcxForm" novalidate>
+        <div class="container">
+          <div class="form-row-custom">
+
+            <div class="form-group-custom">
+              <b>
+                <label>Select Stock MCX <span style="color:red">*</span></label>
+              </b>
+
+              <select class="form-control" formControlName="tick" style="appearance: auto;"
+                (change)="onMcxSymbolChange($event)" [ngClass]="{ 'is-invalid': submittedMCX && mcxH['tick']?.errors }">
+
+                <option value="" selected disabled>--Select--</option>
+                <option *ngFor="let row of mcxFuturesList" [value]="row.symbol">
+                  {{ row.symbol }}
+                </option>
+              </select>
+
+              <div *ngIf="submittedMCX && mcxH['tick']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="mcxH['tick']?.errors?.['required']" style="color:red">
+                  Stock Name is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>Expiry Date <span style="color:red">*</span></label>
+              </b>
+
+              <ng-select formControlName="expiry_date" [items]="mcxExpiryDateList" bindLabel="expiry_date"
+                bindValue="expiry_date" [searchable]="false" [clearable]="true" [virtualScroll]="true"
+                placeholder="--Select Expiry Date--"
+                [ngClass]="{ 'is-invalid': submittedMCX && mcxH['expiry_date']?.errors }">
+
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="expiry-option-row">
+                    <span class="expiry-label-tag">{{ item.expiry_label }}</span>
+                    <span class="expiry-date-text">{{ item.expiry_date }}</span>
+                  </div>
+                </ng-template>
+
+                <ng-template ng-label-tmp let-item="item">
+                  <div class="expiry-option-row">
+                    <span class="expiry-label-tag">{{ item.expiry_label }}</span>
+                    <span class="expiry-date-text">{{ item.expiry_date }}</span>
+                  </div>
+                </ng-template>
+              </ng-select>
+
+              <div *ngIf="submittedMCX && mcxH['expiry_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="mcxH['expiry_date']?.errors?.['required']" style="color:red">
+                  Expiry Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>Filter <span style="color:red">*</span></label>
+              </b>
+
+              <select class="form-control" formControlName="time_frame" style="appearance: auto;"
+                [ngClass]="{ 'is-invalid': submittedMCX && mcxH['time_frame']?.errors }">
+                <option value="" disabled>--Select--</option>
+                <option [value]="1">Monthly - Weekly - Daily</option>
+                <option [value]="2">Weekly - Daily - 240</option>
+                <option [value]="3">Daily - 240 - 120</option>
+                <option [value]="4">Daily - 240 - 60</option>
+              </select>
+
+              <div *ngIf="submittedMCX && mcxH['time_frame']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="mcxH['time_frame']?.errors?.['required']" style="color:red">
+                  Filter is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>Start Date <span style="color:red">*</span></label>
+              </b>
+
+              <input type="date" class="form-control" formControlName="start_date"
+                [ngClass]="{ 'is-invalid': submittedMCX && mcxH['start_date']?.errors }" />
+
+              <div *ngIf="submittedMCX && mcxH['start_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="mcxH['start_date']?.errors?.['required']" style="color:red">
+                  Start Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>End Date <span style="color:red">*</span></label>
+              </b>
+
+              <input type="date" class="form-control" formControlName="end_date"
+                [ngClass]="{ 'is-invalid': submittedMCX && mcxH['end_date']?.errors }" />
+
+              <div *ngIf="submittedMCX && mcxH['end_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="mcxH['end_date']?.errors?.['required']" style="color:red">
+                  End Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom form-group-custom--actions">
+              <label class="action-label-space"></label>
+              <div class="trade-action-group">
+                <button type="button" class="trade-submit-btn" (click)="getOHLCdataMCX()">
+                  Download Excel
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </form>
+
+      <form *ngIf="activeOhlcTab === 'NSEFO'" [formGroup]="nsefoForm" novalidate>
+        <div class="container">
+          <div class="form-row-custom">
+
+            <div class="form-group-custom">
+              <b>
+                <label>Select Stock NSEFO <span style="color:red">*</span></label>
+              </b>
+
+              <ng-select formControlName="tick" [items]="ScripData" [searchable]="true" [clearable]="true"
+                [virtualScroll]="true" placeholder="--Select--" (change)="onNsefoSymbolChange($event)"
+                [ngClass]="{ 'is-invalid': submittedNSEFO && nsefoH['tick']?.errors }">
+              </ng-select>
+
+              <div *ngIf="submittedNSEFO && nsefoH['tick']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nsefoH['tick']?.errors?.['required']" style="color:red">
+                  Stock Name is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>Expiry Date <span style="color:red">*</span></label>
+              </b>
+
+              <ng-select formControlName="expiry_date" [items]="expiryDateList" bindLabel="expiry_date"
+                bindValue="expiry_date" [searchable]="false" [clearable]="true" [virtualScroll]="true"
+                placeholder="--Select Expiry Date--"
+                [ngClass]="{ 'is-invalid': submittedNSEFO && nsefoH['expiry_date']?.errors }">
+
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="expiry-option-row">
+                    <span class="expiry-label-tag">{{ item.expiry_label }}</span>
+                    <span class="expiry-date-text">{{ item.expiry_date }}</span>
+                  </div>
+                </ng-template>
+
+                <ng-template ng-label-tmp let-item="item">
+                  <div class="expiry-option-row">
+                    <span class="expiry-label-tag">{{ item.expiry_label }}</span>
+                    <span class="expiry-date-text">{{ item.expiry_date }}</span>
+                  </div>
+                </ng-template>
+              </ng-select>
+
+              <div *ngIf="submittedNSEFO && nsefoH['expiry_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nsefoH['expiry_date']?.errors?.['required']" style="color:red">
+                  Expiry Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>Filter <span style="color:red">*</span></label>
+              </b>
+
+              <select class="form-control" formControlName="time_frame" style="appearance: auto;"
+                [ngClass]="{ 'is-invalid': submittedNSEFO && nsefoH['time_frame']?.errors }">
+                <option value="" disabled>--Select--</option>
+                <option [value]="1">Monthly - Weekly - Daily</option>
+                <option [value]="25">Weekly - Daily - 75</option>
+                <option [value]="2">Weekly - Daily - 60</option>
+                <option [value]="3">Daily - 75 - 60 - 15</option>
+              </select>
+
+              <div *ngIf="submittedNSEFO && nsefoH['time_frame']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nsefoH['time_frame']?.errors?.['required']" style="color:red">
+                  Filter is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>Start Date <span style="color:red">*</span></label>
+              </b>
+
+              <input type="date" class="form-control" formControlName="start_date"
+                [ngClass]="{ 'is-invalid': submittedNSEFO && nsefoH['start_date']?.errors }" />
+
+              <div *ngIf="submittedNSEFO && nsefoH['start_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nsefoH['start_date']?.errors?.['required']" style="color:red">
+                  Start Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>End Date <span style="color:red">*</span></label>
+              </b>
+
+              <input type="date" class="form-control" formControlName="end_date"
+                [ngClass]="{ 'is-invalid': submittedNSEFO && nsefoH['end_date']?.errors }" />
+
+              <div *ngIf="submittedNSEFO && nsefoH['end_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nsefoH['end_date']?.errors?.['required']" style="color:red">
+                  End Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom form-group-custom--actions">
+              <label class="action-label-space"></label>
+              <div class="trade-action-group">
+                <button type="button" class="trade-submit-btn" (click)="getOHLCdataNSEFO()">
+                  Download Excel
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div> -->
+
+
+
+
+
+
+
+<!-- OHLC SIDE PANEL -->
+<!-- backdrop -->
+<div class="ohlc-backdrop" *ngIf="isOhlcPanelOpen" (click)="closeOhlcPanel()">
+</div>
+
+<div class="ohlc-panel" [class.ohlc-panel--open]="isOhlcPanelOpen">
+  <div class="ohlc-panel__header">
+    <div>
+      <h3>OHLC Details</h3>
+      <p>View open, high, low, close information</p>
+    </div>
+
+    <button type="button" class="ohlc-panel__close" (click)="closeOhlcPanel()">
+      <i class="fa fa-times"></i>
+    </button>
+  </div>
+
+  <div class="ohlc-panel__body">
+    <div class="ohlc-card">
+
+      <!-- Tabs -->
+      <div class="ohlc-tabs">
+        <button type="button" class="ohlc-tab-btn" [class.active]="activeOhlcTab === 'NSE'" (click)="setOhlcTab('NSE')">
+          NSE
+        </button>
+
+        <button type="button" class="ohlc-tab-btn" [class.active]="activeOhlcTab === 'MCX'" (click)="setOhlcTab('MCX')">
+          MCX
+        </button>
+
+        <button type="button" class="ohlc-tab-btn" [class.active]="activeOhlcTab === 'NSEFO'"
+          (click)="setOhlcTab('NSEFO')">
+          NSEFO
+        </button>
+      </div>
+
+      <!-- NSE FORM -->
+      <form *ngIf="activeOhlcTab === 'NSE'" [formGroup]="nseForm" novalidate>
+        <div class="container">
+          <div class="form-row-custom">
+
+            <div class="form-group-custom">
+              <b>
+                <label>Select Stock <span style="color:red">*</span></label>
+              </b>
+
+              <ng-select formControlName="tick" [items]="filteredStockData" bindLabel="stock_tick" [searchable]="true"
+                [clearable]="true" [virtualScroll]="true" [trackByFn]="trackByTick"
+                (search)="onStockSearch($event.term)" placeholder="--Select--" appendTo="body" dropdownPosition="bottom"
+                [ngClass]="{ 'is-invalid': submittedNSE && nseH['tick']?.errors }">
+
+                <ng-template ng-option-tmp let-item="item">
+                  {{ item.stock_tick | uppercase }}
+                  <small *ngIf="item.name"> — {{ item.name }}</small>
+                </ng-template>
+              </ng-select>
+
+              <div *ngIf="submittedNSE && nseH['tick']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nseH['tick']?.errors?.['required']" style="color:red">
+                  Stock Name is required
+                </span>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group-custom">
+                  <b>
+                    <label>Multiple Timeframe </label>
+                  </b>
+
+                  <select class="form-control" formControlName="time_frame" style="appearance: auto;"
+                    [ngClass]="{ 'is-invalid': submittedNSE && nseH['time_frame']?.errors }">
+                    <option value="" disabled>--Select--</option>
+                    <option [value]="1">Monthly - Weekly - Daily</option>
+                    <option [value]="2">Weekly - Daily - 60</option>
+                    <option [value]="3">Daily - 75 - 60 - 15</option>
+                    <option [value]="4">Monthly - Weekly - 125</option>
+                    <option [value]="5">Weekly - Daily - 125</option>
+                    <option [value]="6">Daily - 125 - 25</option>
+                    <option [value]="25">Weekly - Daily - 75</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group-custom">
+                  <b>
+                    <label>Single Timeframe</label>
+                  </b>
+                  <select class="form-control" formControlName="single_time_frame" style="appearance: auto;"
+                    [ngClass]="{ 'is-invalid': submittedNSE && nseH['single_time_frame']?.errors }">
+                    <option value="" disabled>--Select--</option>
+                    <option [value]="3">15 Min</option>
+                    <option [value]="6">25 Min</option>
+                    <option [value]="2">60 Min</option>
+                    <option [value]="25">75 Min</option>
+                    <option [value]="5">125 Min</option>
+                    <option [value]="1">Daily</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>Start Date <span style="color:red">*</span></label>
+              </b>
+
+              <input #startDateInput type="date" class="form-control clickable-date-input" formControlName="start_date"
+                (click)="openDatePicker(startDateInput)" (focus)="openDatePicker(startDateInput)"
+                [ngClass]="{ 'is-invalid': submittedNSE && nseH['start_date']?.errors }" />
+
+              <div *ngIf="submittedNSE && nseH['start_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nseH['start_date']?.errors?.['required']" style="color:red">
+                  Start Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>End Date <span style="color:red">*</span></label>
+              </b>
+
+              <input #endDateInput type="date" class="form-control clickable-date-input" formControlName="end_date"
+                (click)="openDatePicker(endDateInput)" (focus)="openDatePicker(endDateInput)"
+                [ngClass]="{ 'is-invalid': submittedNSE && nseH['end_date']?.errors }" />
+
+              <div *ngIf="submittedNSE && nseH['end_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nseH['end_date']?.errors?.['required']" style="color:red">
+                  End Date is required
+                </span>
+              </div>
+            </div>
+
+
+            <!-- <div class="form-group-custom">
+              <b>
+                <label>Start Date <span style="color:red">*</span></label>
+              </b>
+
+              <input type="date" class="form-control" formControlName="start_date"
+                [ngClass]="{ 'is-invalid': submittedNSE && nseH['start_date']?.errors }" />
+
+              <div *ngIf="submittedNSE && nseH['start_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nseH['start_date']?.errors?.['required']" style="color:red">
+                  Start Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>End Date <span style="color:red">*</span></label>
+              </b>
+
+              <input type="date" class="form-control" formControlName="end_date"
+                [ngClass]="{ 'is-invalid': submittedNSE && nseH['end_date']?.errors }" />
+
+              <div *ngIf="submittedNSE && nseH['end_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nseH['end_date']?.errors?.['required']" style="color:red">
+                  End Date is required
+                </span>
+              </div>
+            </div> -->
+
+            <div class="form-group-custom form-group-custom--actions">
+              <label class="action-label-space"></label>
+              <div class="trade-action-group">
+                <button type="button" class="trade-submit-btn" (click)="getOHLCdataNSE()">
+                  Download Excel
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </form>
+
+      <!-- MCX FORM -->
+      <form *ngIf="activeOhlcTab === 'MCX'" [formGroup]="mcxForm" novalidate>
+        <div class="container">
+          <div class="form-row-custom">
+
+            <div class="form-group-custom">
+              <b>
+                <label>Select Stock MCX <span style="color:red">*</span></label>
+              </b>
+
+              <select class="form-control" formControlName="tick" style="appearance: auto;" dropdownPosition="bottom"
+                (change)="onMcxSymbolChange($event)" [ngClass]="{ 'is-invalid': submittedMCX && mcxH['tick']?.errors }">
+
+                <option value="" selected disabled>--Select--</option>
+                <option *ngFor="let row of mcxFuturesList" [value]="row.symbol">
+                  {{ row.symbol }}
+                </option>
+              </select>
+
+              <div *ngIf="submittedMCX && mcxH['tick']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="mcxH['tick']?.errors?.['required']" style="color:red">
+                  Stock Name is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>Expiry Date <span style="color:red">*</span></label>
+              </b>
+
+              <ng-select formControlName="expiry_date" [items]="mcxExpiryDateList" bindLabel="expiry_date"
+                bindValue="expiry_date" [searchable]="false" [clearable]="true" [virtualScroll]="true"
+                placeholder="--Select Expiry Date--"
+                [ngClass]="{ 'is-invalid': submittedMCX && mcxH['expiry_date']?.errors }">
+
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="expiry-option-row">
+                    <span class="expiry-label-tag">{{ item.expiry_label }}</span>
+                    <span class="expiry-date-text">{{ item.expiry_date }}</span>
+                  </div>
+                </ng-template>
+
+                <ng-template ng-label-tmp let-item="item">
+                  <div class="expiry-option-row">
+                    <span class="expiry-label-tag">{{ item.expiry_label }}</span>
+                    <span class="expiry-date-text">{{ item.expiry_date }}</span>
+                  </div>
+                </ng-template>
+              </ng-select>
+
+              <div *ngIf="submittedMCX && mcxH['expiry_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="mcxH['expiry_date']?.errors?.['required']" style="color:red">
+                  Expiry Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group-custom">
+                  <b>
+                    <label>Multiple Timeframe</label>
+                  </b>
+
+                  <select class="form-control" formControlName="time_frame" style="appearance: auto;"
+                    [ngClass]="{ 'is-invalid': submittedMCX && mcxH['time_frame']?.errors }">
+                    <option value="" disabled>--Select--</option>
+                    <option [value]="1">Monthly - Weekly - Daily</option>
+                    <option [value]="2">Weekly - Daily - 240</option>
+                    <option [value]="3">Daily - 240 - 120</option>
+                    <option [value]="4">Daily - 240 - 60</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group-custom">
+                  <b>
+                    <label>Single Timeframe</label>
+                  </b>
+
+                  <select class="form-control" formControlName="single_time_frame" style="appearance: auto;"
+                    [ngClass]="{ 'is-invalid': submittedMCX && mcxH['single_time_frame']?.errors }">
+                    <option value="" disabled>--Select--</option>
+                    <option [value]="4">60 Min</option>
+                    <option [value]="3">120 Min</option>
+                    <option [value]="2">240 Min</option>
+                    <option [value]="1">Daily</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="form-group-custom">
+              <b>
+                <label>Start Date <span style="color:red">*</span></label>
+              </b>
+
+              <input #mcxStartDate type="date" class="form-control" formControlName="start_date"
+                (click)="openDatePicker(mcxStartDate)" (focus)="openDatePicker(mcxStartDate)"
+                [ngClass]="{ 'is-invalid': submittedMCX && mcxH['start_date']?.errors }" />
+
+              <div *ngIf="submittedMCX && mcxH['start_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="mcxH['start_date']?.errors?.['required']" style="color:red">
+                  Start Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>End Date <span style="color:red">*</span></label>
+              </b>
+
+              <input #mcxEndDate type="date" class="form-control" formControlName="end_date"
+                (click)="openDatePicker(mcxEndDate)" (focus)="openDatePicker(mcxEndDate)"
+                [ngClass]="{ 'is-invalid': submittedMCX && mcxH['end_date']?.errors }" />
+
+              <div *ngIf="submittedMCX && mcxH['end_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="mcxH['end_date']?.errors?.['required']" style="color:red">
+                  End Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom form-group-custom--actions">
+              <label class="action-label-space"></label>
+              <div class="trade-action-group">
+                <button type="button" class="trade-submit-btn" (click)="getOHLCdataMCX()">
+                  Download Excel
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </form>
+
+      <!-- NSEFO FORM -->
+      <form *ngIf="activeOhlcTab === 'NSEFO'" [formGroup]="nsefoForm" novalidate>
+        <div class="container">
+          <div class="form-row-custom">
+
+            <div class="form-group-custom">
+              <b>
+                <label>Select Stock NSEFO <span style="color:red">*</span></label>
+              </b>
+
+              <ng-select formControlName="tick" [items]="filteredScripData" [searchable]="true" [clearable]="true"
+                dropdownPosition="bottom" [virtualScroll]="true" placeholder="--Select--"
+                (search)="onScripSearch($event.term)" (clear)="onScripSearch('')" (change)="onNsefoSymbolChange($event)"
+                [ngClass]="{ 'is-invalid': submittedNSEFO && nsefoH['tick']?.errors }">
+              </ng-select>
+
+              <div *ngIf="submittedNSEFO && nsefoH['tick']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nsefoH['tick']?.errors?.['required']" style="color:red">
+                  Stock Name is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>Expiry Date <span style="color:red">*</span></label>
+              </b>
+
+              <ng-select formControlName="expiry_date" [items]="expiryDateList" bindLabel="expiry_date"
+                bindValue="expiry_date" [searchable]="false" [clearable]="true" [virtualScroll]="true"
+                placeholder="--Select Expiry Date--"
+                [ngClass]="{ 'is-invalid': submittedNSEFO && nsefoH['expiry_date']?.errors }">
+
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="expiry-option-row">
+                    <span class="expiry-label-tag">{{ item.expiry_label }}</span>
+                    <span class="expiry-date-text">{{ item.expiry_date }}</span>
+                  </div>
+                </ng-template>
+
+                <ng-template ng-label-tmp let-item="item">
+                  <div class="expiry-option-row">
+                    <span class="expiry-label-tag">{{ item.expiry_label }}</span>
+                    <span class="expiry-date-text">{{ item.expiry_date }}</span>
+                  </div>
+                </ng-template>
+              </ng-select>
+
+              <div *ngIf="submittedNSEFO && nsefoH['expiry_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nsefoH['expiry_date']?.errors?.['required']" style="color:red">
+                  Expiry Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group-custom">
+                  <b>
+                    <label>Multiple Timeframe <span style="color:red">*</span></label>
+                  </b>
+
+                  <select class="form-control" formControlName="time_frame" style="appearance: auto;"
+                    [ngClass]="{ 'is-invalid': submittedNSEFO && nsefoH['time_frame']?.errors }">
+                    <option value="" disabled>--Select--</option>
+                    <option [value]="1">Monthly - Weekly - Daily</option>
+                    <option [value]="25">Weekly - Daily - 75</option>
+                    <option [value]="2">Weekly - Daily - 60</option>
+                    <option [value]="3">Daily - 75 - 60 - 15</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group-custom">
+                  <b>
+                    <label>Single Timeframe <span style="color:red">*</span></label>
+                  </b>
+
+                  <select class="form-control" formControlName="single_time_frame" style="appearance: auto;"
+                    [ngClass]="{ 'is-invalid': submittedNSEFO && nsefoH['single_time_frame']?.errors }">
+                    <option value="" disabled>--Select--</option>
+                    <option [value]="3">15 Min</option>
+                    <option [value]="2">60 Min</option>
+                    <option [value]="25">75 Min</option>
+                    <option [value]="1">Daily</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>Start Date <span style="color:red">*</span></label>
+              </b>
+
+              <input #nsefoStartDate type="date" class="form-control" formControlName="start_date"
+                (click)="openDatePicker(nsefoStartDate)" (focus)="openDatePicker(nsefoStartDate)"
+                [ngClass]="{ 'is-invalid': submittedNSEFO && nsefoH['start_date']?.errors }" />
+
+              <div *ngIf="submittedNSEFO && nsefoH['start_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nsefoH['start_date']?.errors?.['required']" style="color:red">
+                  Start Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <b>
+                <label>End Date <span style="color:red">*</span></label>
+              </b>
+
+              <input #nsefoEndDate type="date" class="form-control" formControlName="end_date"
+                (click)="openDatePicker(nsefoEndDate)" (focus)="openDatePicker(nsefoEndDate)"
+                [ngClass]="{ 'is-invalid': submittedNSEFO && nsefoH['end_date']?.errors }" />
+
+              <div *ngIf="submittedNSEFO && nsefoH['end_date']?.errors" class="invalid-feedback d-block">
+                <span *ngIf="nsefoH['end_date']?.errors?.['required']" style="color:red">
+                  End Date is required
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group-custom form-group-custom--actions">
+              <label class="action-label-space"></label>
+              <div class="trade-action-group">
+                <button type="button" class="trade-submit-btn" (click)="getOHLCdataNSEFO()">
+                  Download Excel
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

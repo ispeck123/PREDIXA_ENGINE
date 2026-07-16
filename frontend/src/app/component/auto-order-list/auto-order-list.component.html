@@ -1,0 +1,2490 @@
+
+
+  <!-- Main Content -->
+
+    <div class=" d-flex justify-content-between align-items-center flex-wrap">
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeTab === 'Stocks'" (click)="SwitchMasterMenu('Stocks')">Stocks</a>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link" [class.active]="activeTab === 'Commodity'"
+            (click)="SwitchMasterMenu('Commodity')">Commodity</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeTab === 'Future'" (click)="SwitchMasterMenu('Future')">Future</a>
+        </li> -->
+      </ul>
+
+      <div class="d-flex align-items-center gap-3 ms-auto">
+        <!-- <div class="dropdown-align-end">
+          <label for="exchange" class="dropdown-label">Select Time Frame:</label>
+          <select [(ngModel)]="timeframe_forOrderList" (change)="onTimeframeChangeForSuccess()">
+            <option value="null">All</option>
+            <option value="1">Daily</option>
+            <option value="2">60 Minutes</option>
+            <option value="3">15 Minutes</option>
+          </select>
+        </div> -->
+        <!-- <input type="submit" value="Update Status" class="btn btn-primary" (click)="UpdateStatus()"> -->
+        <input type="text" class="form-control stock-search-input" placeholder="Search stock by name..."
+          [(ngModel)]="searchText" (input)="onSearchInput(searchText)" />
+        <div class="div"><button class="btn btn-success btn-sm" (click)="exportToExcel()">Download Excel</button></div>
+
+        <div class="filter-container">
+          <button class="filter-btn" (click)="openPopup()">
+            <i class="fas fa-filter" style="color: green;" title="Filter"></i>
+          </button>
+
+          <div class="filter-popup" *ngIf="isPopupOpen">
+            <div class="popup-header">
+              <span style="color: #141E30;">Filter Options</span>
+              <button class="reset" title="Reset Filter" (click)="resetFilter()">Reset</button>
+              <button class="close-btn" (click)="togglePopsup()" style="font-size: 20px;">×</button>
+            </div>
+            <div class="popup-body">
+              <div class="cmp-toggle-row">
+                <span class="cmp-label">
+                  Sort By Date
+                </span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)">
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div class="cmp-toggle-row">
+                <div class="dropdown-group">
+                  <label for="exchange" class="dropdown-label">Time Frame:</label>
+                 <select class="dropdown-select" [(ngModel)]="timeframe_forOrderList"
+                    (change)="onTimeframeChangeForSuccess()">
+                    <option value="null">All</option>
+                    
+                    
+                    <option *ngIf="this.activeTab == 'Stocks'" value="3">
+                      15 Minutes
+                    </option>
+                      <option *ngIf="this.activeTab == 'Stocks'" value="6">
+                      25 Minutes
+                    </option>
+                    <option *ngIf="this.activeTab == 'Stocks'" value="2">
+                      60 Minutes
+                    </option>
+                    <option *ngIf="this.activeTab == 'Stocks'" value="25">
+                      75 Minutes
+                    </option>
+                       <option *ngIf="this.activeTab == 'Stocks'" value="5">
+                      125 Minutes
+                    </option>
+                    <option *ngIf="this.activeTab == 'Stocks'" value="1">
+                      Daily
+                    </option>
+
+                    <option *ngIf="this.activeTab == 'Commodity'" value="1">
+                      Daily
+                    </option>
+                    <option *ngIf="this.activeTab == 'Commodity'" value="2">
+                      240 Minutes
+                    </option>
+                    <option *ngIf="this.activeTab == 'Commodity'" value="3">
+                      120 Minutes
+                    </option>
+                    <option *ngIf="this.activeTab == 'Commodity'" value="4">
+                      60 Minutes
+                    </option>
+
+                    <option *ngIf="this.activeTab == 'Future'" value="1">
+                      Daily
+                    </option>
+                    <option *ngIf="this.activeTab == 'Future'" value="2">
+                      60 Minutes
+                    </option>
+                    <option *ngIf="this.activeTab == 'Future'" value="3">
+                      15 Minutes
+                    </option>
+                    <option *ngIf="this.activeTab == 'Future'" value="25">
+                      75 Minutes
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="cmp-toggle-row">
+                <div class="dropdown-group">
+                  <label for="exchange" class="dropdown-label">Order Type:</label>
+                  <select name="exchange" class="dropdown-select" [(ngModel)]="selectTradeType"
+                    (change)="onOrderTypeChangeFilter()">
+                    <option disabled>--Select--</option>
+                    <option value="all">All</option>
+                    <option value="buy">BUY</option>
+                    <option value="sell">SELL</option>
+                  </select>
+                </div>
+              </div>
+              <div class="cmp-toggle-row">
+                <input ngxDaterangepickerBootstrap [(ngModel)]="selectedDateRange" [showCustomRangeLabel]="true"
+                  [alwaysShowCalendars]="true" [ranges]="ranges" [linkedCalendars]="true"
+                  [isInvalidDate]="isInvalidDate" [showClearButton]="true" placeholder="Select Date Range..."
+                  [opens]="'left'" />
+                <button type="button" value="Search" class="search-btn" (click)="onSearchButtonClick()">
+                  <i class="fas fa-search"></i> Search
+                </button>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="tab-content p-3 border border-top-0">
+
+      <div *ngIf="activeTab === 'Stocks'">
+        <div class="menu-bar">
+          <ul class="tab-menu">
+            <li class="tab-item" [class.active]="activeMenu === 'Success'" (click)="switchMenu('Success')">
+              Success ({{SuccessCount}})
+            </li>
+            <li class="tab-item" [class.active]="activeMenu === 'Progress'" (click)="switchMenu('Progress')">
+              In Progress ({{ProgressCount}})
+            </li>
+            <li class="tab-item" [class.active]="activeMenu === 'Pending'" (click)="switchMenu('Pending')">
+              Pending ({{PendingCount }})
+            </li>
+            <li class="tab-item" [class.active]="activeMenu === 'Failed'" (click)="switchMenu('Failed')">
+              Failed ({{FailedCount}})
+            </li>
+          </ul>
+        </div>
+
+        <div *ngIf="activeMenu === 'Pending'" class="menu-content">
+          <section class="orders">
+            <div class=" d-flex justify-content-between align-items-center flex-wrap">
+              <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+                <button class="btn btn-sm nav-btn" (click)="goToPreviousPage()" [disabled]="getCurrentPage() === 1">
+                  ‹ Prev
+                </button>
+
+                <ng-container *ngFor="let page of getPageNumbers()">
+                  <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPage()"
+                    (click)="goToPage(page)">
+                    {{ page }}
+                  </button>
+                </ng-container>
+
+                <button class="btn btn-sm nav-btn" (click)="goToNextPage()"
+                  [disabled]="getCurrentPage() >= getTotalPages()">
+                  Next ›
+                </button>
+
+                <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSize"
+                  (change)="onPageSizeChange()">
+                  <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+                </select>
+              </div>
+
+            </div>
+            <div class="table-container">
+              <table class="table fixed-header">
+                <thead>
+                  <tr>
+                    <!-- <th style="cursor: pointer;">
+                      SL. NO.</th> -->
+                    <th (click)="sortData('order_id', 'pending')" style="cursor: pointer;">
+                      Order ID
+                      <span *ngIf="sortColumn === 'order_id'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('stock_tick', 'pending')" style="cursor: pointer;">
+                      Stock Tick
+                      <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('time_frame', 'pending')" style="cursor: pointer;">
+                      Time Frame
+                      <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('order_type', 'pending')" style="cursor: pointer;">
+                      Order Type
+                      <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- US Columns -->
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price', 'pending')"
+                      style="cursor: pointer;">
+                      Purchased (USD)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stoploss_price', 'pending')"
+                      style="cursor: pointer;">
+                      Stoploss Price (USD)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price', 'pending')"
+                      style="cursor: pointer;">
+                      Target Price (USD)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- India Columns -->
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price', 'pending')"
+                      style="cursor: pointer;">
+                      Purchased (INR)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stoploss_price', 'pending')"
+                      style="cursor: pointer;">
+                      Stoploss Price (INR)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price', 'pending')"
+                      style="cursor: pointer;">
+                      Target Price (INR)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th (click)="sortData('stock_quantity', 'pending')" style="cursor: pointer;">
+                      Quantity
+                      <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('purchased_cmp_date', 'pending')" style="cursor: pointer;">
+                      Purchased CMP Date
+                      <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('arima_ab_model_prob', 'pending')" style="cursor: pointer;">
+                      Model Prediction
+                      <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓'
+                        }}</span>
+                    </th>
+                    <!-- <th (click)="sortData('order_status', 'pending')" style="cursor: pointer;">
+                      Order Status
+                      <span *ngIf="sortColumn === 'order_status'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th> -->
+                    <th>View Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngFor="let order of pendingOrders">
+                    <tr>
+                      <td>{{ order.order_id }}</td>
+                      <td
+                        (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,'',order.stock_id)"
+                        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                        [attr.data-stock]="order.stock_tick" style="cursor: pointer;" id="stockCell" #stockCell
+                        [ngStyle]="
+                          (highlightedTradeId !== null
+                            ? order.trade_signal_id === highlightedTradeId
+                            : highlightedStockTick !== null
+                              ? order.stock_tick?.toLowerCase() === highlightedStockTick?.toLowerCase()
+                              : false
+                          )
+                            ? { 'background-color': '#c4c439' }
+                            : {}
+                        ">
+                        {{ order.stock_tick | uppercase }}</td>
+                      <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                      <td>{{ order.order_type }}</td>
+                      <td>{{ order.entry_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stoploss_price | number:'1.2-2' }}</td>
+                      <td>{{ order.target_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stock_quantity }}</td>
+                      <td>{{ order.purchased_cmp_date | date: 'MMM d, y, hh:mm a' }}</td>
+                      <td>{{order.arima_ab_model_prediction | uppercase }}({{ (order.arima_ab_model_prob * 100) |
+                        number:'1.0-2' }}%)</td>
+                      <!-- <td>{{ order.order_status}}</td> -->
+                      <td>
+                        <i class="fas fa-chart-line" style="color: green;cursor: pointer;font-size: 20px;"
+                          (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,'',order.stock_id)"
+                          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View">
+
+                        </i>
+                      </td>
+                      <td>
+                        <i (click)="onDeleteStocks(order.order_id)" class="fas fa-trash"
+                          style="color: red;cursor: pointer;font-size: 20px;" title="Delete"></i>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div *ngIf="activeMenu === 'Success'" class="menu-content">
+          <section class="orders">
+            <div class=" d-flex justify-content-between align-items-center flex-wrap">
+              <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+                <button class="btn btn-sm nav-btn" (click)="goToPreviousPage()" [disabled]="getCurrentPage() === 1">
+                  ‹ Prev
+                </button>
+                <ng-container *ngFor="let page of getPageNumbers()">
+                  <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPage()"
+                    (click)="goToPage(page)">
+                    {{ page }}
+                  </button>
+                </ng-container>
+                <button class="btn btn-sm nav-btn" (click)="goToNextPage()"
+                  [disabled]="getCurrentPage() >= getTotalPages()">
+                  Next ›
+                </button>
+
+                <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSize"
+                  style="height: 38px;" (change)="onPageSizeChange()">
+                  <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+                </select>
+              </div>
+              <!-- <div class="cmp-toggle-row">
+                <span class="cmp-label">
+                  Sort By Date
+                </span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)">
+                  <span class="slider round"></span>
+                </label>
+              </div> -->
+
+            </div>
+            <div class="table-container">
+              <table class="table fixed-header">
+                <thead>
+                  <tr>
+                    <!-- <th style="cursor: pointer;">
+                      SL. NO.</th> -->
+                    <th (click)="sortData('order_id', 'success')" style="cursor: pointer;">
+                      Order ID
+                      <span *ngIf="sortColumn === 'order_id'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('stock_tick', 'success')" style="cursor: pointer;">
+                      Stock Tick
+                      <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('time_frame', 'success')" style="cursor: pointer;">
+                      Time Frame
+                      <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('order_type', 'success')" style="cursor: pointer;">
+                      Order Type
+                      <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- US Prices -->
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price', 'success')"
+                      style="cursor: pointer;">
+                      Purchased (USD)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stoploss_price', 'success')"
+                      style="cursor: pointer;">
+                      Stoploss Price (USD)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price', 'success')"
+                      style="cursor: pointer;">
+                      Target Price (USD)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- India Prices -->
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price', 'success')"
+                      style="cursor: pointer;">
+                      Purchased (INR)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stoploss_price', 'success')"
+                      style="cursor: pointer;">
+                      Stoploss Price (INR)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price', 'success')"
+                      style="cursor: pointer;">
+                      Target Price (INR)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th (click)="sortData('stock_quantity', 'success')" style="cursor: pointer;">
+                      Quantity
+                      <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('purchased_cmp_date', 'success')" style="cursor: pointer;">
+                      Purchased CMP Date
+                      <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('arima_ab_model_prob', 'success')" style="cursor: pointer;">
+                      Model Prediction
+                      <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓'
+                        }}</span>
+                    </th>
+
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('profit_amount', 'success')"
+                      style="cursor: pointer;">
+                      Profit (INR)
+                      <span *ngIf="sortColumn === 'profit_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('profit_amount', 'success')"
+                      style="cursor: pointer;">
+                      Profit (USD)
+                      <span *ngIf="sortColumn === 'profit_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th>View Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <ng-container *ngFor="let order of successOrders;">
+                    <tr>
+                      <!-- <td>{{ i+1 }}</td> -->
+                      <td>{{ order.order_id }}</td>
+                      <td
+                        (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,'',order.stock_id)"
+                        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                        [attr.data-stock]="order.stock_tick" style="cursor: pointer;" id="stockCell" #stockCell
+                         [ngStyle]="
+                          (highlightedTradeId !== null
+                            ? order.trade_signal_id === highlightedTradeId
+                            : highlightedStockTick !== null
+                              ? order.stock_tick?.toLowerCase() === highlightedStockTick?.toLowerCase()
+                              : false
+                          )
+                            ? { 'background-color': '#c4c439' }
+                            : {}
+                        ">
+                        {{ order.stock_tick | uppercase }}</td>
+                      <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                      <td>{{ order.order_type }}</td>
+                      <td>{{ order.entry_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stoploss_price | number:'1.2-2' }}</td>
+                      <td>{{ order.target_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stock_quantity }}</td>
+                      <td>{{ order.purchased_cmp_date | date: 'MMM d, y, hh:mm a' }}</td>
+                      <td>
+                        <!-- <ng-container *ngIf="order.arima_ab_model_prediction; else naTemplate">
+                        <span class="prediction-text">
+                          {{ order.arima_ab_model_prediction.toUpperCase() }}
+                          ({{ (order.arima_ab_model_prob * 100) | number:'1.0-2' }}%)
+                        </span>
+                      </ng-container> -->
+                        <ng-container *ngIf="order.arima_ab_model_prediction; else naTemplate">
+                          <span class="prediction-text"
+                            [ngClass]="{ 'text-red': order.arima_ab_model_prediction.toLowerCase() === 'failed' }">
+                            {{ order.arima_ab_model_prediction.toUpperCase() }}
+                            ({{ (order.arima_ab_model_prob * 100) | number:'1.0-2' }}%)
+                          </span>
+                        </ng-container>
+
+                        <ng-template #naTemplate>NA</ng-template>
+                      </td>
+                      <td class="status-cell">
+                        <div><span style="color: green;">{{ order.profit_amount | number:'1.2-2' }}</span></div>
+                      </td>
+                      <td>
+                        <i class="fas fa-chart-line" style="color: green;cursor: pointer;font-size: 20px;"
+                          (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,'',order.stock_id)"
+                          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View">
+
+                        </i>
+                      </td>
+                      <td>
+                        <i (click)="onDeleteStocks(order.order_id)" class="fas fa-trash"
+                          style="color: red;cursor: pointer;font-size: 20px;" title="Delete"></i>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div *ngIf="activeMenu === 'Failed'" class="menu-content">
+          <section class="orders">
+            <div class=" d-flex justify-content-between align-items-center flex-wrap">
+              <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+                <button class="btn btn-sm nav-btn" (click)="goToPreviousPage()" [disabled]="getCurrentPage() === 1">
+                  ‹ Prev
+                </button>
+                <ng-container *ngFor="let page of getPageNumbers()">
+                  <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPage()"
+                    (click)="goToPage(page)">
+                    {{ page }}
+                  </button>
+                </ng-container>
+                <button class="btn btn-sm nav-btn" (click)="goToNextPage()"
+                  [disabled]="getCurrentPage() >= getTotalPages()">
+                  Next ›
+                </button>
+
+                <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSize"
+                  (change)="onPageSizeChange()">
+                  <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+                </select>
+              </div>
+              <!-- <div class="cmp-toggle-row">
+                <span class="cmp-label">
+                  Sort By Date
+                </span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)">
+                  <span class="slider round"></span>
+                </label>
+              </div> -->
+
+            </div>
+            <div class="table-container">
+              <table class="table fixed-header">
+                <thead>
+                  <tr>
+                    <!-- <th style="cursor: pointer;">
+                      SL. NO.</th> -->
+                    <th (click)="sortData('order_id', 'failed')" style="cursor: pointer;">
+                      Order ID
+                      <span *ngIf="sortColumn === 'order_id'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('stock_tick', 'failed')" style="cursor: pointer;">
+                      Stock Tick
+                      <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('time_frame', 'failed')" style="cursor: pointer;">
+                      Time Frame
+                      <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('order_type', 'failed')" style="cursor: pointer;">
+                      Order Type
+                      <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- US Prices -->
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price', 'failed')"
+                      style="cursor: pointer;">
+                      Purchased (USD)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stoploss_price', 'failed')"
+                      style="cursor: pointer;">
+                      Stoploss Price (USD)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price', 'failed')"
+                      style="cursor: pointer;">
+                      Target Price (USD)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- India Prices -->
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price', 'failed')"
+                      style="cursor: pointer;">
+                      Purchased (INR)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stoploss_price', 'failed')"
+                      style="cursor: pointer;">
+                      Stoploss Price (INR)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price', 'failed')"
+                      style="cursor: pointer;">
+                      Target Price (INR)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th (click)="sortData('stock_quantity', 'failed')" style="cursor: pointer;">
+                      Quantity
+                      <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('purchased_cmp_date', 'failed')" style="cursor: pointer;">
+                      Purchased CMP Date
+                      <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('arima_ab_model_prob', 'failed')" style="cursor: pointer;">
+                      Model Prediction
+                      <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓'
+                        }}</span>
+                    </th>
+
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('loss_amount', 'failed')"
+                      style="cursor: pointer;">
+                      Loss (INR)
+                      <span *ngIf="sortColumn === 'loss_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('loss_amount', 'failed')"
+                      style="cursor: pointer;">
+                      Loss (USD)
+                      <span *ngIf="sortColumn === 'loss_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th>View Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <ng-container *ngFor="let order of failedOrders;">
+                    <tr>
+                      <!-- <td>{{i+1}}</td> -->
+                      <td>{{ order.order_id }}</td>
+                      <td
+                        (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,'',order.stock_id)"
+                        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                        [attr.data-stock]="order.stock_tick" style="cursor: pointer;" id="stockCell" #stockCell
+                         [ngStyle]="
+                          (highlightedTradeId !== null
+                            ? order.trade_signal_id === highlightedTradeId
+                            : highlightedStockTick !== null
+                              ? order.stock_tick?.toLowerCase() === highlightedStockTick?.toLowerCase()
+                              : false
+                          )
+                            ? { 'background-color': '#c4c439' }
+                            : {}
+                        ">
+                        {{ order.stock_tick | uppercase }}</td>
+                      <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                      <td>{{ order.order_type }}</td>
+                      <td>{{ order.entry_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stoploss_price | number:'1.2-2' }}</td>
+                      <td>{{ order.target_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stock_quantity }}</td>
+                      <td>{{ order.purchased_cmp_date | date: 'MMM d, y, hh:mm a' }}</td>
+                      <td>
+                        <ng-container *ngIf="order.arima_ab_model_prediction; else naTemplate">
+                          <span class="prediction-text"
+                            [ngClass]="{ 'text-red': order.arima_ab_model_prediction.toLowerCase() === 'success' }">
+                            {{ order.arima_ab_model_prediction.toUpperCase() }}
+                            ({{ (order.arima_ab_model_prob * 100) | number:'1.0-2' }}%)
+                          </span>
+                        </ng-container>
+                        <ng-template #naTemplate>NA</ng-template>
+                      </td>
+                      <td class="status-cell">
+                        <div><span style="color: red;">{{ order.loss_amount | number:'1.2-2' }}</span></div>
+                      </td>
+                      <td>
+                        <i class="fas fa-chart-line" style="color: green;cursor: pointer;font-size: 20px;"
+                          (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,'',order.stock_id)"
+                          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View">
+
+                        </i>
+                      </td>
+                      <td>
+                        <i (click)="onDeleteStocks(order.order_id)" class="fas fa-trash"
+                          style="color: red;cursor: pointer;font-size: 20px;" title="Delete"></i>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div *ngIf="activeMenu === 'Progress'" class="menu-content">
+          <section class="orders">
+            <div class=" d-flex justify-content-between align-items-center flex-wrap">
+              <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+                <button class="btn btn-sm nav-btn" (click)="goToPreviousPage()" [disabled]="getCurrentPage() === 1">
+                  ‹ Prev
+                </button>
+                <ng-container *ngFor="let page of getPageNumbers()">
+                  <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPage()"
+                    (click)="goToPage(page)">
+                    {{ page }}
+                  </button>
+                </ng-container>
+                <button class="btn btn-sm nav-btn" (click)="goToNextPage()"
+                  [disabled]="getCurrentPage() >= getTotalPages()">
+                  Next ›
+                </button>
+
+                <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSize"
+                  (change)="onPageSizeChange()">
+                  <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+                </select>
+              </div>
+              <!-- <div class="cmp-toggle-row">
+                <span class="cmp-label">
+                  Sort By Date
+                </span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)">
+                  <span class="slider round"></span>
+                </label>
+              </div> -->
+
+            </div>
+            <div class="table-container">
+              <table class="table fixed-header">
+                <thead>
+                  <tr>
+                    <!-- <th style="cursor: pointer;">
+                      SL. NO.</th> -->
+                    <th (click)="sortData('order_id', 'progress')" style="cursor: pointer;">
+                      Order ID
+                      <span *ngIf="sortColumn === 'order_id'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('stock_tick', 'progress')" style="cursor: pointer;">
+                      Stock Tick
+                      <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('time_frame', 'progress')" style="cursor: pointer;">
+                      Time Frame
+                      <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('order_type', 'progress')" style="cursor: pointer;">
+                      Order Type
+                      <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- US Prices -->
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price', 'progress')"
+                      style="cursor: pointer;">
+                      Purchased (USD)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stoploss_price', 'progress')"
+                      style="cursor: pointer;">
+                      Stoploss Price (USD)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price', 'progress')"
+                      style="cursor: pointer;">
+                      Target Price (USD)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- India Prices -->
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price', 'progress')"
+                      style="cursor: pointer;">
+                      Purchased (INR)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stoploss_price', 'progress')"
+                      style="cursor: pointer;">
+                      Stoploss Price (INR)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price', 'progress')"
+                      style="cursor: pointer;">
+                      Target Price (INR)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th (click)="sortData('stock_quantity', 'progress')" style="cursor: pointer;">
+                      Quantity
+                      <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('purchased_cmp_date', 'progress')" style="cursor: pointer;">
+                      Purchased CMP Date
+                      <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('arima_ab_model_prob', 'progress')" style="cursor: pointer;">
+                      Model Prediction
+                      <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓'
+                        }}</span>
+                    </th>
+
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('pl_amount', 'failed')"
+                      style="cursor: pointer;">
+                      Profit/Loss (INR)
+                      <span *ngIf="sortColumn === 'pl_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- <th *ngIf="SelectedCountryName=='India'" (click)="sortData('loss_amount', 'progress')"
+                      style="cursor: pointer;">
+                      Loss (INR)
+                      <span *ngIf="sortColumn === 'loss_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('loss_amount', 'progress')"
+                      style="cursor: pointer;">
+                      Loss (USD)
+                      <span *ngIf="sortColumn === 'loss_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th> -->
+
+                    <th>View Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <ng-container *ngFor="let order of progressOrders;">
+                    <tr>
+                      <td>{{ order.order_id }}</td>
+                      <td
+                        (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,'',order.stock_id)"
+                        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                        [attr.data-stock]="order.stock_tick" style="cursor: pointer;" id="stockCell" #stockCell
+                         [ngStyle]="
+                          (highlightedTradeId !== null
+                            ? order.trade_signal_id === highlightedTradeId
+                            : highlightedStockTick !== null
+                              ? order.stock_tick?.toLowerCase() === highlightedStockTick?.toLowerCase()
+                              : false
+                          )
+                            ? { 'background-color': '#c4c439' }
+                            : {}
+                        ">
+                        {{ order.stock_tick | uppercase }}</td>
+                      <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                      <td>{{ order.order_type }}</td>
+                      <td>{{ order.entry_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stoploss_price | number:'1.2-2' }}</td>
+                      <td>{{ order.target_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stock_quantity }}</td>
+                      <td>{{ order.purchased_cmp_date | date: 'MMM d, y, hh:mm a' }}</td>
+                      <td>
+                        <ng-container *ngIf="order.arima_ab_model_prediction; else naTemplate">
+                          <span class="prediction-text">
+                            {{ order.arima_ab_model_prediction.toUpperCase() }}
+                            ({{ (order.arima_ab_model_prob * 100) | number:'1.0-2' }}%)
+                          </span>
+                        </ng-container>
+                        <ng-template #naTemplate>NA</ng-template>
+                      </td>
+                     <td class="status-cell">
+                        <div 
+                          [ngClass]="{
+                            'profit': order?.current_status?.status === 'profit',
+                            'loss': order?.current_status?.status === 'loss'
+                          }"
+                        >
+                          {{ order?.current_status?.amount != null 
+                              ? (order.current_status.amount | number:'1.2-2') 
+                              : 'null' }}
+                        </div>
+                      </td>
+
+                      <td>
+                        <i class="fas fa-chart-line" style="color: green;cursor: pointer;font-size: 20px;"
+                          (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,'',order.stock_id)"
+                          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View">
+
+                        </i>
+                      </td>
+                      <td>
+                        <i (click)="onDeleteStocks(order.order_id)" class="fas fa-trash"
+                          style="color: red;cursor: pointer;font-size: 20px;" title="Delete"></i>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 'Commodity'">
+        <!-- <div class="calender-control">
+          <div class="calendar-container">
+            <h3>Order Management</h3>
+          </div>
+          <div class="filters">
+            <input type="text" class="form-control stock-search-input" placeholder="Search stock by name..."
+              [(ngModel)]="searchText" (input)="onSearchInput(searchText)" />
+            <input ngxDaterangepickerBootstrap [(ngModel)]="selectedDateRange" [showCustomRangeLabel]="true"
+              [alwaysShowCalendars]="true" [ranges]="ranges" [linkedCalendars]="true" [isInvalidDate]="isInvalidDate"
+              [showClearButton]="true" placeholder="Select Date Range..." [opens]="'left'" />
+            <input type="submit" value="Search" class="btn btn-primary" (click)="onSearchButtonClick()">
+            <input type="submit" value="Update Status" class="btn btn-primary" (click)="UpdateStatus()">
+          </div>
+        </div> -->
+
+        <div class="menu-bar">
+          <ul class="tab-menu">
+            <li class="tab-item" [class.active]="activeMenuCommodity === 'Success'"
+              (click)="switchMenuCommodity('Success')">
+              Success ({{SuccessCountCommodity}})
+            </li>
+            <li class="tab-item" [class.active]="activeMenuCommodity === 'Progress'"
+              (click)="switchMenuCommodity('Progress')">
+              In Progress ({{ProgressCountCommodity}})
+            </li>
+            <li class="tab-item" [class.active]="activeMenuCommodity === 'Pending'"
+              (click)="switchMenuCommodity('Pending')">
+              Pending ({{PendingCountCommodity }})
+            </li>
+            <li class="tab-item" [class.active]="activeMenuCommodity === 'Failed'"
+              (click)="switchMenuCommodity('Failed')">
+              Failed ({{FailedCountCommodity}})
+            </li>
+          </ul>
+        </div>
+
+        <div *ngIf="activeMenuCommodity === 'Pending'" class="menu-content">
+          <section class="orders">
+            <div class=" d-flex justify-content-between align-items-center flex-wrap">
+              <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+                <button class="btn btn-sm nav-btn" (click)="goToPreviousPageCommodity()"
+                  [disabled]="getCurrentPageCommodity() === 1">
+                  ‹ Prev
+                </button>
+
+                <ng-container *ngFor="let page of getPageNumbersCommodity()">
+                  <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPageCommodity()"
+                    (click)="goToPageCommodity(page)">
+                    {{ page }}
+                  </button>
+                </ng-container>
+
+                <button class="btn btn-sm nav-btn" (click)="goToNextPageCommodity()"
+                  [disabled]="getCurrentPageCommodity() >= getTotalPagesCommodity()">
+                  Next ›
+                </button>
+
+                <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSizeCommodity"
+                  (change)="onPageSizeChangeCommodity()">
+                  <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+                </select>
+              </div>
+              <!-- <div class="cmp-toggle-row">
+                <span class="cmp-label">
+                  Sort By Date
+                </span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)">
+                  <span class="slider round"></span>
+                </label>
+              </div> -->
+
+            </div>
+            <div class="table-container">
+              <table class="table fixed-header">
+                <thead>
+                  <tr>
+                    <th (click)="sortData('order_id', 'pending')" style="cursor: pointer;">
+                      Order ID
+                      <span *ngIf="sortColumn === 'order_id'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('stock_tick', 'pending')" style="cursor: pointer;">
+                      Stock Tick
+                      <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('time_frame', 'pending')" style="cursor: pointer;">
+                      Time Frame
+                      <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('order_type', 'pending')" style="cursor: pointer;">
+                      Order Type
+                      <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- US Columns -->
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price', 'pending')"
+                      style="cursor: pointer;">
+                      Purchased (USD)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stoploss_price', 'pending')"
+                      style="cursor: pointer;">
+                      Stoploss Price (USD)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price', 'pending')"
+                      style="cursor: pointer;">
+                      Target Price (USD)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- India Columns -->
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price', 'pending')"
+                      style="cursor: pointer;">
+                      Purchased (INR)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stoploss_price', 'pending')"
+                      style="cursor: pointer;">
+                      Stoploss Price (INR)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price', 'pending')"
+                      style="cursor: pointer;">
+                      Target Price (INR)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th (click)="sortData('stock_quantity', 'pending')" style="cursor: pointer;">
+                      Quantity
+                      <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('purchased_cmp_date', 'pending')" style="cursor: pointer;">
+                      Purchased CMP Date
+                      <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('arima_ab_model_prob', 'pending')" style="cursor: pointer;">
+                      Model Prediction
+                      <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓'
+                        }}</span>
+                    </th>
+                    <!-- <th (click)="sortData('order_status', 'pending')" style="cursor: pointer;">
+                      Order Status
+                      <span *ngIf="sortColumn === 'order_status'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th> -->
+                    <th>View Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <ng-container *ngFor="let order of pendingOrdersCommodity;">
+                    <tr>
+                      <td>{{ order.order_id }}</td>
+                      <td
+                        (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                        [attr.data-stock]="order.stock_tick" style="cursor: pointer;" id="stockCell" #stockCell
+                        [ngStyle]="
+                          (highlightedTradeId !== null
+                            ? order.trade_signal_id === highlightedTradeId
+                            : highlightedStockTick !== null
+                              ? order.stock_tick?.toLowerCase() === highlightedStockTick?.toLowerCase()
+                              : false
+                          )
+                            ? { 'background-color': '#c4c439' }
+                            : {}
+                        ">
+                        {{ order.stock_tick | uppercase }}</td>
+                      <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                      <td>{{ order.order_type }}</td>
+                      <td>{{ order.entry_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stoploss_price | number:'1.2-2' }}</td>
+                      <td>{{ order.target_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stock_quantity }}</td>
+                      <td>{{ order.purchased_cmp_date | date: 'yyyy-MM-dd' }}</td>
+                      <td>{{order.arima_ab_model_prediction | uppercase }}({{ (order.arima_ab_model_prob * 100) |
+                        number:'1.0-2' }}%)</td>
+                      <!-- <td>{{ order.order_status}}</td> -->
+                      <td>
+                        <i class="fas fa-chart-line" style="color: green;cursor: pointer;font-size: 20px;"
+                          (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View">
+
+                        </i>
+                      </td>
+                      <td>
+                        <i (click)="onDeleteCommodity(order.order_id)" class="fas fa-trash"
+                          style="color: red;cursor: pointer;font-size: 20px;" title="Delete"></i>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div *ngIf="activeMenuCommodity === 'Success'" class="menu-content">
+          <section class="orders">
+            <div class=" d-flex justify-content-between align-items-center flex-wrap">
+              <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+                <button class="btn btn-sm nav-btn" (click)="goToPreviousPageCommodity()"
+                  [disabled]="getCurrentPageCommodity() === 1">
+                  ‹ Prev
+                </button>
+
+                <ng-container *ngFor="let page of getPageNumbersCommodity()">
+                  <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPageCommodity()"
+                    (click)="goToPageCommodity(page)">
+                    {{ page }}
+                  </button>
+                </ng-container>
+
+                <button class="btn btn-sm nav-btn" (click)="goToNextPageCommodity()"
+                  [disabled]="getCurrentPageCommodity() >= getTotalPagesCommodity()">
+                  Next ›
+                </button>
+
+                <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSizeCommodity"
+                  (change)="onPageSizeChangeCommodity()">
+                  <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+                </select>
+              </div>
+              <!-- <div class="cmp-toggle-row">
+                <span class="cmp-label">
+                  Sort By Date
+                </span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)">
+                  <span class="slider round"></span>
+                </label>
+              </div> -->
+
+            </div>
+            <div class="table-container">
+              <table class="table fixed-header">
+                <thead>
+                  <tr>
+                    <th (click)="sortData('order_id', 'success')" style="cursor: pointer;">
+                      Order ID
+                      <span *ngIf="sortColumn === 'order_id'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('stock_tick', 'success')" style="cursor: pointer;">
+                      Stock Tick
+                      <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('time_frame', 'success')" style="cursor: pointer;">
+                      Time Frame
+                      <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('order_type', 'success')" style="cursor: pointer;">
+                      Order Type
+                      <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- US Prices -->
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price', 'success')"
+                      style="cursor: pointer;">
+                      Purchased (USD)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stoploss_price', 'success')"
+                      style="cursor: pointer;">
+                      Stoploss Price (USD)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price', 'success')"
+                      style="cursor: pointer;">
+                      Target Price (USD)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- India Prices -->
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price', 'success')"
+                      style="cursor: pointer;">
+                      Purchased (INR)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stoploss_price', 'success')"
+                      style="cursor: pointer;">
+                      Stoploss Price (INR)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price', 'success')"
+                      style="cursor: pointer;">
+                      Target Price (INR)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th (click)="sortData('stock_quantity', 'success')" style="cursor: pointer;">
+                      Quantity
+                      <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('purchased_cmp_date', 'success')" style="cursor: pointer;">
+                      Purchased CMP Date
+                      <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('arima_ab_model_prob', 'success')" style="cursor: pointer;">
+                      Model Prediction
+                      <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓'
+                        }}</span>
+                    </th>
+
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('profit_amount', 'success')"
+                      style="cursor: pointer;">
+                      Profit (INR)
+                      <span *ngIf="sortColumn === 'profit_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('profit_amount', 'success')"
+                      style="cursor: pointer;">
+                      Profit (USD)
+                      <span *ngIf="sortColumn === 'profit_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th>View Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <ng-container *ngFor="let order of successOrdersCommodity;">
+                    <tr>
+                      <td>{{ order.order_id }}</td>
+                      <td
+                        (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                        [attr.data-stock]="order.stock_tick" style="cursor: pointer;" id="stockCell" #stockCell
+                         [ngStyle]="
+                          (highlightedTradeId !== null
+                            ? order.trade_signal_id === highlightedTradeId
+                            : highlightedStockTick !== null
+                              ? order.stock_tick?.toLowerCase() === highlightedStockTick?.toLowerCase()
+                              : false
+                          )
+                            ? { 'background-color': '#c4c439' }
+                            : {}
+                        ">
+                        {{ order.stock_tick | uppercase }}</td>
+                      <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                      <td>{{ order.order_type }}</td>
+                      <td>{{ order.entry_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stoploss_price | number:'1.2-2' }}</td>
+                      <td>{{ order.target_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stock_quantity }}</td>
+                      <td>{{ order.purchased_cmp_date | date: 'yyyy-MM-dd' }}</td>
+                      <td>
+                        <ng-container *ngIf="order.arima_ab_model_prediction; else naTemplate">
+                          <span class="prediction-text"
+                            [ngClass]="{ 'text-red': order.arima_ab_model_prediction.toLowerCase() === 'failed' }">
+                            {{ order.arima_ab_model_prediction.toUpperCase() }}
+                            ({{ (order.arima_ab_model_prob * 100) | number:'1.0-2' }}%)
+                          </span>
+                        </ng-container>
+                        <ng-template #naTemplate>NA</ng-template>
+                      </td>
+                      <td class="status-cell">
+                        <div><span style="color: green;">{{ order.profit_amount | number:'1.2-2' }}</span></div>
+                      </td>
+                      <td>
+                        <i class="fas fa-chart-line" style="color: green;cursor: pointer;font-size: 20px;"
+                          (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View">
+
+                        </i>
+                      </td>
+                      <td>
+                        <i (click)="onDeleteCommodity(order.order_id)" class="fas fa-trash"
+                          style="color: red;cursor: pointer;font-size: 20px;" title="Delete"></i>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div *ngIf="activeMenuCommodity === 'Failed'" class="menu-content">
+          <section class="orders">
+            <div class=" d-flex justify-content-between align-items-center flex-wrap">
+              <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+                <button class="btn btn-sm nav-btn" (click)="goToPreviousPageCommodity()"
+                  [disabled]="getCurrentPageCommodity() === 1">
+                  ‹ Prev
+                </button>
+
+                <ng-container *ngFor="let page of getPageNumbersCommodity()">
+                  <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPageCommodity()"
+                    (click)="goToPageCommodity(page)">
+                    {{ page }}
+                  </button>
+                </ng-container>
+
+                <button class="btn btn-sm nav-btn" (click)="goToNextPageCommodity()"
+                  [disabled]="getCurrentPageCommodity() >= getTotalPagesCommodity()">
+                  Next ›
+                </button>
+
+                <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSizeCommodity"
+                  (change)="onPageSizeChangeCommodity()">
+                  <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+                </select>
+              </div>
+              <!-- <div class="cmp-toggle-row">
+                <span class="cmp-label">
+                  Sort By Date
+                </span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)">
+                  <span class="slider round"></span>
+                </label>
+              </div> -->
+
+            </div>
+            <div class="table-container">
+              <table class="table fixed-header">
+                <thead>
+                  <tr>
+                    <th (click)="sortData('order_id', 'failed')" style="cursor: pointer;">
+                      Order ID
+                      <span *ngIf="sortColumn === 'order_id'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('stock_tick', 'failed')" style="cursor: pointer;">
+                      Stock Tick
+                      <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('time_frame', 'failed')" style="cursor: pointer;">
+                      Time Frame
+                      <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('order_type', 'failed')" style="cursor: pointer;">
+                      Order Type
+                      <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- US Prices -->
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price', 'failed')"
+                      style="cursor: pointer;">
+                      Purchased (USD)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stoploss_price', 'failed')"
+                      style="cursor: pointer;">
+                      Stoploss Price (USD)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price', 'failed')"
+                      style="cursor: pointer;">
+                      Target Price (USD)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- India Prices -->
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price', 'failed')"
+                      style="cursor: pointer;">
+                      Purchased (INR)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stoploss_price', 'failed')"
+                      style="cursor: pointer;">
+                      Stoploss Price (INR)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price', 'failed')"
+                      style="cursor: pointer;">
+                      Target Price (INR)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th (click)="sortData('stock_quantity', 'failed')" style="cursor: pointer;">
+                     Quantity
+                      <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('purchased_cmp_date', 'failed')" style="cursor: pointer;">
+                      Purchased CMP Date
+                      <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('arima_ab_model_prob', 'failed')" style="cursor: pointer;">
+                      Model Prediction
+                      <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓'
+                        }}</span>
+                    </th>
+
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('loss_amount', 'failed')"
+                      style="cursor: pointer;">
+                      Loss (INR)
+                      <span *ngIf="sortColumn === 'loss_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('loss_amount', 'failed')"
+                      style="cursor: pointer;">
+                      Loss (USD)
+                      <span *ngIf="sortColumn === 'loss_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th>View Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <ng-container *ngFor="let order of failedOrdersCommodity;">
+                    <tr>
+                      <td>{{ order.order_id }}</td>
+                      <td
+                        (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                        [attr.data-stock]="order.stock_tick" style="cursor: pointer;" id="stockCell" #stockCell
+                         [ngStyle]="
+                          (highlightedTradeId !== null
+                            ? order.trade_signal_id === highlightedTradeId
+                            : highlightedStockTick !== null
+                              ? order.stock_tick?.toLowerCase() === highlightedStockTick?.toLowerCase()
+                              : false
+                          )
+                            ? { 'background-color': '#c4c439' }
+                            : {}
+                        ">
+                        {{ order.stock_tick | uppercase }}</td>
+                      <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                      <td>{{ order.order_type }}</td>
+                      <td>{{ order.entry_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stoploss_price | number:'1.2-2' }}</td>
+                      <td>{{ order.target_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stock_quantity }}</td>
+                      <td>{{ order.purchased_cmp_date | date: 'yyyy-MM-dd' }}</td>
+                      <td>
+                        <ng-container *ngIf="order.arima_ab_model_prediction; else naTemplate">
+                          <span class="prediction-text"
+                            [ngClass]="{ 'text-red': order.arima_ab_model_prediction.toLowerCase() === 'success' }">
+                            {{ order.arima_ab_model_prediction.toUpperCase() }}
+                            ({{ (order.arima_ab_model_prob * 100) | number:'1.0-2' }}%)
+                          </span>
+                        </ng-container>
+                        <ng-template #naTemplate>NA</ng-template>
+                      </td>
+                      <td class="status-cell">
+                        <div><span style="color: red;">{{ order.loss_amount | number:'1.2-2' }}</span></div>
+                      </td>
+                      <td>
+                        <i class="fas fa-chart-line" style="color: green;cursor: pointer;font-size: 20px;"
+                          (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View">
+
+                        </i>
+                      </td>
+                      <td>
+                        <i (click)="onDeleteCommodity(order.order_id)" class="fas fa-trash"
+                          style="color: red;cursor: pointer;font-size: 20px;" title="Delete"></i>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div *ngIf="activeMenuCommodity === 'Progress'" class="menu-content">
+          <section class="orders">
+            <div class=" d-flex justify-content-between align-items-center flex-wrap">
+              <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+                <button class="btn btn-sm nav-btn" (click)="goToPreviousPageCommodity()"
+                  [disabled]="getCurrentPageCommodity() === 1">
+                  ‹ Prev
+                </button>
+
+                <ng-container *ngFor="let page of getPageNumbersCommodity()">
+                  <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPageCommodity()"
+                    (click)="goToPageCommodity(page)">
+                    {{ page }}
+                  </button>
+                </ng-container>
+
+                <button class="btn btn-sm nav-btn" (click)="goToNextPageCommodity()"
+                  [disabled]="getCurrentPageCommodity() >= getTotalPagesCommodity()">
+                  Next ›
+                </button>
+
+                <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSizeCommodity"
+                  (change)="onPageSizeChangeCommodity()">
+                  <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+                </select>
+              </div>
+              <!-- <div class="cmp-toggle-row">
+                <span class="cmp-label">
+                  Sort By Date
+                </span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)">
+                  <span class="slider round"></span>
+                </label>
+              </div> -->
+            </div>
+            <div class="table-container">
+              <table class="table fixed-header">
+                <thead>
+                  <tr>
+                    <th (click)="sortData('order_id', 'progress')" style="cursor: pointer;">
+                      Order ID
+                      <span *ngIf="sortColumn === 'order_id'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('stock_tick', 'progress')" style="cursor: pointer;">
+                      Stock Tick
+                      <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('time_frame', 'progress')" style="cursor: pointer;">
+                      Time Frame
+                      <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('order_type', 'progress')" style="cursor: pointer;">
+                      Order Type
+                      <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- US Prices -->
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price', 'progress')"
+                      style="cursor: pointer;">
+                      Purchased (USD)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stoploss_price', 'progress')"
+                      style="cursor: pointer;">
+                      Stoploss Price (USD)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price', 'progress')"
+                      style="cursor: pointer;">
+                      Target Price (USD)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- India Prices -->
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price', 'progress')"
+                      style="cursor: pointer;">
+                      Purchased (INR)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stoploss_price', 'progress')"
+                      style="cursor: pointer;">
+                      Stoploss Price (INR)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price', 'progress')"
+                      style="cursor: pointer;">
+                      Target Price (INR)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th (click)="sortData('stock_quantity', 'progress')" style="cursor: pointer;">
+                      Quantity
+                      <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('purchased_cmp_date', 'progress')" style="cursor: pointer;">
+                      Purchased CMP Date
+                      <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('arima_ab_model_prob', 'progress')" style="cursor: pointer;">
+                      Model Prediction
+                      <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓'
+                        }}</span>
+                    </th>
+
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('loss_amount', 'progress')"
+                      style="cursor: pointer;">
+                      Loss (INR)
+                      <span *ngIf="sortColumn === 'loss_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('loss_amount', 'progress')"
+                      style="cursor: pointer;">
+                      Loss (USD)
+                      <span *ngIf="sortColumn === 'loss_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th>View Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <ng-container *ngFor="let order of progressOrdersCommodity">
+                    <tr>
+                      <td>{{ order.order_id }}</td>
+                      <td
+                        (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                        [attr.data-stock]="order.stock_tick" style="cursor: pointer;" id="stockCell" #stockCell
+                         [ngStyle]="
+                          (highlightedTradeId !== null
+                            ? order.trade_signal_id === highlightedTradeId
+                            : highlightedStockTick !== null
+                              ? order.stock_tick?.toLowerCase() === highlightedStockTick?.toLowerCase()
+                              : false
+                          )
+                            ? { 'background-color': '#c4c439' }
+                            : {}
+                        ">
+                        {{ order.stock_tick | uppercase }}</td>
+                      <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                      <td>{{ order.order_type }}</td>
+                      <td>{{ order.entry_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stoploss_price | number:'1.2-2' }}</td>
+                      <td>{{ order.target_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stock_quantity }}</td>
+                      <td>{{ order.purchased_cmp_date | date: 'yyyy-MM-dd' }}</td>
+                      <td>
+                        <ng-container *ngIf="order.arima_ab_model_prediction; else naTemplate">
+                          <span class="prediction-text">
+                            {{ order.arima_ab_model_prediction.toUpperCase() }}
+                            ({{ (order.arima_ab_model_prob * 100) | number:'1.0-2' }}%)
+                          </span>
+                        </ng-container>
+                        <ng-template #naTemplate>NA</ng-template>
+                      </td>
+                      <td class="status-cell">
+                        <div><span style="color: red;">{{ order.loss_amount | number:'1.2-2' }}</span></div>
+                      </td>
+                      <td>
+                        <i class="fas fa-chart-line" style="color: green;cursor: pointer;font-size: 20px;"
+                          (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View">
+
+                        </i>
+                      </td>
+                      <td>
+                        <i (click)="onDeleteCommodity(order.order_id)" class="fas fa-trash"
+                          style="color: red;cursor: pointer;font-size: 20px;" title="Delete"></i>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 'Future'">
+        <!-- <div class="calender-control">
+          <div class="calendar-container">
+            <h3>Order Management</h3>
+          </div>
+          <div class="filters">
+            <input type="text" class="form-control stock-search-input" placeholder="Search stock by name..."
+              [(ngModel)]="searchText" (input)="onSearchInput(searchText)" />
+            <input ngxDaterangepickerBootstrap [(ngModel)]="selectedDateRange" [showCustomRangeLabel]="true"
+              [alwaysShowCalendars]="true" [ranges]="ranges" [linkedCalendars]="true" [isInvalidDate]="isInvalidDate"
+              [showClearButton]="true" placeholder="Select Date Range..." [opens]="'left'" />
+            <input type="submit" value="Search" class="btn btn-primary" (click)="onSearchButtonClick()">
+            <input type="submit" value="Update Status" class="btn btn-primary" (click)="UpdateStatus()">
+          </div>
+        </div> -->
+
+        <div class="menu-bar">
+          <ul class="tab-menu">
+            <li class="tab-item" [class.active]="activeMenuFuture === 'Success'" (click)="switchMenuFuture('Success')">
+              Success ({{SuccessCountFuture}})
+            </li>
+            <li class="tab-item" [class.active]="activeMenuFuture === 'Progress'"
+              (click)="switchMenuFuture('Progress')">
+              In Progress ({{ProgressCountFuture}})
+            </li>
+            <li class="tab-item" [class.active]="activeMenuFuture === 'Pending'" (click)="switchMenuFuture('Pending')">
+              Pending ({{PendingCountFuture }})
+            </li>
+            <li class="tab-item" [class.active]="activeMenuFuture === 'Failed'" (click)="switchMenuFuture('Failed')">
+              Failed ({{FailedCountFuture}})
+            </li>
+          </ul>
+        </div>
+
+        <div *ngIf="activeMenuFuture === 'Pending'" class="menu-content">
+          <section class="orders">
+            <div class=" d-flex justify-content-between align-items-center flex-wrap">
+              <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+                <button class="btn btn-sm nav-btn" (click)="goToPreviousPageFuture()"
+                  [disabled]="getCurrentPageFuture() === 1">
+                  ‹ Prev
+                </button>
+
+                <ng-container *ngFor="let page of getPageNumbersFuture()">
+                  <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPageFuture()"
+                    (click)="goToPageFuture(page)">
+                    {{ page }}
+                  </button>
+                </ng-container>
+
+                <button class="btn btn-sm nav-btn" (click)="goToNextPageFuture()"
+                  [disabled]="getCurrentPageFuture() >= getTotalPagesFuture()">
+                  Next ›
+                </button>
+
+                <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSizeFuture"
+                  (change)="onPageSizeChangeFuture()">
+                  <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+                </select>
+              </div>
+              <!-- <div class="cmp-toggle-row">
+                <span class="cmp-label">
+                  Sort By Date
+                </span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)">
+                  <span class="slider round"></span>
+                </label>
+              </div> -->
+
+            </div>
+            <div class="table-container">
+              <table class="table fixed-header">
+                <thead>
+                  <tr>
+                    <th (click)="sortData('order_id', 'pending')" style="cursor: pointer;">
+                      Order ID
+                      <span *ngIf="sortColumn === 'order_id'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('stock_tick', 'pending')" style="cursor: pointer;">
+                      Stock Tick
+                      <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('time_frame', 'pending')" style="cursor: pointer;">
+                      Time Frame
+                      <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('order_type', 'pending')" style="cursor: pointer;">
+                      Order Type
+                      <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- US Columns -->
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price', 'pending')"
+                      style="cursor: pointer;">
+                      Purchased (USD)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stoploss_price', 'pending')"
+                      style="cursor: pointer;">
+                      Stoploss Price (USD)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price', 'pending')"
+                      style="cursor: pointer;">
+                      Target Price (USD)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- India Columns -->
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price', 'pending')"
+                      style="cursor: pointer;">
+                      Purchased (INR)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stoploss_price', 'pending')"
+                      style="cursor: pointer;">
+                      Stoploss Price (INR)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price', 'pending')"
+                      style="cursor: pointer;">
+                      Target Price (INR)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th (click)="sortData('stock_quantity', 'pending')" style="cursor: pointer;">
+                      Quantity
+                      <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('purchased_cmp_date', 'pending')" style="cursor: pointer;">
+                      Purchased CMP Date
+                      <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('arima_ab_model_prob', 'pending')" style="cursor: pointer;">
+                      Model Prediction
+                      <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓'
+                        }}</span>
+                    </th>
+                    <!-- <th (click)="sortData('order_status', 'pending')" style="cursor: pointer;">
+                      Order Status
+                      <span *ngIf="sortColumn === 'order_status'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th> -->
+                    <th>View Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <ng-container *ngFor="let order of pendingOrdersFuture;">
+                    <tr>
+                      <td>{{ order.order_id }}</td>
+                      <td
+                        (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                        [attr.data-stock]="order.stock_tick" style="cursor: pointer;" id="stockCell" #stockCell
+                         [ngStyle]="
+                          (highlightedTradeId !== null
+                            ? order.trade_signal_id === highlightedTradeId
+                            : highlightedStockTick !== null
+                              ? order.stock_tick?.toLowerCase() === highlightedStockTick?.toLowerCase()
+                              : false
+                          )
+                            ? { 'background-color': '#c4c439' }
+                            : {}
+                        ">
+                        {{ order.stock_tick | uppercase }}</td>
+                      <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                      <td>{{ order.order_type }}</td>
+                      <td>{{ order.entry_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stoploss_price | number:'1.2-2' }}</td>
+                      <td>{{ order.target_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stock_quantity }}</td>
+                      <td>{{ order.purchased_cmp_date | date: 'yyyy-MM-dd' }}</td>
+                      <td>{{order.arima_ab_model_prediction | uppercase }}({{ (order.arima_ab_model_prob * 100) |
+                        number:'1.0-2' }}%)</td>
+                      <!-- <td>{{ order.order_status}}</td> -->
+                      <td>
+                        <i class="fas fa-chart-line" style="color: green;cursor: pointer;font-size: 20px;"
+                          (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View">
+
+                        </i>
+                      </td>
+                      <td>
+                        <i (click)="onDeleteFuture(order.order_id)" class="fas fa-trash"
+                          style="color: red;cursor: pointer;font-size: 20px;" title="Delete"></i>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div *ngIf="activeMenuFuture === 'Success'" class="menu-content">
+          <section class="orders">
+            <div class=" d-flex justify-content-between align-items-center flex-wrap">
+              <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+                <button class="btn btn-sm nav-btn" (click)="goToPreviousPageFuture()"
+                  [disabled]="getCurrentPageFuture() === 1">
+                  ‹ Prev
+                </button>
+
+                <ng-container *ngFor="let page of getPageNumbersFuture()">
+                  <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPageFuture()"
+                    (click)="goToPageFuture(page)">
+                    {{ page }}
+                  </button>
+                </ng-container>
+
+                <button class="btn btn-sm nav-btn" (click)="goToNextPageFuture()"
+                  [disabled]="getCurrentPageFuture() >= getTotalPagesFuture()">
+                  Next ›
+                </button>
+
+                <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSizeFuture"
+                  (change)="onPageSizeChangeFuture()">
+                  <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+                </select>
+              </div>
+              <!-- <div class="cmp-toggle-row">
+                <span class="cmp-label">
+                  Sort By Date
+                </span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)">
+                  <span class="slider round"></span>
+                </label>
+              </div> -->
+
+            </div>
+            <div class="table-container">
+              <table class="table fixed-header">
+                <thead>
+                  <tr>
+                    <th (click)="sortData('order_id', 'success')" style="cursor: pointer;">
+                      Order ID
+                      <span *ngIf="sortColumn === 'order_id'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('stock_tick', 'success')" style="cursor: pointer;">
+                      Stock Tick
+                      <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('time_frame', 'success')" style="cursor: pointer;">
+                      Time Frame
+                      <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('order_type', 'success')" style="cursor: pointer;">
+                      Order Type
+                      <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- US Prices -->
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price', 'success')"
+                      style="cursor: pointer;">
+                      Purchased (USD)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stoploss_price', 'success')"
+                      style="cursor: pointer;">
+                      Stoploss Price (USD)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price', 'success')"
+                      style="cursor: pointer;">
+                      Target Price (USD)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- India Prices -->
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price', 'success')"
+                      style="cursor: pointer;">
+                      Purchased (INR)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stoploss_price', 'success')"
+                      style="cursor: pointer;">
+                      Stoploss Price (INR)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price', 'success')"
+                      style="cursor: pointer;">
+                      Target Price (INR)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th (click)="sortData('stock_quantity', 'success')" style="cursor: pointer;">
+                      Quantity
+                      <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('purchased_cmp_date', 'success')" style="cursor: pointer;">
+                      Purchased CMP Date
+                      <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('arima_ab_model_prob', 'success')" style="cursor: pointer;">
+                      Model Prediction
+                      <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓'
+                        }}</span>
+                    </th>
+
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('profit_amount', 'success')"
+                      style="cursor: pointer;">
+                      Profit (INR)
+                      <span *ngIf="sortColumn === 'profit_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('profit_amount', 'success')"
+                      style="cursor: pointer;">
+                      Profit (USD)
+                      <span *ngIf="sortColumn === 'profit_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th>View Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <ng-container *ngFor="let order of successOrdersFuture;">
+                    <tr>
+                      <td>{{ order.order_id }}</td>
+                      <td
+                        (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                        [attr.data-stock]="order.stock_tick" style="cursor: pointer;" id="stockCell" #stockCell
+                         [ngStyle]="
+                          (highlightedTradeId !== null
+                            ? order.trade_signal_id === highlightedTradeId
+                            : highlightedStockTick !== null
+                              ? order.stock_tick?.toLowerCase() === highlightedStockTick?.toLowerCase()
+                              : false
+                          )
+                            ? { 'background-color': '#c4c439' }
+                            : {}
+                        ">
+                        {{ order.stock_tick | uppercase }}</td>
+                      <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                      <td>{{ order.order_type }}</td>
+                      <td>{{ order.entry_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stoploss_price | number:'1.2-2' }}</td>
+                      <td>{{ order.target_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stock_quantity }}</td>
+                      <td>{{ order.purchased_cmp_date | date: 'yyyy-MM-dd' }}</td>
+                      <td>
+                        <ng-container *ngIf="order.arima_ab_model_prediction; else naTemplate">
+                          <span class="prediction-text"
+                            [ngClass]="{ 'text-red': order.arima_ab_model_prediction.toLowerCase() === 'failed' }">
+                            {{ order.arima_ab_model_prediction.toUpperCase() }}
+                            ({{ (order.arima_ab_model_prob * 100) | number:'1.0-2' }}%)
+                          </span>
+                        </ng-container>
+                        <ng-template #naTemplate>NA</ng-template>
+                      </td>
+                      <td class="status-cell">
+                        <div><span style="color: green;">{{ order.profit_amount | number:'1.2-2' }}</span></div>
+                      </td>
+                      <td>
+                        <i class="fas fa-chart-line" style="color: green;cursor: pointer;font-size: 20px;"
+                          (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View">
+
+                        </i>
+                      </td>
+                      <td>
+                        <i (click)="onDeleteFuture(order.order_id)" class="fas fa-trash"
+                          style="color: red;cursor: pointer;font-size: 20px;" title="Delete"></i>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div *ngIf="activeMenuFuture === 'Progress'" class="menu-content">
+          <section class="orders">
+            <div class=" d-flex justify-content-between align-items-center flex-wrap">
+              <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+                <button class="btn btn-sm nav-btn" (click)="goToPreviousPageFuture()"
+                  [disabled]="getCurrentPageFuture() === 1">
+                  ‹ Prev
+                </button>
+
+                <ng-container *ngFor="let page of getPageNumbersFuture()">
+                  <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPageFuture()"
+                    (click)="goToPageFuture(page)">
+                    {{ page }}
+                  </button>
+                </ng-container>
+
+                <button class="btn btn-sm nav-btn" (click)="goToNextPageFuture()"
+                  [disabled]="getCurrentPageFuture() >= getTotalPagesFuture()">
+                  Next ›
+                </button>
+
+                <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSizeFuture"
+                  (change)="onPageSizeChangeFuture()">
+                  <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+                </select>
+              </div>
+              <!-- <div class="cmp-toggle-row">
+                <span class="cmp-label">
+                  Sort By Date
+                </span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)">
+                  <span class="slider round"></span>
+                </label>
+              </div> -->
+
+            </div>
+            <div class="table-container">
+              <table class="table fixed-header">
+                <thead>
+                  <tr>
+                    <th (click)="sortData('order_id', 'progress')" style="cursor: pointer;">
+                      Order ID
+                      <span *ngIf="sortColumn === 'order_id'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('stock_tick', 'progress')" style="cursor: pointer;">
+                      Stock Tick
+                      <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('time_frame', 'progress')" style="cursor: pointer;">
+                      Time Frame
+                      <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('order_type', 'progress')" style="cursor: pointer;">
+                      Order Type
+                      <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- US Columns -->
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price', 'progress')"
+                      style="cursor: pointer;">
+                      Purchased (USD)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stoploss_price', 'progress')"
+                      style="cursor: pointer;">
+                      Stoploss Price (USD)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price', 'progress')"
+                      style="cursor: pointer;">
+                      Target Price (USD)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- India Columns -->
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price', 'progress')"
+                      style="cursor: pointer;">
+                      Purchased (INR)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stoploss_price', 'progress')"
+                      style="cursor: pointer;">
+                      Stoploss Price (INR)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price', 'progress')"
+                      style="cursor: pointer;">
+                      Target Price (INR)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th (click)="sortData('stock_quantity', 'progress')" style="cursor: pointer;">
+                      Quantity
+                      <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('purchased_cmp_date', 'progress')" style="cursor: pointer;">
+                      Purchased CMP Date
+                      <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('arima_ab_model_prob', 'progress')" style="cursor: pointer;">
+                      Model Prediction
+                      <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓'
+                        }}</span>
+                    </th>
+                    <!-- <th (click)="sortData('order_status', 'progress')" style="cursor: pointer;">
+                      Order Status
+                      <span *ngIf="sortColumn === 'order_status'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th> -->
+                    <th>View Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <ng-container *ngFor="let order of progressOrdersFuture;">
+                    <tr>
+                      <td>{{ order.order_id }}</td>
+                      <td
+                        (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                        [attr.data-stock]="order.stock_tick" style="cursor: pointer;" id="stockCell" #stockCell
+                        [ngStyle]="
+                          (highlightedTradeId !== null
+                            ? order.trade_signal_id === highlightedTradeId
+                            : highlightedStockTick !== null
+                              ? order.stock_tick?.toLowerCase() === highlightedStockTick?.toLowerCase()
+                              : false
+                          )
+                            ? { 'background-color': '#c4c439' }
+                            : {}
+                        ">
+                        {{ order.stock_tick | uppercase }}</td>
+                      <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                      <td>{{ order.order_type }}</td>
+                      <td>{{ order.entry_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stoploss_price | number:'1.2-2' }}</td>
+                      <td>{{ order.target_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stock_quantity }}</td>
+                      <td>{{ order.purchased_cmp_date | date: 'yyyy-MM-dd' }}</td>
+                      <td>{{order.arima_ab_model_prediction | uppercase }}({{ (order.arima_ab_model_prob * 100) |
+                        number:'1.0-2' }}%)</td>
+                      <!-- <td>{{ order.order_status}}</td> -->
+                      <td>
+                        <i class="fas fa-chart-line" style="color: green;cursor: pointer;font-size: 20px;"
+                          (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View">
+
+                        </i>
+                      </td>
+                      <td>
+                        <i (click)="onDeleteFuture(order.order_id)" class="fas fa-trash"
+                          style="color: red;cursor: pointer;font-size: 20px;" title="Delete"></i>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div *ngIf="activeMenuFuture === 'Failed'" class="menu-content">
+          <section class="orders">
+            <div class=" d-flex justify-content-between align-items-center flex-wrap">
+              <div class="pagination-container d-flex align-items-center gap-1 flex-wrap">
+                <button class="btn btn-sm nav-btn" (click)="goToPreviousPageFuture()"
+                  [disabled]="getCurrentPageFuture() === 1">
+                  ‹ Prev
+                </button>
+
+                <ng-container *ngFor="let page of getPageNumbersFuture()">
+                  <button class="btn btn-sm page-btn" [class.active]="page === getCurrentPageFuture()"
+                    (click)="goToPageFuture(page)">
+                    {{ page }}
+                  </button>
+                </ng-container>
+
+                <button class="btn btn-sm nav-btn" (click)="goToNextPageFuture()"
+                  [disabled]="getCurrentPageFuture() >= getTotalPagesFuture()">
+                  Next ›
+                </button>
+
+                <select class="form-select form-select-sm w-auto d-inline-block" [(ngModel)]="pageSizeFuture"
+                  (change)="onPageSizeChangeFuture()">
+                  <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} per page</option>
+                </select>
+              </div>
+              <!-- <div class="cmp-toggle-row">
+                <span class="cmp-label">
+                  Sort By Date
+                </span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="isChecked" (change)="onCmpToggle($event)">
+                  <span class="slider round"></span>
+                </label>
+              </div> -->
+
+            </div>
+            <div class="table-container">
+              <table class="table fixed-header">
+                <thead>
+                  <tr>
+                    <th (click)="sortData('order_id', 'failed')" style="cursor: pointer;">
+                      Order ID
+                      <span *ngIf="sortColumn === 'order_id'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('stock_tick', 'failed')" style="cursor: pointer;">
+                      Stock Tick
+                      <span *ngIf="sortColumn === 'stock_tick'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('time_frame', 'failed')" style="cursor: pointer;">
+                      Time Frame
+                      <span *ngIf="sortColumn === 'time_frame'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('order_type', 'failed')" style="cursor: pointer;">
+                      Order Type
+                      <span *ngIf="sortColumn === 'order_type'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- US Prices -->
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('entry_price', 'failed')"
+                      style="cursor: pointer;">
+                      Purchased (USD)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('stoploss_price', 'failed')"
+                      style="cursor: pointer;">
+                      Stoploss Price (USD)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('target_price', 'failed')"
+                      style="cursor: pointer;">
+                      Target Price (USD)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <!-- India Prices -->
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('entry_price', 'failed')"
+                      style="cursor: pointer;">
+                      Purchased (INR)
+                      <span *ngIf="sortColumn === 'entry_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('stoploss_price', 'failed')"
+                      style="cursor: pointer;">
+                      Stoploss Price (INR)
+                      <span *ngIf="sortColumn === 'stoploss_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('target_price', 'failed')"
+                      style="cursor: pointer;">
+                      Target Price (INR)
+                      <span *ngIf="sortColumn === 'target_price'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th (click)="sortData('stock_quantity', 'failed')" style="cursor: pointer;">
+                      Quantity
+                      <span *ngIf="sortColumn === 'stock_quantity'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('purchased_cmp_date', 'failed')" style="cursor: pointer;">
+                      Purchased CMP Date
+                      <span *ngIf="sortColumn === 'purchased_cmp_date'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th (click)="sortData('arima_ab_model_prob', 'failed')" style="cursor: pointer;">
+                      Model Prediction
+                      <span *ngIf="sortColumn === 'arima_ab_model_prob'">{{ sortDirection === 'asc' ? '↑' : '↓'
+                        }}</span>
+                    </th>
+
+                    <th *ngIf="SelectedCountryName=='India'" (click)="sortData('loss_amount', 'failed')"
+                      style="cursor: pointer;">
+                      Loss (INR)
+                      <span *ngIf="sortColumn === 'loss_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+                    <th *ngIf="SelectedCountryName=='US'" (click)="sortData('loss_amount', 'failed')"
+                      style="cursor: pointer;">
+                      Loss (USD)
+                      <span *ngIf="sortColumn === 'loss_amount'">{{ sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    </th>
+
+                    <th>View Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <ng-container *ngFor="let order of failedOrdersFuture;">
+                    <tr>
+                      <td>{{ order.order_id }}</td>
+                      <td
+                        (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                        data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View"
+                        [attr.data-stock]="order.stock_tick" style="cursor: pointer;" id="stockCell" #stockCell
+                         [ngStyle]="
+                          (highlightedTradeId !== null
+                            ? order.trade_signal_id === highlightedTradeId
+                            : highlightedStockTick !== null
+                              ? order.stock_tick?.toLowerCase() === highlightedStockTick?.toLowerCase()
+                              : false
+                          )
+                            ? { 'background-color': '#c4c439' }
+                            : {}
+                        ">
+                        {{ order.stock_tick | uppercase }}</td>
+                      <td>{{ getTimeFrameLabel(order.time_frame) }}</td>
+                      <td>{{ order.order_type }}</td>
+                      <td>{{ order.entry_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stoploss_price | number:'1.2-2' }}</td>
+                      <td>{{ order.target_price | number:'1.2-2' }}</td>
+                      <td>{{ order.stock_quantity }}</td>
+                      <td>{{ order.purchased_cmp_date | date: 'yyyy-MM-dd' }}</td>
+                      <td>
+                        <ng-container *ngIf="order.arima_ab_model_prediction; else naTemplate">
+                          <span class="prediction-text"
+                            [ngClass]="{ 'text-red': order.arima_ab_model_prediction.toLowerCase() === 'success' }">
+                            {{ order.arima_ab_model_prediction.toUpperCase() }}
+                            ({{ (order.arima_ab_model_prob * 100) | number:'1.0-2' }}%)
+                          </span>
+                        </ng-container>
+                        <ng-template #naTemplate>NA</ng-template>
+                      </td>
+                      <td class="status-cell">
+                        <div><span style="color: red;">{{ order.loss_amount | number:'1.2-2' }}</span></div>
+                      </td>
+                      <td>
+                        <i class="fas fa-chart-line" style="color: green;cursor: pointer;font-size: 20px;"
+                          (click)="ViewGraph(order.order_id,order.stock_tick,order.entry_price,order.stoploss_price,order.target_price,order.purchased_cmp_date,order.completed_on,order.entry_timestamp,order.order_type,order.order_status,order.time_frame,order.expiry_date,'')"
+                          data-bs-toggle="modal" data-bs-target="#myModal" title="Click for View">
+
+                        </i>
+                      </td>
+                      <td>
+                        <i (click)="onDeleteFuture(order.order_id)" class="fas fa-trash"
+                          style="color: red;cursor: pointer;font-size: 20px;" title="Delete"></i>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+
+<!-- NEW CODE END -->
+
+<!-- MODAL FOR FULLSCREEN CHART-->
+<div class="modal" id="myModal" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div id="fullscreen-modal" class="modal-dialog modal-dialog-centered modal-fullscreen custom-modal"
+    style="max-width: 100%;height: 97%;">
+    <div class="modal-content">
+      <!-- new header -->
+      <header class="header">
+        <div class="logo2">{{SelectedStockName | uppercase}}<span class="logo-bar">||</span>{{ModalHeader |
+          uppercase}}<span class="logo-bar">||</span>{{order_type | uppercase}}<span class="logo-bar">||</span>{{SelectedExpiry | uppercase}}
+        </div>
+        <!-- View Reason Button -->
+        <button class="replay-button-viewreson" (click)="viewReason()" title="View Reason">
+          View Reason
+        </button>
+        <div class="right-panel" *ngIf="showReasonPanel">
+          <div class="panel-header">
+            <h3>📝 Reason</h3>
+            <button class="close-btn" (click)="closePanel()">×</button>
+          </div>
+
+          <div class="panel-content">
+            <ul *ngIf="reasons.length > 0">
+              <li *ngFor="let reason of reasons; let i = index">
+                <span class="number">{{ i + 1 }}.</span>
+                <span class="capital-text">{{ reason }}</span>
+              </li>
+
+            </ul>
+            <p *ngIf="reasons.length === 0">No reasons found.</p>
+          </div>
+        </div>
+
+
+
+      </header>
+      <!-- new header end -->
+
+
+      <div class="sub-nav" style="background-color: #14203f;border: 1px solid black; border-radius: 2px;">
+        <!-- Left Side: Buttons -->
+        <div class="sub-nav-left">
+          <button class="ta-button-demo" (mouseenter)="openBar(true)" (mouseleave)="openBar(false)">
+            <img src="assets/image/settingIcon.png" class="button-icon">
+          </button>&nbsp;&nbsp;
+          <!-- <div *ngIf="SETUPREQ">
+          <button class="replay-button" (click)="autoReplay()"
+            *ngIf="activeMenu === 'Success' || activeMenu === 'Failed'" title="Bar Replay">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="yellow">
+              <path d="M11 8.5v7l-5.5-3.5L11 8.5zm7 0v7l-5.5-3.5L18 8.5z" />
+            </svg>
+          </button>
+          </div> -->
+        </div>
+
+        <!-- Right Side: OHLC Info -->
+        <div class="sub-nav-info">
+          <div style="color: white;" [ngClass]="CandleColor">
+            <span class="separated-item">Open: {{Open}}</span>
+            <span class="separated-item">High: {{High}}</span>
+            <span class="separated-item">Low: {{Low}}</span>
+            <span class="separated-item">Close: {{Close}}</span>
+          </div>
+        </div>
+      </div>
+
+
+      <button type="button" #closeButton class="btn-close" data-bs-dismiss="modal" (click)="CloseFullModal()"></button>
+      <div class="modal-body">
+        <div id="chart-container_new" style="width: 100%; height: 100%;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRADE SETTINGS LEFT BAR START -->
+<div id="leftBar" class="left-bar" (mouseenter)="openBar(true)" (mouseleave)="openBar(false)">
+  <div class="settingHeader">
+    <Span class="settings">Market Zones & Strategy</Span>
+  </div>
+
+  <div class="sub-nav" style="background-color: white">
+    <div class="sub-nav-links">
+      <a *ngIf="QualifiedZoneFlag">
+        <input type="checkbox" [(ngModel)]="selectedOptions['qualified_zones']"
+          (click)="checkboxClicked('qualified_zones')" id="qualified_zones" hidden>
+        <label for="qualified_zones" class="responsive-label">
+          <i class="fas fa-cogs" style="margin-right: 10px;color: #14203f;"></i> Qualified Zones
+        </label>
+      </a>
+      <!-- <a>
+        <input type="checkbox" [(ngModel)]="selectedOptions['all_zones']" (click)="checkboxClicked('all_zones')"
+          id="all_zones" hidden>
+        <label for="all_zones" class="responsive-label">
+          <i class="fas fa-globe" style="margin-right: 10px;color: #14203f;"></i> All Zones
+        </label>
+      </a> -->
+      <a>
+        <input type="checkbox" [(ngModel)]="selectedOptions['base_candle']" (click)="checkboxClicked('base_candle')"
+          id="base_candle" hidden>
+        <label for="base_candle" class="responsive-label">
+          <i class="fas fa-chart-line" style="margin-right: 10px;color: #14203f;"></i> Base Candle
+        </label>
+      </a>
+      <!-- <a>
+        <input type="checkbox" [(ngModel)]="selectedOptions['buy_sell_zone']" (click)="checkboxClicked('buy_sell_zone')"
+          id="buy_sell_zone" hidden>
+        <label for="buy_sell_zone" class="responsive-label">
+          <i class="fas fa-exchange-alt" style="margin-right: 10px;color: #14203f;"></i> Buy / Sell Zone
+        </label>
+      </a> -->
+      <a>
+        <input type="checkbox" [(ngModel)]="selectedOptions['bad_zone']" (click)="checkboxClicked('bad_zone')"
+          id="bad_zone" hidden>
+        <label for="bad_zone" class="responsive-label">
+          <i class="fas fa-times-circle" style="margin-right: 10px;color: #14203f;"></i> Bad Zone
+        </label>
+      </a>
+      <a *ngIf="QualifiedZoneFlag">
+        <input type="checkbox" [(ngModel)]="selectedOptions['overlap_evaluate']"
+          (click)="checkboxClicked('overlap_evaluate')" id="overlap_evaluate" hidden>
+        <label for="overlap_evaluate" class="responsive-label">
+          <i class="fas fa-check-circle" style="margin-right: 10px;color: #14203f;"></i> Overlap Evaluate
+        </label>
+      </a>
+      <a *ngIf="QualifiedZoneFlag">
+        <input type="checkbox" [(ngModel)]="selectedOptions['overlap_analyze']"
+          (click)="checkboxClicked('overlap_analyze')" id="overlap_analyze" hidden>
+        <label for="overlap_analyze" class="responsive-label">
+          <i class="fas fa-search" style="margin-right: 10px;color: #14203f;"></i> Overlap Analyze
+        </label>
+      </a>
+      <a *ngIf="QualifiedZoneFlag==false">
+        <input type="checkbox" [(ngModel)]="selectedOptions['optimized_buy_sell_zone']"
+          (click)="checkboxClicked('optimized_buy_sell_zone')" id="optimized_buy_sell_zone" hidden>
+        <label for="optimized_buy_sell_zone" class="responsive-label">
+          <i class="fas fa-search" style="margin-right: 10px;color: #14203f;"></i> Optimize Buy/Sell Zone
+        </label>
+      </a>
+    </div>
+  </div>
+</div>
+<!-- TRADE SETTINGS LEFT BAR END -->
+
+
+
+<ngx-spinner
+  bdColor="rgba(255, 255, 255, 0.35)"
+  [fullScreen]="true"
+  [disableAnimation]="true"
+  type="none"
+>
+  <div class="spinner-box">
+    <div class="custom-loader"></div>
+    <div class="spinner-text">Please wait...</div>
+  </div>
+</ngx-spinner>

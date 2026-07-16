@@ -1,0 +1,18 @@
+services:
+  frontend:
+    image: predixa_front:v1
+    ports:
+      #- "80:80"
+      # later, when you enable HTTPS:
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl:/etc/nginx/ssl
+    networks:
+      - appnet
+
+
+
+networks:
+  appnet:
+    external: true
