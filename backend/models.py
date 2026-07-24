@@ -434,7 +434,12 @@ class Config:
     # If risk (|entry - stop|) / entry < this fraction, skip that SL level in cascade.
     # Prevents sub-ATR stops that get triggered by normal intraday noise.
     # Example: BOSCH entry 29595, risk 257 = 0.87% < 1% → skip to wider SL.
-    min_risk_pct: float = 0.01           # 1% minimum risk as fraction of entry price
+    min_risk_pct: float = 0.01
+    embed_strict_stop: bool = False      # B-W-EMBED Edit 3: strict structural stop (measure before enabling)
+    # B-W-EMBED tunable parameters — REQUIRE full-universe tuning before lock (see embed_tuning.md).
+    # Defaults are provisional placeholders, NOT validated values.
+    embed_sits_on_top_target_pct: float = 0.5   # TIER_3 far-HTF target discount [TUNE: sweep 0.3-0.7]
+    embed_overlap_threshold: float = 0.5        # nesting vs TIER_3 boundary [TUNE: sweep 0.4-0.6]           # 1% minimum risk as fraction of entry price
 
     single_base_nonbasing_needed: int = 2
     single_base_range_mult: float = 2.5
@@ -504,6 +509,10 @@ class Config:
     # Setup Extraction (v3.8.2: Step 19 — BUG-21 IMPLEMENTED)
     # REF: Methodology v3.8.2 Sec 9.3, Sec 13.1; Annexure v1.2 Sec 4
     setup_proximity_pct: float = 5.0     # Max % distance from CMP to zone proximal
+    # PROX (CB): ATR-tier proximity. Default OFF reproduces legacy flat-5%. TUNE proximity_atr_mult
+    # on full universe before enabling (same discipline as B-W-EMBED params).
+    proximity_use_atr_tier: bool = False
+    proximity_atr_mult: float = 1.5      # threshold = max(setup_proximity_pct, mult * ATR%) [TUNE]
     setup_top_n: int = 3                 # Methodology Sec 13.1: "top N" candidates per direction
     
     # ── Weighted Setup Scoring (configurable, sum must = 1.0) ──
@@ -775,7 +784,32 @@ def load_preprocess_data(csv_path, last_d_time):
     cutoff = _start_of_current_period(last_d_time, freq)
     print(csv_path, freq, cutoff, "*****************************************************************")
     # if freq in ['W', 'M', 'D']:
-    df = df[df[col] < cutoff]
+    # df = df[df[col] < cutoff]
+    if freq in ['W', 'M']:
+        df = df[df[col] < cutoff]
+
+    if freq == 'W':
+        daily_csv_path = csv_path.replace('weekly', 'daily')
+        daily_csv_df = pd.read_csv(daily_csv_path)
+        daily_csv_df[col] = pd.to_datetime(daily_csv_df[col], dayfirst=True)
+        daily_csv_df = daily_csv_df[daily_csv_df[col] <= last_d_time]
+
+        cutoff_candle = aggregate_from_daily(daily_csv_df, 'W', cutoff=cutoff)
+        if not cutoff_candle.empty:
+            df = pd.concat([df, cutoff_candle], ignore_index=True)
+        # df = aggregate_from_daily(daily_csv_df, 'W')
+
+
+    elif freq == 'M':
+        daily_csv_path = csv_path.replace('monthly', 'daily')
+        daily_csv_df = pd.read_csv(daily_csv_path)
+        daily_csv_df[col] = pd.to_datetime(daily_csv_df[col], dayfirst=True)
+        daily_csv_df = daily_csv_df[daily_csv_df[col] <= last_d_time]
+        cutoff_candle = aggregate_from_daily(daily_csv_df, 'M', cutoff=cutoff)
+        if not cutoff_candle.empty:
+            df = pd.concat([df, cutoff_candle], ignore_index=True)
+    elif freq == 'D':
+        pass 
     # else:
         # df = df[df["timestamp"] < cutoff]
     if not(str(csv_path).__contains__('monthly') or str(csv_path).__contains__('weekly') or str(csv_path).__contains__('daily')):

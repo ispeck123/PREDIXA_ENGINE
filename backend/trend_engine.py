@@ -222,6 +222,10 @@ class Config:
     # Setup Extraction (v3.8.1: Step 19 — BUG-21 IMPLEMENTED)
     # REF: Methodology v3.8.1 Sec 9.3, Sec 13.1; Annexure v1.2 Sec 4
     setup_proximity_pct: float = 5.0     # Max % distance from CMP to zone proximal
+    # PROX (CB): ATR-tier proximity. Default OFF reproduces legacy flat-5%. TUNE proximity_atr_mult
+    # on full universe before enabling (same discipline as B-W-EMBED params).
+    proximity_use_atr_tier: bool = False
+    proximity_atr_mult: float = 1.5      # threshold = max(setup_proximity_pct, mult * ATR%) [TUNE]
     setup_top_n: int = 3                 # Methodology Sec 13.1: "top N" candidates per direction
     
     # ── Weighted Setup Scoring (configurable, sum must = 1.0) ──
@@ -244,6 +248,11 @@ class Config:
     entry_buffer_pct: float = 0.0015 
     sl_buffer_atr: float = 0.25
     min_risk_pct: float = 0.01
+    embed_strict_stop: bool = False      # B-W-EMBED Edit 3: strict structural stop (measure before enabling)
+    # B-W-EMBED tunable parameters — REQUIRE full-universe tuning before lock (see embed_tuning.md).
+    # Defaults are provisional placeholders, NOT validated values.
+    embed_sits_on_top_target_pct: float = 0.5   # TIER_3 far-HTF target discount [TUNE: sweep 0.3-0.7]
+    embed_overlap_threshold: float = 0.5        # nesting vs TIER_3 boundary [TUNE: sweep 0.4-0.6]
     min_risk_atr: float = 0.5            # 0.5 × ATR absolute floor (ATR override)
 
     compound_stale_age_bars: int = 100

@@ -16,7 +16,13 @@ class Config:
     DB_PORT = os.environ.get('DB_PORT', 3306)
     DB_USER = os.environ.get('DB_USER', 'root')  
     DB_PASSWORD = _env('DB_PASSWORD')
-    DB_SCHEMA = os.environ.get('DB_SCHEMA', 'Fin_product') 
+    DB_SCHEMA = os.environ.get('DB_SCHEMA', 'Fin_product')
+    
+    # DB_HOST = os.environ.get('DB_HOST', '103.13.113.132') 
+    # DB_PORT = os.environ.get('DB_PORT', 3306)
+    # DB_USER = os.environ.get('DB_USER', 'root')  
+    # DB_PASSWORD = "Root1234"
+    # DB_SCHEMA = os.environ.get('DB_SCHEMA', 'Fin_prod')
 
     stock_list = ['hdfcbank', 'hindunilvr', 'icicibank', 'infy', 
                   'itc', 'sun_pharma', 'tatamotors', 'tatapower', 'reliance', 

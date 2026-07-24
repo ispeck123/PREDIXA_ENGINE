@@ -423,7 +423,7 @@ class RiskTargetCalculator:
     def _compute_target(self, entry: float, risk: float, opposing: Optional[Zone], 
                     opposing_htf_zone: Optional[Zone], is_buy: bool,
                     atr_val: float, cmp: Optional[float] = None,
-                    htf_nested: bool = False) -> Tuple[float, str]:
+                    htf_nested: bool = False, sits_on_top: bool = False) -> Tuple[float, str]:
         """
         BUG-07:
         Conservative/aggressive structural target selection with
@@ -515,7 +515,12 @@ class RiskTargetCalculator:
             )
 
         # HTF targets are more conservative
-        if source == "HTF" and htf_nested:
+        # B-W-EMBED: TIER_3 (sits-on-top / partial overlap) has NO structural mandate to reach
+        # the far HTF opposing zone. Force a conservative reference so we do not set unreachable
+        # targets that produce give-back losers (price runs partway, reverses, hits SL).
+        if source == "HTF" and sits_on_top:
+            pct = getattr(self.cfg, "embed_sits_on_top_target_pct", 0.5)   # B-W-EMBED: config-driven (TUNE on full universe; see embed_tuning.md)
+        elif source == "HTF" and htf_nested:
             pct = 1.0   # Full institutional target — nesting confirms HTF thesis
         elif source == "HTF":
             pct = 0.85  # HTF but not nested — discount for intermediate obstacles
@@ -579,6 +584,19 @@ class RiskTargetCalculator:
                     if len(zone.enclosing_a_zone.sl_levels) > 0:
                         levels.extend(zone.enclosing_a_zone.sl_levels)
             
+            # B-W-EMBED: TIER_3 (sits-on-top / overlapping) — stop belongs at the structural
+            # level it sits on (the overlapping A/E distal), NOT the tight X-distal. This fixes
+            # wick-out losses on zones that were structurally right. RR only filters (Edit 3).
+            elif zone.nesting_tier and zone.nesting_tier.value == 'TIER_3':  # TIER_3 sits-on-top
+                if zone.enclosing_a_zone is not None:
+                    levels.append(zone.enclosing_a_zone.distal)
+                    if len(zone.enclosing_a_zone.sl_levels) > 0:
+                        levels.extend(zone.enclosing_a_zone.sl_levels)
+                elif zone.enclosing_e_zone is not None:
+                    levels.append(zone.enclosing_e_zone.distal)
+                    if len(zone.enclosing_e_zone.sl_levels) > 0:
+                        levels.extend(zone.enclosing_e_zone.sl_levels)
+
             # TIER_2 (nested in E or A): HTF zone → X-zone
             elif zone.nesting_tier and zone.nesting_tier.value == 'TIER_2':  # TIER_2
                 if zone.enclosing_e_zone is not None:
@@ -677,9 +695,24 @@ class RiskTargetCalculator:
             opposing_htf_zones = self.get_active_opposing_zone(zone, htf_zones, cmp)
             _htf_nested = (zone.nesting_tier is not None and 
                            zone.nesting_tier in (ZoneNestingTier.TIER_1, ZoneNestingTier.TIER_2))
-            target, target_mode = self._compute_target(entry, risk, opposing_zones, opposing_htf_zones, is_buy, atr_val, cmp, _htf_nested)
+            # B-W-EMBED: TIER_3 = overlapping/sits-on-top (partial overlap below nesting threshold)
+            _sits_on_top = (zone.nesting_tier is not None and 
+                            zone.nesting_tier == ZoneNestingTier.TIER_3)
+            target, target_mode = self._compute_target(entry, risk, opposing_zones, opposing_htf_zones, is_buy, atr_val, cmp, _htf_nested, _sits_on_top)
             reward = abs(target - entry)
             rr = reward / risk
+
+            # B-W-EMBED Edit 3 (config-gated, default OFF): for structurally-nested zones
+            # (TIER_1/2/3), do NOT accept the zone's own tight X-distal as an RR-passing stop.
+            # Structure defines the stop; RR only filters fire/no-fire. When enabled, a nested
+            # zone whose structural (A/E) distal fails min_rr will FAIL rather than fall through
+            # to a structurally-wrong tight stop. Ships OFF so the trade-count vs win-rate
+            # trade-off can be measured on a full backtest before committing (pre-registered).
+            _embed_strict = getattr(self.cfg, "embed_strict_stop", False)
+            _structural_tier = zone.nesting_tier in (ZoneNestingTier.TIER_1, ZoneNestingTier.TIER_2, ZoneNestingTier.TIER_3) if zone.nesting_tier else False
+            if _embed_strict and _structural_tier and abs(sl_ref - zone.distal) < 1e-9:
+                # this sl_ref is the tight own-distal; skip in strict mode for nested zones
+                continue
             # print(zone.ztype, zone.proximal, zone.distal, "=====", rr, entry, target, stop, target_mode, "rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
             if rr >= self.cfg.min_rr:
                 # print("returning here ...................................")
@@ -1627,7 +1660,9 @@ class ZoneNestingClassifier:
     """
     
     def __init__(self, overlap_threshold: float = 0.5):
-        self.overlap_threshold = overlap_threshold  # 50% overlap required for nesting
+        # B-W-EMBED: overlap_threshold is the TIER_2(nested) vs TIER_3(sits-on-top) boundary.
+        # Caller should pass Config.embed_overlap_threshold. TUNE on full universe (see embed_tuning.md).
+        self.overlap_threshold = overlap_threshold  # provisional 0.5 — NOT validated
     
     def _zones_overlap(self, z1: Zone, z2: Zone) -> bool:
         """Check if two zones overlap at all."""
@@ -2139,11 +2174,21 @@ class SetupExtractor:
         if not green_zones:
             return None, None, []
         
-        # 2. PROXIMITY HARD FILTER: >5% from CMP = excluded
+        # 2. PROXIMITY FILTER: exclude zones too far from CMP.
+        # PROX (CB): the flat 5% filter is volatility-blind (5% is huge for a low-vol large-cap,
+        # tight for a high-vol name). When proximity_use_atr_tier is enabled, the threshold is
+        # ATR-scaled: max(setup_proximity_pct, proximity_atr_mult * ATR%). Defaults reproduce the
+        # legacy flat-5% behaviour until the ATR multiple is tuned on the full universe (see notes).
         scored = []
         for z in green_zones:
             prox_pct = abs(cmp - z.proximal) / cmp * 100.0 if cmp > 0 else float('inf')
-            if prox_pct <= self.cfg.setup_proximity_pct:
+            _prox_threshold = self.cfg.setup_proximity_pct
+            if getattr(self.cfg, 'proximity_use_atr_tier', False) and cmp > 0 and atr_X:
+                # atr_X is this function's X-TF ATR param; express as % of CMP.
+                _atr_pct = atr_X / cmp * 100.0
+                _atr_thresh = getattr(self.cfg, 'proximity_atr_mult', 1.5) * _atr_pct
+                _prox_threshold = max(self.cfg.setup_proximity_pct, _atr_thresh)
+            if prox_pct <= _prox_threshold:
             # 3. WEIGHTED SCORE (uses RR from E/S/T already computed in loop)
                 w_score = self.scorer.compute_weighted_score(z, cmp, trend_context, ema_20)
                 breakdown = self.scorer.compute_score_breakdown(z, cmp, trend_context, ema_20)
