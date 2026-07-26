@@ -2183,8 +2183,12 @@ class SetupExtractor:
         for z in green_zones:
             prox_pct = abs(cmp - z.proximal) / cmp * 100.0 if cmp > 0 else float('inf')
             _prox_threshold = self.cfg.setup_proximity_pct
-            if getattr(self.cfg, 'proximity_use_atr_tier', False) and cmp > 0 and atr_X:
-                # atr_X is this function's X-TF ATR param; express as % of CMP.
+            # PROX-1: ATR-tier proximity is VALIDATED FOR NSE CASH ONLY (NSE <=2xATR 35% / >2x 17%;
+            # NSEFO/MCX FLAT). A global ATR-tier is a defect. Gate on the cash segment.
+            _is_cash = getattr(self, 'is_cash', None)
+            if _is_cash is None:
+                _is_cash = getattr(self.cfg, 'is_cash_segment', False)
+            if _is_cash and getattr(self.cfg, 'proximity_use_atr_tier', False) and cmp > 0 and atr_X:
                 _atr_pct = atr_X / cmp * 100.0
                 _atr_thresh = getattr(self.cfg, 'proximity_atr_mult', 1.5) * _atr_pct
                 _prox_threshold = max(self.cfg.setup_proximity_pct, _atr_thresh)

@@ -27,10 +27,14 @@ class Side(str, Enum):
 # Canonical default policy. LONG enabled (long-only v1 product); SHORT fail-closed everywhere.
 # DO NOT flip a SHORT to True here without recording the Phase-2 acceptance evidence + sign-off.
 _DEFAULT_POLICY: Dict[str, Dict[str, bool]] = {
-    "NSE_CASH": {"LONG": True, "SHORT": True},   # was leaking via CASH_SHORT_TFS — now gated off
-    "NSE_FO":   {"LONG": True, "SHORT": True},
-    "NSEFO":    {"LONG": True, "SHORT": True},
-    "MCX":      {"LONG": True, "SHORT": True},
+    # v1 = long-only across ALL segments. Deployed repo had SHORT:True (veto NOT enforced) — a live
+    # defect: the scanner could emit shorts. Corrected to fail-closed. Short admission is POST-SUNSET
+    # (2026-12-31), acceptance = holdout+shadow, NOT backtest. The futures-short backtest evidence
+    # (+0.35R) is filed to the short-rework dossier; it does NOT authorise flipping these to True.
+    "NSE_CASH": {"LONG": True, "SHORT": False},   # also legal: no overnight cash short in India
+    "NSE_FO":   {"LONG": True, "SHORT": False},
+    "NSEFO":    {"LONG": True, "SHORT": False},
+    "MCX":      {"LONG": True, "SHORT": False},
 }
 
 
