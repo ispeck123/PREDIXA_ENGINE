@@ -314,6 +314,9 @@ class Zone:
     entry_path_clear: Optional[bool] = None
     entry_blocking_zone_id: Optional[str] = None
 
+    overlap_ratio: float = 0.0
+    htf_target_price: Optional[float] = None
+
 
     
     @property
@@ -784,32 +787,7 @@ def load_preprocess_data(csv_path, last_d_time):
     cutoff = _start_of_current_period(last_d_time, freq)
     print(csv_path, freq, cutoff, "*****************************************************************")
     # if freq in ['W', 'M', 'D']:
-    # df = df[df[col] < cutoff]
-    if freq in ['W', 'M']:
-        df = df[df[col] < cutoff]
-
-    if freq == 'W':
-        daily_csv_path = csv_path.replace('weekly', 'daily')
-        daily_csv_df = pd.read_csv(daily_csv_path)
-        daily_csv_df[col] = pd.to_datetime(daily_csv_df[col], dayfirst=True)
-        daily_csv_df = daily_csv_df[daily_csv_df[col] <= last_d_time]
-
-        cutoff_candle = aggregate_from_daily(daily_csv_df, 'W', cutoff=cutoff)
-        if not cutoff_candle.empty:
-            df = pd.concat([df, cutoff_candle], ignore_index=True)
-        # df = aggregate_from_daily(daily_csv_df, 'W')
-
-
-    elif freq == 'M':
-        daily_csv_path = csv_path.replace('monthly', 'daily')
-        daily_csv_df = pd.read_csv(daily_csv_path)
-        daily_csv_df[col] = pd.to_datetime(daily_csv_df[col], dayfirst=True)
-        daily_csv_df = daily_csv_df[daily_csv_df[col] <= last_d_time]
-        cutoff_candle = aggregate_from_daily(daily_csv_df, 'M', cutoff=cutoff)
-        if not cutoff_candle.empty:
-            df = pd.concat([df, cutoff_candle], ignore_index=True)
-    elif freq == 'D':
-        pass 
+    df = df[df[col] < cutoff]
     # else:
         # df = df[df["timestamp"] < cutoff]
     if not(str(csv_path).__contains__('monthly') or str(csv_path).__contains__('weekly') or str(csv_path).__contains__('daily')):

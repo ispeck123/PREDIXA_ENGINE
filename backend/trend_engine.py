@@ -411,6 +411,9 @@ class Zone:
 
     entry_path_clear: Optional[bool] = None
     entry_blocking_zone_id: Optional[str] = None
+
+    overlap_ratio: float = 0.0
+    htf_target_price: Optional[float] = None
     
     @property
     def zone_id(self) -> str:

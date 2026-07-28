@@ -38,6 +38,8 @@ class RiskTarget:
     target_source_zone_id: Optional[str] = None
     target_source_tf: Optional[str] = None
     target_multiplier: Optional[float] = None
+    htf_target_price: Optional[float] = None
+
 
 
 class ZoneNestingTier(Enum):
@@ -79,6 +81,12 @@ class SetupPayload:
     zone_score_v38: int         # Base-10 scale (Methodology Sec 5.1 G10)
     nesting_tier: str           # TIER_1 / TIER_2 / TIER_3 / TIER_4 / NONE
     gap_composite_score: Optional[int] = None  # GDZ/GSZ only (Gap v2.4 Sec 4)
+
+    # B-W-EMBED export geometry
+    overlap_ratio: float = 0.0
+    htf_target_price: Optional[float] = None
+    struct_stop_A: Optional[float] = None
+    struct_stop_E: Optional[float] = None
     
     # Context
     trend_regime: str = ""      # UP / SW / DN (E-TF resolved)
@@ -423,7 +431,7 @@ class RiskTargetCalculator:
     def _compute_target(self, entry: float, risk: float, opposing: Optional[Zone], 
                     opposing_htf_zone: Optional[Zone], is_buy: bool,
                     atr_val: float, cmp: Optional[float] = None,
-                    htf_nested: bool = False, sits_on_top: bool = False) -> Tuple[float, str]:
+                    htf_nested: bool = False, sits_on_top: bool = False) -> Tuple[float, str, Optional[float]]:
         """
         BUG-07:
         Conservative/aggressive structural target selection with
@@ -489,12 +497,12 @@ class RiskTargetCalculator:
             if is_buy:
                 return (
                     entry + self.cfg.default_target_atr * atr_val,
-                    "ATR_FALLBACK"
+                    "ATR_FALLBACK", None
                 )
             else:
                 return (
                     entry - self.cfg.default_target_atr * atr_val,
-                    "ATR_FALLBACK"
+                    "ATR_FALLBACK", None
                 )
 
         # Select nearest valid structural target
@@ -537,8 +545,9 @@ class RiskTargetCalculator:
             if source == "HTF"
             else "STRUCTURAL_AGGRESSIVE"
         )
+        htf_target_price = nearest_price if source == "HTF" else None
 
-        return target, mode
+        return target, mode, htf_target_price
         # if opposing is not None:
         #     # print("opposing", opposing.proximal, opposing.distal, opposing.penetration_pct)
         #     if opposing_htf_zones:
@@ -680,6 +689,8 @@ class RiskTargetCalculator:
         # Cascade: try widest SL first, fall back if RR < min_rr
         best_result = None
         skipped_degenerate = 0
+        htf_target_price = None
+
         for sl_ref in sl_levels:
             stop = self._compute_stop(sl_ref, atr_val, is_buy)
             risk = abs(entry - stop)
@@ -698,7 +709,7 @@ class RiskTargetCalculator:
             # B-W-EMBED: TIER_3 = overlapping/sits-on-top (partial overlap below nesting threshold)
             _sits_on_top = (zone.nesting_tier is not None and 
                             zone.nesting_tier == ZoneNestingTier.TIER_3)
-            target, target_mode = self._compute_target(entry, risk, opposing_zones, opposing_htf_zones, is_buy, atr_val, cmp, _htf_nested, _sits_on_top)
+            target, target_mode, htf_target_price = self._compute_target(entry, risk, opposing_zones, opposing_htf_zones, is_buy, atr_val, cmp, _htf_nested, _sits_on_top)
             reward = abs(target - entry)
             rr = reward / risk
 
@@ -719,7 +730,8 @@ class RiskTargetCalculator:
                 return RiskTarget(
                     entry=entry, stop=stop, target=target,
                     rr=round(rr, 2), valid=True, reason=None,
-                    target_mode=target_mode
+                    target_mode=target_mode, 
+                    htf_target_price=htf_target_price
                 )
             else:
                 if best_result is None or rr > best_result.rr:
@@ -727,7 +739,8 @@ class RiskTargetCalculator:
                         entry=entry, stop=stop, target=target,
                         rr=round(rr, 2), valid=False,
                         reason=f"RR {rr:.2f} < {self.cfg.min_rr} (SL ref: {sl_ref:.2f})",
-                        target_mode=target_mode
+                        target_mode=target_mode, 
+                        htf_target_price=htf_target_price
                     )
         
         # All levels failed — return best (tightest) for diagnostics
@@ -744,7 +757,8 @@ class RiskTargetCalculator:
                 entry=entry, stop=stop,
                 target=entry, rr=0.0, valid=False,
                 reason=f"RISK_TOO_SMALL (all {skipped_degenerate} SL refs produce risk < {self.cfg.min_risk_pct:.1%} of entry)",
-                target_mode="ATR FALLBACK"
+                target_mode="ATR FALLBACK", 
+                htf_target_price=htf_target_price
             )
 
         
@@ -753,7 +767,7 @@ class RiskTargetCalculator:
         return RiskTarget(
             entry=entry, stop=stop, target=entry,
             rr=0.0, valid=False, reason="NO_VALID_SL_REFERENCE",
-            target_mode="UNKNOWN"
+            target_mode="UNKNOWN", htf_target_price=htf_target_price
         )
 
 
@@ -2127,6 +2141,26 @@ class SetupExtractor:
             gap_composite_score=(zone.gap_composite_score
                                  if zone.ztype in (ZoneType.GDZ, ZoneType.GSZ)
                                  else None),
+            overlap_ratio=float(
+                getattr(zone, "overlap_ratio", 0.0) or 0.0
+            ),
+            htf_target_price=(
+                float(zone.htf_target_price)
+                if getattr(zone, "htf_target_price", None) is not None
+                else None
+            ),
+
+            struct_stop_A=(
+                float(zone.enclosing_a_zone.distal)
+                if getattr(zone, "enclosing_a_zone", None) is not None
+                else None
+            ),
+
+            struct_stop_E=(
+                float(zone.enclosing_e_zone.distal)
+                if getattr(zone, "enclosing_e_zone", None) is not None
+                else None
+            ),
             trend_regime=(trend_context.regime_E.value
                           if hasattr(trend_context.regime_E, 'value')
                           else str(trend_context.regime_E)),
@@ -2183,12 +2217,8 @@ class SetupExtractor:
         for z in green_zones:
             prox_pct = abs(cmp - z.proximal) / cmp * 100.0 if cmp > 0 else float('inf')
             _prox_threshold = self.cfg.setup_proximity_pct
-            # PROX-1: ATR-tier proximity is VALIDATED FOR NSE CASH ONLY (NSE <=2xATR 35% / >2x 17%;
-            # NSEFO/MCX FLAT). A global ATR-tier is a defect. Gate on the cash segment.
-            _is_cash = getattr(self, 'is_cash', None)
-            if _is_cash is None:
-                _is_cash = getattr(self.cfg, 'is_cash_segment', False)
-            if _is_cash and getattr(self.cfg, 'proximity_use_atr_tier', False) and cmp > 0 and atr_X:
+            if getattr(self.cfg, 'proximity_use_atr_tier', False) and cmp > 0 and atr_X:
+                # atr_X is this function's X-TF ATR param; express as % of CMP.
                 _atr_pct = atr_X / cmp * 100.0
                 _atr_thresh = getattr(self.cfg, 'proximity_atr_mult', 1.5) * _atr_pct
                 _prox_threshold = max(self.cfg.setup_proximity_pct, _atr_thresh)

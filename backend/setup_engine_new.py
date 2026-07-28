@@ -232,6 +232,7 @@ class SDEnginePipeline:
         self.last_d_time = last_d_time
 
     def get_candle_series_data(self, csv_path, last_d_time):
+        print(csv_path, "ffffffffffffffffffffffffffffffffffffff")
         df, violation_df = load_preprocess_data(csv_path, last_d_time)
         cs = CandleSeries(
             o=df['open'].tolist(),
@@ -656,11 +657,18 @@ class SDEnginePipeline:
             zone_v38_score = self.zone_scorer_v38.calculate_score(zone)
             
             # v3.8: Nesting tier classification
-            nesting_tier = self.nesting_classifier.classify(
-                zone, zones_A_filtered, zones_E_filtered
+            # nesting_tier = self.nesting_classifier.classify(
+            #     zone, zones_A_filtered, zones_E_filtered
+            # )
+            tier, debug = self.nesting_classifier.classify_with_debug(zone, zones_A_filtered, zones_E_filtered)
+            zone.nesting_tier = tier
+            nesting_tier = tier
+            zone.overlap_ratio = max(
+                debug["best_a_overlap"],
+                debug["best_e_overlap"],
             )
-            zone.nesting_tier = nesting_tier
             zone.zone_v38_score = zone_v38_score
+        
             
             zone.enclosing_e_zone = self._find_enclosing_zone(zone, zones_E_filtered)
             zone.enclosing_a_zone = self._find_enclosing_zone(zone, zones_A_filtered)
@@ -709,6 +717,7 @@ class SDEnginePipeline:
             zone.stop_price = risk_target.stop
             zone.rr_ratio = risk_target.rr
             zone.target_mode = risk_target.target_mode
+            zone.htf_target_price = risk_target.htf_target_price
             
             # Determine trade type for quadrant enforcement
             # trade_type_for_zone = (
@@ -1077,6 +1086,11 @@ def format_calculate_setup_response(
             "entry_price": float(best_long["entry_price"]),
             "stop_loss": float(best_long["stop_price"]),
             "target_price": float(best_long["target_price"]),
+
+            "overlap_ratio": float(best_long.get("overlap_ratio", 0.0)),
+            "htf_target_price": best_long.get("htf_target_price"),
+            "struct_stop_A": best_long.get("struct_stop_A"),
+            "struct_stop_E": best_long.get("struct_stop_E")
         }
         out["BUY_RRR"] = float(best_long.get("rr_ratio", 0.0))
         out["BUY_TIMESTAMPS"] = {
@@ -1091,6 +1105,11 @@ def format_calculate_setup_response(
             "entry_price": float(best_short["entry_price"]),
             "stop_loss": float(best_short["stop_price"]),
             "target_price": float(best_short["target_price"]),
+
+            "overlap_ratio": float(best_short.get("overlap_ratio", 0.0)),
+            "htf_target_price": best_short.get("htf_target_price"),
+            "struct_stop_A": best_short.get("struct_stop_A"),
+            "struct_stop_E": best_short.get("struct_stop_E"),
         }
         out["SELL_RRR"] = float(best_short.get("rr_ratio", 0.0))
         out["SELL_TIMESTAMPS"] = {
