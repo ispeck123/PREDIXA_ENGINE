@@ -1720,6 +1720,57 @@ class ZoneNestingClassifier:
         overlap_pct = self._calculate_overlap_pct(x_zone, htf_zone)
         return overlap_pct >= self.overlap_threshold
 
+    def find_best_structural_parent(self, x_zone: Zone, htf_zones: List[Zone]) -> Optional[Zone]:
+        """
+        Return the same-direction HTF zone with the strongest overlap.
+
+        This is required for TIER_3 sits-on-top zones because they
+        partially overlap an A/E zone but are not fully contained by it.
+        """
+
+        candidates: List[Tuple[float, float, Zone]] = []
+
+        for htf_zone in htf_zones:
+            if htf_zone.invalidated:
+                continue
+
+            # Structural parent must be in the same direction.
+            if x_zone.is_buy_zone != htf_zone.is_buy_zone:
+                continue
+
+            overlap_ratio = self._calculate_overlap_pct(
+                x_zone,
+                htf_zone,
+            )
+
+            if overlap_ratio <= 0.0:
+                continue
+
+            zone_height = abs(
+                htf_zone.proximal - htf_zone.distal
+            )
+
+            candidates.append(
+                (
+                    overlap_ratio,
+                    zone_height,
+                    htf_zone,
+                )
+            )
+
+        if not candidates:
+            return None
+
+        # Highest overlap wins.
+        # On equal overlap, select the smaller/tighter HTF zone.
+        return max(
+            candidates,
+            key=lambda item: (
+                item[0],
+                -item[1],
+            ),
+        )[2]
+
     
     def classify(self, x_zone: Zone, a_zones: List[Zone], e_zones: List[Zone]) -> ZoneNestingTier:
         """
@@ -2151,15 +2202,31 @@ class SetupExtractor:
             ),
 
             struct_stop_A=(
-                float(zone.enclosing_a_zone.distal)
-                if getattr(zone, "enclosing_a_zone", None) is not None
-                else None
+                float(getattr(zone, "struct_stop_A"))
+                if getattr(zone, "struct_stop_A", None) is not None
+                else (
+                    float(zone.enclosing_a_zone.distal)
+                    if getattr(
+                        zone,
+                        "enclosing_a_zone",
+                        None,
+                    ) is not None
+                    else None
+                )
             ),
 
             struct_stop_E=(
-                float(zone.enclosing_e_zone.distal)
-                if getattr(zone, "enclosing_e_zone", None) is not None
-                else None
+                float(getattr(zone, "struct_stop_E"))
+                if getattr(zone, "struct_stop_E", None) is not None
+                else (
+                    float(zone.enclosing_e_zone.distal)
+                    if getattr(
+                        zone,
+                        "enclosing_e_zone",
+                        None,
+                    ) is not None
+                    else None
+                )
             ),
             trend_regime=(trend_context.regime_E.value
                           if hasattr(trend_context.regime_E, 'value')

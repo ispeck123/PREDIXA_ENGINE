@@ -669,9 +669,20 @@ class SDEnginePipeline:
             )
             zone.zone_v38_score = zone_v38_score
         
-            
+            # First try strict containment for genuinely nested zones.
             zone.enclosing_e_zone = self._find_enclosing_zone(zone, zones_E_filtered)
             zone.enclosing_a_zone = self._find_enclosing_zone(zone, zones_A_filtered)
+
+            # B-W-EMBED fix:
+            # TIER_3 is partial overlap, so strict containment normally
+            # returns None. Recover the strongest overlapping A/E parent.
+            if nesting_tier in (ZoneNestingTier.TIER_1, ZoneNestingTier.TIER_2, ZoneNestingTier.TIER_3,):
+                if zone.enclosing_e_zone is None:
+                    zone.enclosing_e_zone = self.nesting_classifier.find_best_structural_parent(zone, zones_E_filtered)
+
+            if zone.enclosing_a_zone is None:
+                zone.enclosing_a_zone = self.nesting_classifier.find_best_structural_parent(zone, zones_A_filtered)
+            
 
             zone.zone_in_zone = (
                 nesting_tier is not None and 
