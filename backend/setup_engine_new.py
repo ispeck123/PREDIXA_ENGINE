@@ -680,8 +680,8 @@ class SDEnginePipeline:
                 if zone.enclosing_e_zone is None:
                     zone.enclosing_e_zone = self.nesting_classifier.find_best_structural_parent(zone, zones_E_filtered)
 
-            if zone.enclosing_a_zone is None:
-                zone.enclosing_a_zone = self.nesting_classifier.find_best_structural_parent(zone, zones_A_filtered)
+                if zone.enclosing_a_zone is None:
+                    zone.enclosing_a_zone = self.nesting_classifier.find_best_structural_parent(zone, zones_A_filtered)
             
 
             zone.zone_in_zone = (
