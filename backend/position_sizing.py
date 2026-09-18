@@ -25,6 +25,22 @@ SLIPPAGE = 0.0005  # SL-leg slippage buffer baked into per-unit risk (limit entr
 # Measured net-of-cost expectancy per segment (from BACKTEST-NET @ 10L). Single source.
 SEGMENT_NET_R = {"NSEFO": 0.27, "NSE_CASH": 0.08, "MCX": -0.18}
 
+# Regime x TF position-size weights (OOS-validated on 48,438 backtest BUY trades, net-of-cost).
+# Key = (E_regime, A_regime, time_frame). Weight scales the per-trade risk budget.
+#   FULL 1.00 = validated strong edge (SW ranges on execution TFs)
+#   MIN  0.35 = break-even; small size to MEASURE live, not bet on
+#   any (E,A,TF) NOT in this table -> 0.0 -> setup suppressed (net-negative or NO_TRADE cell).
+# The 13 net-negative cell x TFs and all DN/* long cells fall through to the 0.0 default.
+REGIME_TF_SIZE_WEIGHT = {
+    ("SW", "SW", "25"): 1.00,   # +1.727R net
+    ("SW", "SW", "2"):  1.00,   # +0.887R
+    ("SW", "SW", "6"):  1.00,   # +0.796R
+    ("SW", "UP", "6"):  1.00,   # +0.472R
+    ("UP", "UP", "2"):  0.35,   # +0.142R (break-even; observe)
+    ("SW", "UP", "2"):  0.35,   # +0.093R
+    ("UP", "SW", "2"):  0.35,   # +0.072R
+}
+
 
 # ----------------------------------------------------------------------------- config
 @dataclass(frozen=True)
@@ -58,6 +74,10 @@ class Setup:
     rr: float
     sector: str
     lot_size: int = 1          # 1 = divisible (cash); >1 = futures/commodity lot
+    # Regime x TF sizing key (populated by the caller from the SetupPayload):
+    e_regime: str = ""         # "UP" / "DN" / "SW"
+    a_regime: str = ""
+    time_frame: str = ""       # "1" / "2" / "5" / "6" / "25"
 
 
 @dataclass(frozen=True)
@@ -80,7 +100,11 @@ class PositionSizer:
         per_unit_risk = abs(s.entry - s.stop) * (1 + SLIPPAGE)
         if per_unit_risk <= 0:
             return None
-        risk_budget = pol.risk_pct / 100.0 * self.portfolio.total_equity
+        # Regime x TF sizing weight (0.0 -> suppress: net-negative or unmapped cell x TF).
+        w = REGIME_TF_SIZE_WEIGHT.get((s.e_regime, s.a_regime, s.time_frame), 0.0)
+        if w <= 0.0:
+            return None
+        risk_budget = (pol.risk_pct / 100.0 * self.portfolio.total_equity) * w
         raw_qty = risk_budget / per_unit_risk
         lot = max(1, s.lot_size)
         qty = int(math.floor(raw_qty / lot) * lot)
