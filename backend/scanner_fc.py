@@ -111,8 +111,8 @@ def extract_date(entry):
 
 def is_expiry_valid(expiry_str, min_days=5, today=None):
     """
-    Reject expiries within min_days.
-    Keep only expiry if days_left > min_days
+    Reject expiries with min_days or fewer days remaining.
+    Keep only expiry if days_left > min_days.
     """
     if today is None:
         today = date.today()
@@ -145,7 +145,7 @@ def get_nse_stock_futures_expiries():
 
     return list(dict.fromkeys(expiries))
 
-def build_futures_expiry_map(min_days=5, today=None, time_fr: int = 1):
+def build_futures_expiry_map(min_days=5, today=None, time_fr: int = 1, allowed_symbols=None):
     """
     Output:
     [
@@ -153,21 +153,26 @@ def build_futures_expiry_map(min_days=5, today=None, time_fr: int = 1):
         {'symbol': 'SBIN', 'expiry': [28042026, 26052026]},
     ]
     """
-    sorted_symbols_by_volume = future_liquidity_by_volume(time_fr)
+    allowed = {str(symbol).strip().upper() for symbol in allowed_symbols} if allowed_symbols else None
+    sorted_symbols_by_volume = future_liquidity_by_volume(time_fr, allowed_symbols=allowed)
     if len(sorted_symbols_by_volume) > 0:
         no_of_stocks = 50 if len(sorted_symbols_by_volume) > 50 else len(sorted_symbols_by_volume)
         sorted_symbols_by_volume = sorted_symbols_by_volume[0 : no_of_stocks]
         symbols = [item["symbol"] for item in sorted_symbols_by_volume]
     else:
         symbols = get_all_future_stock_syms(time_fr)
+        if allowed is not None:
+            symbols = [symbol for symbol in symbols if str(symbol).strip().upper() in allowed]
     raw_expiries = get_nse_stock_futures_expiries()
-
+    print("raw_expiries", raw_expiries)
     valid_expiries = [
         expiry_to_numeric(exp)
         for exp in raw_expiries
         if is_expiry_valid(exp, min_days=min_days, today=today)
     ]
-    print(symbols)
+    valid_expiries = [valid_expiries[0]]
+    # print(symbols)
+    print("valid_expiries", valid_expiries)
     return [{"symbol": sym, "expiry": valid_expiries.copy()} for sym in symbols]
 
 
@@ -180,7 +185,7 @@ def get_nearest_expiry_date(dates):
     return None
 
 
-def future_liquidity_by_volume(time_fr: int):
+def future_liquidity_by_volume(time_fr: int, allowed_symbols=None):
     try:
         session = dbc.get_session()
         # symbols = session.query(distinct(FuturesMaster.symbol)).all()
@@ -189,7 +194,10 @@ def future_liquidity_by_volume(time_fr: int):
                     (TradeSignal.time_fr == time_fr) &
                     (TradeSignal.is_active == True) & 
                     (TradeSignal.exchange_id == 11))).all()
+        allowed = {str(symbol).strip().upper() for symbol in allowed_symbols} if allowed_symbols else None
         sym_list = [s[0] for s in res]
+        if allowed is not None:
+            sym_list = [symbol for symbol in sym_list if str(symbol).strip().upper() in allowed]
         avg_traded_quantity = []
         for symbol in sym_list:
             results = session.query(FuturesMaster).filter(FuturesMaster.symbol == symbol.upper()).order_by(FuturesMaster.expiry_date).all()
@@ -231,7 +239,8 @@ def future_liquidity_by_volume(time_fr: int):
     return avg_traded_quantity
 
 
-def build_commodity_expiry_map(min_days=5, today=None, time_fr: int = 1):
+def build_commodity_expiry_map(min_days=5, today=None, time_fr: int = 1,
+                               include_existing: bool = False):
     """
     commodity_expiry_map input example:
     [
@@ -266,8 +275,11 @@ def build_commodity_expiry_map(min_days=5, today=None, time_fr: int = 1):
                 TradeSignal.exp_date == exp_dt,
                 TradeSignal.exchange_id == 10,   # COMMODITY (was 8 = cash)
             ).first()
-            if existing:
+            if existing and not include_existing:
                 continue
+            # Commodity candidates need the same explicit minimum-days buffer
+            # as NSEFO.  The old call referenced an undefined helper/variable,
+            # making the MCX scan fail before it could emit any candidate.
             if is_expiry_valid(exp, min_days=min_days, today=today):
                 valid_expiries.append(exp_dt)
 
@@ -353,7 +365,8 @@ class SetupScannerOrchestrator_FC:
                                 time_fr=job.time_frame,
                                 exp_num=EXP_NUM,
                                 last_d_time=job.last_d_time,
-                                is_future=job.is_future
+                                is_future=job.is_future,
+                                is_cash=False
                             )
 
                             record["status"] = "OK"

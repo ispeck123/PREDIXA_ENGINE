@@ -107,14 +107,6 @@ class ZoneAgeClass(str, Enum):
     REACTIVATED = "REACTIVATED"  # Was STALE but CMP returned to zone
 
 
-class ZoneNestingTier(Enum):
-    """X Zone nesting tiers based on HTF alignment."""
-    TIER_1 = "TIER_1"  # X nested in BOTH E and A (HIGHEST probability)
-    TIER_2 = "TIER_2"  # X nested in E OR A (HIGH probability)
-    TIER_3 = "TIER_3"  # X overlapping with E or A (MODERATE probability)
-    TIER_4 = "TIER_4"  # X standalone (LOW probability - AVOID)
-
-
 # ==============================================================================
 # TREND RESULT DATA CLASS
 # ==============================================================================
@@ -290,7 +282,7 @@ class Zone:
     legout_range: float = 0.0  # v3.4 ENHANCED: Range of legout sequence (for P2 validation)
     
     # NEW v3.8.1: Topology fields (BUG-08, BUG-11)
-    nesting_tier: Optional[ZoneNestingTier] = None
+    nesting_tier: Optional['ZoneNestingTier'] = None
     nesting_debug: Optional[dict] = None  # Diagnostic info from classify_with_debug
     zone_v38_score: Optional[int] = None
     obstruction_clear: bool = True
@@ -350,14 +342,6 @@ class Zone:
     @property
     def is_sell_zone(self) -> bool:
         return self.ztype in (ZoneType.SZ, ZoneType.GSZ)
-
-    @property
-    def execute_retest_limit(self) -> int:
-        """Max retests allowed at Execute TF before the zone is spent.
-        GDZ (gap-up demand) tolerates 1 retest (OOS-validated: retested GDZ
-        grossR +2.10 out-of-sample, >= fresh). All other types = 0 (fresh only).
-        Doctrine change 2026-08, evidence-based; see methodology Section 7."""
-        return 1 if self.ztype == ZoneType.GDZ else 0
 
     @property
     def low_edge_base(self) -> float:

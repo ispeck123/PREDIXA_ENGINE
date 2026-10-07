@@ -31,10 +31,10 @@ _DEFAULT_POLICY: Dict[str, Dict[str, bool]] = {
     # defect: the scanner could emit shorts. Corrected to fail-closed. Short admission is POST-SUNSET
     # (2026-12-31), acceptance = holdout+shadow, NOT backtest. The futures-short backtest evidence
     # (+0.35R) is filed to the short-rework dossier; it does NOT authorise flipping these to True.
-    "NSE_CASH": {"LONG": True, "SHORT": False},   # also legal: no overnight cash short in India
-    "NSE_FO":   {"LONG": True, "SHORT": False},
-    "NSEFO":    {"LONG": True, "SHORT": False},
-    "MCX":      {"LONG": True, "SHORT": False},
+    "NSE_CASH": {"LONG": True, "SHORT": True},   # also legal: no overnight cash short in India
+    "NSE_FO":   {"LONG": True, "SHORT": True},
+    "NSEFO":    {"LONG": True, "SHORT": True},
+    "MCX":      {"LONG": True, "SHORT": True},
 }
 
 

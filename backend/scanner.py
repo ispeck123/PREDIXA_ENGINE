@@ -305,6 +305,7 @@ class SetupScannerOrchestrator:
                             stock_name=symbol,
                             time_fr=job.time_frame,
                             last_d_time=job.last_d_time,
+                            is_future=False,
                             is_cash=True
                         )
 
@@ -402,6 +403,7 @@ class SetupScannerOrchestrator:
                         stock_name=symbol,
                         time_fr=job.time_frame,
                         last_d_time=job.last_d_time,
+                        is_future=False,
                         is_cash=True
                     )
 
@@ -480,7 +482,7 @@ class SetupScannerOrchestrator:
 
                     formatted = format_calculate_setup_response(
                         raw, stock_name=symbol, time_fr=job.time_frame,
-                        last_d_time=job.last_d_time, is_cash=True
+                        last_d_time=job.last_d_time, is_future=False, is_cash=True
                     )
 
                     trade_type = setup.trade_type

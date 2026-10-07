@@ -93,6 +93,13 @@ class PatternType(str, Enum):
     DBD = "DBD"
     NONE = "NONE"
 
+class ZoneNestingTier(Enum):
+    """X Zone nesting tiers based on HTF alignment."""
+    TIER_1 = "TIER_1"  # X nested in BOTH E and A (HIGHEST probability)
+    TIER_2 = "TIER_2"  # X nested in E OR A (HIGH probability)
+    TIER_3 = "TIER_3"  # X overlapping with E or A (MODERATE probability)
+    TIER_4 = "TIER_4"  # X standalone (LOW probability - AVOID)
+
 
 # NEW in v3.4: Zone Age Classification (v4.4.1 Section 13.2)
 class ZoneAgeClass(str, Enum):
@@ -105,14 +112,6 @@ class ZoneAgeClass(str, Enum):
     ACTIVE = "ACTIVE"        # 50-200 bars + CMP within 5 ATR
     STALE = "STALE"          # > 200 bars OR CMP > 10 ATR away
     REACTIVATED = "REACTIVATED"  # Was STALE but CMP returned to zone
-
-
-class ZoneNestingTier(Enum):
-    """X Zone nesting tiers based on HTF alignment."""
-    TIER_1 = "TIER_1"  # X nested in BOTH E and A (HIGHEST probability)
-    TIER_2 = "TIER_2"  # X nested in E OR A (HIGH probability)
-    TIER_3 = "TIER_3"  # X overlapping with E or A (MODERATE probability)
-    TIER_4 = "TIER_4"  # X standalone (LOW probability - AVOID)
 
 
 # ==============================================================================

@@ -10,26 +10,8 @@ import numpy as np
 from sympy.ntheory.continued_fraction import continued_fraction_iterator
 # from scripts.additional_engine_class import ZoneNestingTier
 from scripts.models import ZoneType, TF, CandleSeries, Config, VolatilityRegime, BoundaryMode, Zone, ViolationType, ZoneState, TrendContext, load_preprocess_data, ReversalPattern, ZonePattern
-from scripts.mcx_session import same_e1_session, mcx_e1_session_ids
 
 Side = Literal["BUY", "SELL"]
-
-
-@dataclass
-class RiskTarget:
-    """Risk and target calculation result."""
-    entry: float
-    stop: float
-    target: float
-    rr: float
-    valid: bool
-    reason: Optional[str] = None
-    target_mode: str = "UNKNOWN"  # STRUCTURAL | MINIMUM_RR
-    target_source_zone_id: Optional[str] = None
-    target_source_tf: Optional[str] = None
-    target_multiplier: Optional[float] = None
-    htf_target_price: Optional[float] = None
-
 
 # ==============================================================================
 # ENUMERATIONS
@@ -1358,42 +1340,6 @@ class ZoneDetector:
 
 
     def detect(self, symbol: str, tf: TF, cs: CandleSeries) -> List[Zone]:
-        """Detect zones without allowing an E1-marked MCX seam to be crossed.
-
-        A session id is supplied only by the commodity route.  Splitting before
-        detection makes base formation, bridge logic, and all legout checks
-        mechanically incapable of using a 09:00 gap-open as a continuation of
-        the prior 23:30 session.  Other segments retain the exact legacy path.
-        """
-        session_ids = cs.session_id
-        if not session_ids or len(session_ids) != cs.n or len(set(session_ids)) == 1:
-            return self._detect_unbounded(symbol, tf, cs)
-
-        zones: List[Zone] = []
-        start = 0
-        for end in range(1, cs.n + 1):
-            if end != cs.n and session_ids[end] == session_ids[start]:
-                continue
-            local = CandleSeries(
-                o=cs.o[start:end], h=cs.h[start:end], l=cs.l[start:end], c=cs.c[start:end],
-                v=cs.v[start:end] if cs.v else None,
-                ts=cs.ts[start:end] if cs.ts else None,
-                is_live=cs.is_live and end == cs.n,
-                is_incomplete=cs.is_incomplete[start:end] if cs.is_incomplete else None,
-            )
-            for zone in self._detect_unbounded(symbol, tf, local):
-                # These are all positional fields used after detection.  Keep
-                # timestamps/prices untouched and restore global coordinates.
-                for field in ("created_idx", "base_start", "base_end", "departure_idx",
-                              "structure_start_idx", "legin_start_idx"):
-                    value = getattr(zone, field, None)
-                    if value is not None:
-                        setattr(zone, field, value + start)
-                zones.append(zone)
-            start = end
-        return zones
-
-    def _detect_unbounded(self, symbol: str, tf: TF, cs: CandleSeries) -> List[Zone]:
 
         n_completed = cs.n_completed 
         incomplete = cs.is_incomplete or [False] * n_completed
@@ -2395,10 +2341,6 @@ class ZoneQualifier:
         _in_violation = False  # Track episode state
         
         for i in range(start, end):
-            # E1: a zone belongs to the session in which it was formed.  A
-            # later MCX 09:00 gap-open cannot consume, invalidate, or retest it.
-            if not same_e1_session(cs, zone.created_idx, i):
-                continue
             violated_here = False
             if zone.is_buy_zone:
                 # v3.8.8 FIX: Gap zones check entry from PROXIMAL (into zone).
@@ -2531,8 +2473,6 @@ class ZoneQualifier:
             return None
 
         for i in range(start, cs.n):
-            if not same_e1_session(cs, zone.created_idx, i):
-                continue
             low_i = cs.l[i]
             high_i = cs.h[i]
             if zone.is_buy_zone:
@@ -2952,10 +2892,6 @@ class GapModule:
         for vi in range(len(valid_indices) - 1):
             n = valid_indices[vi]
             n1 = valid_indices[vi + 1]
-            # A 09:00 MCX open is not an institutional gap-zone departure
-            # from the prior 23:30 session under E1.
-            if not same_e1_session(cs, n, n1):
-                continue
             av = atr_vals[n]
             if av is None or av <= 0:
                 continue
@@ -3286,8 +3222,8 @@ class ZoneRanker:
             zone.block_reason = f"RR_BELOW_{self.cfg.rr_min}"
             return zone
         
-        # Execute TF freshness gate (GDZ tolerates 1 retest, OOS-validated; else 0)
-        if zone.tf == TF.X and zone.retest_count > zone.execute_retest_limit:
+        # Execute TF freshness gate
+        if zone.tf == TF.X and zone.retest_count > 0:
             zone.score_total = 0
             zone.state = ZoneState.RED
             zone.block_reason = "EXECUTE_NOT_FRESH"
@@ -3451,7 +3387,7 @@ class RRTargetEngine:
         zone.target = target
         zone.rr = rr
         
-        return RiskTarget(entry=entry, stop=stop, target=target, rr=rr, valid=True, target_mode=target_mode)
+        return RiskTarget(entry=entry, stop=stop, target=target, rr=rr, target_mode=target_mode)
 
 
 # ==============================================================================
@@ -3473,7 +3409,7 @@ class EntryGate:
             return False, "NO_STRUCTURE_REMOVAL"
         if zone.rr and zone.rr < self.cfg.rr_min:
             return False, "RR_BELOW_MIN"
-        if zone.tf == TF.X and zone.retest_count > zone.execute_retest_limit:
+        if zone.tf == TF.X and zone.retest_count > 0:
             return False, "EXECUTE_NOT_FRESH"
         if zone.ztype in [ZoneType.BZ, ZoneType.GDZ] and not ctx.allow_long:
             return False, "TREND_BLOCKS_LONG"
@@ -4000,50 +3936,69 @@ def process_qualified_zones(file_path : str, time_frame: TF, last_d_time, time_l
         c=violation_df['close'].tolist(),
         ts=violation_df['unix_timestamp'].tolist()
     )
+    # ctx = TrendContext(
+    #     regime_E=TrendRegime.UP, regime_A=TrendRegime.UP, regime_X=TrendRegime.UP,
+    #     quadrant_E=Quadrant.Q3, quadrant_A=Quadrant.Q3, quadrant_X=Quadrant.Q3,
+    #     allow_long=True, allow_short=False
+    # )
+    # pipeline = SDEnginePipeline()
     detector = ZoneDetector(Config())
     qualifier = ZoneQualifier(Config())
     multi_zone = MultiZoneHandler(Config())
     gap_module = GapModule()
+    # zone_scorer_v38 = ZoneScorerV38()
 
     atr_vals = atr(cs.h, cs.l, cs.c, Config().atr_period)
     atr_now = float(atr_vals[-1]) if atr_vals and atr_vals[-1] else 1.0
-
+        
+    # EMA for regime classification (v3.1)
     atr_ema = ema([a if a else 0.0 for a in atr_vals], 20)
     atr_avg = float(atr_ema[-1]) if atr_ema and atr_ema[-1] else atr_now
     vol = volatility_regime(atr_now, atr_avg, Config())
-
+        
+    # EMA-20 of close for confluence
     close_ema = ema(cs.c, 20)
     ema_20 = float(close_ema[-1]) if close_ema and close_ema[-1] else None
 
     zones = detector.detect("TEST", time_frame, cs) # ctx, entry_price=df['close'].iloc[-1]
+
     if time_frame == TF.X:
         gap_zones = gap_module.detect("TEST", time_frame, cs, vol, opposing_zones=zones)
         # print(gap_zones, "llllllllllllllllllllllllllllllllllllllllllllllllllllllll")
         zones.extend(gap_zones)
-
+        
     # resolved_zones, replaced_ids = multi_zone.process_overlaps(zones, atr_now)
     opp_distal = None
     # for z in zones:
         # if z.zone_id in replaced_ids:
             # z.replaced_by_composite = True
-
+        
     # # 4. Qualify zones (only non-replaced)
     all_zones = zones #+ [z for z in resolved_zones if z.is_composite]
     # print(len(all_zones))
     for zone in all_zones:
         # if zone.replaced_by_composite:
         #     continue
-
+        
         zone.bars_since = cs.n - zone.created_idx
         qualifier.update_violation(violation_cs, zone)
         qualifier.update_retest(violation_cs, zone)
+
         qualifier.compute_structure_removal(violation_cs, zone, opp_distal)
+
         if zone.ztype in [ZoneType.GDZ, ZoneType.GSZ] and time_frame == TF.X:
             gap_module.check_session_acceptance(cs, zone, zone.distal)
-        print(zone.ztype ,zone.proximal, zone.distal, zone.state, zone.violation, zone.block_reason)
 
+        print(zone.ztype ,zone.proximal, zone.distal, zone.state, zone.violation, zone.block_reason)
+        # for z in zones:
+        #     qualifier.update_violation(cs, z)
+    # qualifier.update_violation(("TEST", TF.X, cs, ctx, zones)
     vpct = 50 if time_frame == TF.X else 95
     exe_frame = True if time_frame == TF.X else False
+
+    # for items in all_zones:
+    #     if items.ztype in [ZoneType.GDZ, ZoneType.GSZ]:
+    #         print(items.state, items.penetration_pct)
 
     valid = [z for z in all_zones if z.state != ZoneState.RED and (0.0 <= z.penetration_pct <= vpct)] # 
     # invalid_zones = [z for z in all_zones if z not in valid]#.state == ZoneState.RED and z.penetration_pct > vpct]
@@ -4063,8 +4018,7 @@ def process_qualified_zones(file_path : str, time_frame: TF, last_d_time, time_l
 
 
 
-def process_trend_zones(file_path : str, time_frame: TF, last_d_time, for_frps: bool = True,
-                        e1_session_enforced: bool = False):
+def process_trend_zones(file_path : str, time_frame: TF, last_d_time, for_frps: bool = True):
 
     df, violation_df = load_preprocess_data(file_path, last_d_time)
     
@@ -4073,8 +4027,7 @@ def process_trend_zones(file_path : str, time_frame: TF, last_d_time, for_frps: 
         h=df['high'].tolist(),
         l=df['low'].tolist(),
         c=df['close'].tolist(),
-        ts=df['unix_timestamp'].tolist(),
-        session_id=mcx_e1_session_ids(df['unix_timestamp'].tolist()) if e1_session_enforced else None,
+        ts=df['unix_timestamp'].tolist()
     )
 
     violation_cs = CandleSeries(
@@ -4082,8 +4035,7 @@ def process_trend_zones(file_path : str, time_frame: TF, last_d_time, for_frps: 
         h=violation_df['high'].tolist(),
         l=violation_df['low'].tolist(),
         c=violation_df['close'].tolist(),
-        ts=violation_df['unix_timestamp'].tolist(),
-        session_id=mcx_e1_session_ids(violation_df['unix_timestamp'].tolist()) if e1_session_enforced else None,
+        ts=violation_df['unix_timestamp'].tolist()
     )
     # ctx = TrendContext(
     #     regime_E=TrendRegime.UP, regime_A=TrendRegime.UP, regime_X=TrendRegime.UP,
@@ -4155,8 +4107,7 @@ def process_trend_zones(file_path : str, time_frame: TF, last_d_time, for_frps: 
 
 
 
-def process_qualified_zones_setup(file_path : str, time_frame: TF, last_d_time,
-                                  e1_session_enforced: bool = False) -> list[Zone]:
+def process_qualified_zones_setup(file_path : str, time_frame: TF, last_d_time) -> list[Zone]:
 
     df, violation_df = load_preprocess_data(file_path, last_d_time)
     
@@ -4165,8 +4116,7 @@ def process_qualified_zones_setup(file_path : str, time_frame: TF, last_d_time,
         h=df['high'].tolist(),
         l=df['low'].tolist(),
         c=df['close'].tolist(),
-        ts=df['unix_timestamp'].tolist(),
-        session_id=mcx_e1_session_ids(df['unix_timestamp'].tolist()) if e1_session_enforced else None,
+        ts=df['unix_timestamp'].tolist()
     )
 
     violation_cs = CandleSeries(
@@ -4174,8 +4124,7 @@ def process_qualified_zones_setup(file_path : str, time_frame: TF, last_d_time,
         h=violation_df['high'].tolist(),
         l=violation_df['low'].tolist(),
         c=violation_df['close'].tolist(),
-        ts=violation_df['unix_timestamp'].tolist(),
-        session_id=mcx_e1_session_ids(violation_df['unix_timestamp'].tolist()) if e1_session_enforced else None,
+        ts=violation_df['unix_timestamp'].tolist()
     )
     # ctx = TrendContext(
     #     regime_E=TrendRegime.UP, regime_A=TrendRegime.UP, regime_X=TrendRegime.UP,
@@ -4257,3 +4206,5 @@ def process_qualified_zones_setup(file_path : str, time_frame: TF, last_d_time,
 
     # proc_zones = format_zone_ranges(qualified_zones, df, exe_frame)
     return qualified_zones, all_zones
+
+

@@ -13,13 +13,11 @@ from scripts.trend_engine import Config as trend_config
 from scripts.models import Config as trade_config
 from scripts.models import Zone, CandleSeries
 from shared.config.settings import stock_data_dir_config, stock_logic_config
-from scripts.side_enablement_policy import SIDE_POLICY, Side, resolve_segment
 from dataclasses import asdict, is_dataclass
 from datetime import timedelta
 from scripts.trend_engine import TrendEngine, MultiTimeframeTrendCalculator
 
 from scripts.models import TrendContext, Quadrant, ReversalPattern, PatternType, TF, ZoneType, ZoneState, TrendRegime, TradeType
-from scripts.mcx_session import mcx_e1_session_ids
 import os
 
 from shared.utils.logger import logger
@@ -173,18 +171,15 @@ class SDEnginePipeline:
         symbol,
         last_d_time,
         time_list,
+        exp_num,
+        data_dir,
         htf_sz_overhead: bool = False,
         htf_bz_below: bool = False,
         zones_E_cascade: Optional[List[Zone]] = None,
-        zones_A_cascade: Optional[List[Zone]] = None,
-        exp_num = None,
-        data_dir = None
+        zones_A_cascade: Optional[List[Zone]] = None
     ) -> TrendContext:
         """Calculate complete trend context with trade type classification."""
-        if exp_num and data_dir:
-            self.trend_calculator._set_symbol_and_timeframe_future_and_commodity(time_list, symbol, last_d_time, exp_num, data_dir)
-        else:
-            self.trend_calculator._set_symbol_and_timeframe(time_list, symbol, last_d_time)
+        self.trend_calculator._set_symbol_and_timeframe_future_and_commodity(time_list, symbol, last_d_time, exp_num, data_dir)
         return self.trend_calculator.calculate_full_context(
             htf_sz_overhead, htf_bz_below,
             zones_E_cascade, zones_A_cascade
@@ -232,16 +227,14 @@ class SDEnginePipeline:
         self.csv_path_X = os.path.join(data_dir, 'latest_data_csv', f'{tick}_{exp_num}_{time_list[-1]}.csv')    
         self.last_d_time = last_d_time
 
-    def get_candle_series_data(self, csv_path, last_d_time, *, e1_session_enforced: bool = False):
-        print(csv_path, "ffffffffffffffffffffffffffffffffffffff")
+    def get_candle_series_data(self, csv_path, last_d_time):
         df, violation_df = load_preprocess_data(csv_path, last_d_time)
         cs = CandleSeries(
             o=df['open'].tolist(),
             h=df['high'].tolist(),
             l=df['low'].tolist(),
             c=df['close'].tolist(),
-            ts=df['unix_timestamp'].tolist(),
-            session_id=mcx_e1_session_ids(df['unix_timestamp'].tolist()) if e1_session_enforced else None,
+            ts=df['unix_timestamp'].tolist()
         )
         print("Candle series data loaded for setup engine", df.iloc[-1]['close'], csv_path)
         return cs
@@ -313,11 +306,9 @@ class SDEnginePipeline:
     
     def run(
         self,
-        symbol: str, time_list, 
-        last_d_time,
+        symbol: str, time_list, last_d_time, exp_num, is_future: bool,
         segment: Optional[str] = None,
-        days_to_expiry: Optional[int] = None,
-        exp_num = None, is_future: bool = None, is_cash: bool = None
+        days_to_expiry: Optional[int] = None
     ) -> Dict:
         """
         Run complete pipeline v3.8.
@@ -353,18 +344,11 @@ class SDEnginePipeline:
 
 
         logger.info(f"Running SD Engine Pipeline for {symbol}")
-        data_dir = stock_data_dir_config.indian_stock_future_data_dir if is_future == True else stock_data_dir_config.indian_commodity_data
-        if exp_num and data_dir:
-            self._set_timeframe_candle_series_future_and_commodity(time_list, symbol, last_d_time, exp_num, data_dir)
-        else:
-            self._set_timeframe_candle_series(time_list, symbol, last_d_time)
-        # E1 is exclusive to the MCX commodity path.  Futures and cash retain
-        # their original continuous-session detection semantics.
-        _e1 = is_future is False
-        cs_E = self.get_candle_series_data(self.csv_path_E, last_d_time, e1_session_enforced=_e1)
-        cs_A = self.get_candle_series_data(self.csv_path_A, last_d_time, e1_session_enforced=_e1)
-        cs_X = self.get_candle_series_data(self.csv_path_X, last_d_time, e1_session_enforced=_e1)
-        _e1_boundary_count = (len(set(cs_X.session_id)) - 1) if cs_X.session_id else 0
+        data_dir = stock_data_dir_config.indian_stock_future_data_dir if is_future else stock_data_dir_config.indian_commodity_data
+        self._set_timeframe_candle_series_future_and_commodity(time_list, symbol, last_d_time, exp_num, data_dir)
+        cs_E = self.get_candle_series_data(self.csv_path_E, last_d_time)
+        cs_A = self.get_candle_series_data(self.csv_path_A, last_d_time)
+        cs_X = self.get_candle_series_data(self.csv_path_X, last_d_time)
 
         current_cmp = float(self.get_cmp(self.csv_path_X, last_d_time))
         logger.info(f"cmp aquired....................{current_cmp}")
@@ -387,14 +371,6 @@ class SDEnginePipeline:
                     'gap_zones_E_count': 0, 'gap_zones_A_count': 0, 'gap_zones_X_count': 0,
                     'vol_regime_E': None, 'vol_regime_A': None, 'vol_regime_X': None,
                     'best_setup_long': None, 'best_setup_short': None, 'setup_cascade_log': [],
-                    # CMP is already available above.  Retain the normal
-                    # result contract even when a timeframe lacks enough
-                    # history, so callers can reject cleanly rather than
-                    # attempting float(None) in the formatter.
-                    'price_cmp': current_cmp,
-                    'entry_ts': cmp_t_stamp,
-                    'extend_ts': cmp_t_stamp + self.add_timestamp(),
-                    'e1_session_boundary_count': _e1_boundary_count,
                 }
         _data_warnings = []
         for _tf, _cs, _label in [(TF.E, cs_E, 'E'), (TF.A, cs_A, 'A'), (TF.X, cs_X, 'X')]:
@@ -409,8 +385,8 @@ class SDEnginePipeline:
         logger.info(f"Detecting regular zones for {symbol}")
         # zones_E = self.zone_detector.detect(symbol, TF.E, cs_E)
         # zones_A = self.zone_detector.detect(symbol, TF.A, cs_A)
-        result_E, all_zones_E = process_trend_zones(self.csv_path_E, TF.E, self.last_d_time, e1_session_enforced=_e1)
-        result_A, all_zones_A = process_trend_zones(self.csv_path_A, TF.A, self.last_d_time, e1_session_enforced=_e1)
+        result_E, all_zones_E = process_trend_zones(self.csv_path_E, TF.E, self.last_d_time)
+        result_A, all_zones_A = process_trend_zones(self.csv_path_A, TF.A, self.last_d_time)
         zones_E = result_E['BUY'] + result_E['SELL']
         zones_A = result_A['BUY'] + result_A['SELL']
         zones_X = self.zone_detector.detect(symbol, TF.X, cs_X)
@@ -458,10 +434,10 @@ class SDEnginePipeline:
         # Detect GDZ/GSZ per TF
         # D1 FIX: Pass opposing BZ/SZ zones for structure removal validation
         # Gap v2.3 Sec 3.1 S1: Structure removal is NON-NEGOTIABLE
-        gap_zones_E = self.gap_module.detect(symbol, TF.E, cs_E, vol_E, opposing_zones=zones_E)
-        gap_zones_A = self.gap_module.detect(symbol, TF.A, cs_A, vol_A, opposing_zones=zones_A)
-        gap_zones_X = self.gap_module.detect(symbol, TF.X, cs_X, vol_X, opposing_zones=zones_X)
-
+        gap_zones_E = self.gap_module.detect(symbol, TF.E, cs_E, vol_E)
+        # print(zones_A, "555555555555555555555555555555555555555555")
+        gap_zones_A = self.gap_module.detect(symbol, TF.A, cs_A, vol_A)
+        gap_zones_X = self.gap_module.detect(symbol, TF.X, cs_X, vol_X)
         
         # Merge gap zones into main zone lists (GDZ/GSZ participate
         # alongside BZ/SZ — they share the same qualification pipeline)
@@ -508,6 +484,7 @@ class SDEnginePipeline:
         # in any downstream logic. Non-accepted gaps get AMBER state.
         # ============================================================
         for zone in zones_E_filtered + zones_A_filtered + zones_X_filtered:
+            # print(zone.departure_atr, zone.body_pct, "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
             if zone.ztype in (ZoneType.GDZ, ZoneType.GSZ):
                 # break_level: proximal for same-session close check
                 break_level = zone.proximal
@@ -563,11 +540,8 @@ class SDEnginePipeline:
         
         # Calculate trend context (using Rule C filtered zones)
         logger.info(f"Calculating trend context for {symbol}")
-        if is_cash == True:
-            trend_context = self.calculate_trend_context(symbol, last_d_time, time_list, htf_sz_overhead, htf_bz_below, zones_E_raw_for_cascade, zones_A_raw_for_cascade)
-        else:
-            trend_context = self.calculate_trend_context(symbol, last_d_time, time_list, htf_sz_overhead, htf_bz_below, zones_E_raw_for_cascade, zones_A_raw_for_cascade, exp_num, data_dir)
-
+        trend_context = self.calculate_trend_context(symbol, last_d_time, time_list, exp_num, data_dir, htf_sz_overhead, htf_bz_below)
+        
         # v3.4: Check for three-way conflict and resolve
         three_way_resolution = self.conflict_resolver.resolve(
             trend_context.regime_E, trend_context.regime_A, trend_context.regime_X
@@ -629,11 +603,11 @@ class SDEnginePipeline:
         zones_X_processed, excluded = self.multi_zone.process_overlaps(zones_X_filtered, atr_X_val)
         self.multi_zone.find_consecutive_stack(zones_X_processed, atr_X_val)
 
-        zones_X_processed, all_zone_X = process_qualified_zones_setup(
-            self.csv_path_X, TF.X, self.last_d_time, e1_session_enforced=_e1)
+        zones_X_processed, all_zone_X = process_qualified_zones_setup(self.csv_path_X, TF.X, self.last_d_time)
         htf_zones = zones_E_filtered + zones_A_filtered
         # Qualify zones and calculate scores
         for zone in zones_X_processed:
+            # print(zone.departure_atr, zone.body_pct)
             # self.qualifier.update_violation(cs_X, zone)
             # self.qualifier.update_retest(cs_X, zone)
             
@@ -654,6 +628,7 @@ class SDEnginePipeline:
             
             opposing_distal = opposing.distal if opposing else None
             opposing_prox = opposing.proximal if opposing else None
+            # print(zone.ztype, zone.proximal, zone.distal, opposing_distal, "0000000000000000000000000000000000000000000000000000000000000000")
             self.qualifier.compute_structure_removal(cs_X, zone, opposing_distal, opposing_prox)
             # Score zone (age penalty already set by zone_age_manager)
             self.zone_scorer.score_zone(zone, trend_context.regime_E, opposing, atr_X_val, ema_20_X_val)
@@ -672,32 +647,14 @@ class SDEnginePipeline:
             zone_v38_score = self.zone_scorer_v38.calculate_score(zone)
             
             # v3.8: Nesting tier classification
-            # nesting_tier = self.nesting_classifier.classify(
-            #     zone, zones_A_filtered, zones_E_filtered
-            # )
-            tier, debug = self.nesting_classifier.classify_with_debug(zone, zones_A_filtered, zones_E_filtered)
-            zone.nesting_tier = tier
-            nesting_tier = tier
-            zone.overlap_ratio = max(
-                debug["best_a_overlap"],
-                debug["best_e_overlap"],
+            nesting_tier = self.nesting_classifier.classify(
+                zone, zones_A_filtered, zones_E_filtered
             )
+            zone.nesting_tier = nesting_tier
             zone.zone_v38_score = zone_v38_score
-        
-            # First try strict containment for genuinely nested zones.
+            
             zone.enclosing_e_zone = self._find_enclosing_zone(zone, zones_E_filtered)
             zone.enclosing_a_zone = self._find_enclosing_zone(zone, zones_A_filtered)
-
-            # B-W-EMBED fix:
-            # TIER_3 is partial overlap, so strict containment normally
-            # returns None. Recover the strongest overlapping A/E parent.
-            if nesting_tier in (ZoneNestingTier.TIER_1, ZoneNestingTier.TIER_2, ZoneNestingTier.TIER_3,):
-                if zone.enclosing_e_zone is None:
-                    zone.enclosing_e_zone = self.nesting_classifier.find_best_structural_parent(zone, zones_E_filtered)
-
-                if zone.enclosing_a_zone is None:
-                    zone.enclosing_a_zone = self.nesting_classifier.find_best_structural_parent(zone, zones_A_filtered)
-            
 
             zone.zone_in_zone = (
                 nesting_tier is not None and 
@@ -722,7 +679,6 @@ class SDEnginePipeline:
                 zone, cs_X.cmp, zones_A_filtered, zones_E_filtered
             )
             zone.entry_path_clear = entry_path_clear
-            zone.entry_blocking_zone = entry_blocking_zone   # B-W4: retain object for G6c gate
             zone.entry_blocking_zone_id = (
                 entry_blocking_zone.zone_id if entry_blocking_zone else None
             )
@@ -743,7 +699,6 @@ class SDEnginePipeline:
             zone.stop_price = risk_target.stop
             zone.rr_ratio = risk_target.rr
             zone.target_mode = risk_target.target_mode
-            zone.htf_target_price = risk_target.htf_target_price
             
             # Determine trade type for quadrant enforcement
             # trade_type_for_zone = (
@@ -789,7 +744,7 @@ class SDEnginePipeline:
             #     cmp_inside_htf_sz=cmp_inside_htf_sz,
             #     cmp_inside_htf_bz=cmp_inside_htf_bz
             # )
-            
+            # print(zone.ztype, zone.proximal, zone.distal, zone.removes_structure, zone.removes_structure_type, "overlapping", zone.is_part_of_overlapping,  "consecutive", zone.is_part_of_consecutive, "zone_in_zone", zone.zone_in_zone)
             passed, reason = self.gate_checker.check_gates_pre_rr(
                 zone, trend_context, TF.X, cmp=current_cmp,
                 nesting_tier=nesting_tier,
@@ -798,9 +753,7 @@ class SDEnginePipeline:
                 quadrant=relevant_quadrant,
                 zone_v38_score=zone_v38_score,
                 cmp_inside_htf_sz=cmp_inside_htf_sz,
-                cmp_inside_htf_bz=cmp_inside_htf_bz,
-                entry_path_clear=entry_path_clear,
-                entry_blocking_zone=entry_blocking_zone
+                cmp_inside_htf_bz=cmp_inside_htf_bz
             )
 
             if passed:
@@ -823,8 +776,9 @@ class SDEnginePipeline:
         #      removal computed before propagation.
         # ============================================================
         g8_blocked = [z for z in zones_X_processed if z.state == ZoneState.RED and z.block_reason == "G8_STRUCTURE_NOT_REMOVED" and (z.is_part_of_consecutive or z.is_part_of_overlapping)]
-        
+
         for zone in g8_blocked:
+
             partner_ids = (
                 ([zone.consecutive_partner_id] if zone.consecutive_partner_id is not None else []) +
                 (zone.overlapping_partners_id or [])
@@ -833,10 +787,9 @@ class SDEnginePipeline:
                 (z for z in zones_X_processed if z.zone_id in partner_ids),
                 None
             )
-
             # partner = next(
             #     (z for z in zones_X_processed 
-            #      if z.zone_id in {zone.consecutive_partner_id, all(zone.overlapping_partners_id)}),
+            #      if z.zone_id == zone.consecutive_partner_id),
             #     None
             # )
             if partner and partner.removes_structure:
@@ -862,9 +815,7 @@ class SDEnginePipeline:
                     quadrant=relevant_quadrant,
                     zone_v38_score=zone_v38_score,
                     cmp_inside_htf_sz=cmp_inside_htf_sz,
-                    cmp_inside_htf_bz=cmp_inside_htf_bz,
-                    entry_path_clear=getattr(zone, 'entry_path_clear', True),
-                    entry_blocking_zone=getattr(zone, 'entry_blocking_zone', None)
+                    cmp_inside_htf_bz=cmp_inside_htf_bz
                 )
                 
                 if passed:
@@ -879,7 +830,6 @@ class SDEnginePipeline:
                 else:
                     # Still blocked by a different gate
                     zone.block_reason = reason
-
 
 
 
@@ -941,39 +891,15 @@ class SDEnginePipeline:
         # =====================================================================
         cmp = cs_X.c[-1]  # Current Market Price = last close on Execute TF
 
-        if is_cash == True:
-            best_long, best_short, cascade_log = self.setup_extractor.extract(
-                zones_X=zones_X_processed,
-                trend_context=trend_context,
-                cmp=cmp,
-                atr_X=atr_X_val,
-                ema_20=ema_20_X_val,
-                max_entry_distance_pct=_max_entry_dist,
-                zones_A=zones_A_filtered
-            )
-        else:
-            best_long, best_short, cascade_log = self.setup_extractor.extract(
-                zones_X=zones_X_processed,
-                trend_context=trend_context,
-                cmp=current_cmp,
-                atr_X=atr_X_val,
-                ema_20=ema_20_X_val,
-                max_entry_distance_pct=_max_entry_dist,
-                zones_A=zones_A_filtered
-            )
-
-        # ===== Phase-0 SideEnablementPolicy gate (single chokepoint, fail-closed SELL) =====
-        # Replaces ad-hoc ENABLE_FC_SELL / CASH_SHORT_TFS gating. A disabled side can never
-        # reach order construction. Every drop is audited.
-        _seg = resolve_segment(segment, is_cash, is_future)
-        if best_short is not None and not SIDE_POLICY.is_enabled(_seg, Side.SHORT):
-            logger.info(f"[SIDE_POLICY] SHORT dropped | segment={_seg} | "
-                        f"zone={getattr(best_short, 'zone_id', None)} | reason=side_disabled")
-            best_short = None
-        if best_long is not None and not SIDE_POLICY.is_enabled(_seg, Side.LONG):
-            logger.info(f"[SIDE_POLICY] LONG dropped | segment={_seg} | reason=side_disabled")
-            best_long = None
-        # ===================================================================================
+        best_long, best_short, cascade_log = self.setup_extractor.extract(
+            zones_X=zones_X_processed,
+            trend_context=trend_context,
+            cmp=current_cmp,
+            atr_X=atr_X_val,
+            ema_20=ema_20_X_val,
+            max_entry_distance_pct=_max_entry_dist,
+            zones_A=zones_A_filtered
+        )
 
         return {
             'symbol': symbol,
@@ -1012,12 +938,7 @@ class SDEnginePipeline:
             'data_warnings': _data_warnings,
             'entry_ts': cmp_t_stamp,
             'extend_ts': cmp_t_stamp + self.add_timestamp(),
-            # ``current_cmp`` is obtained from the last valid execute-TF bar
-            # and is the value used for futures/commodity selection above.
-            # ``cs_X.c[-1]`` can be None on an incomplete source bar, so it
-            # must not be exposed as the scanner's CMP.
-            'price_cmp': current_cmp,
-            'e1_session_boundary_count': _e1_boundary_count,
+            'price_cmp': cmp
         }
 
 
@@ -1086,15 +1007,15 @@ def format_calculate_setup_response(
     *,
     stock_name: str,
     time_fr: int,
+    exp_num: str,
     last_d_time,
-    exp_num: str = None,
-    is_future: bool = None,
-    is_cash: bool = None
+    is_future: bool = True
 ) -> Dict[str, Any]:
     """
     Convert your v3.8.x result dict (with best_setup_long/best_setup_short = SetupPayload)
     into the required RESPONSE structure only.
     """
+    # print(result, "#################################################################")
     def _to_dict(sp: Any) -> Optional[Dict[str, Any]]:
         if sp is None:
             return None
@@ -1104,15 +1025,6 @@ def format_calculate_setup_response(
             return sp
         # fallback: object with attrs
         return sp.__dict__
-
-    def _stable_signature(value: Any) -> Optional[str]:
-        """Ensure the persisted signature is scoped to the requested stock."""
-        if not value:
-            return None
-        parts = str(value).split(":")
-        if len(parts) < 4:
-            return str(value)
-        return f"{stock_name}:{parts[-3]}:{parts[-2]}:{parts[-1]}"
 
     out: Dict[str, Any] = {
         "STOCK_NAME": stock_name,
@@ -1126,16 +1038,6 @@ def format_calculate_setup_response(
             "entry_price": float(best_long["entry_price"]),
             "stop_loss": float(best_long["stop_price"]),
             "target_price": float(best_long["target_price"]),
-            "zone_signature": _stable_signature(best_long.get("zone_signature")),
-            "is_execute_tf": bool(best_long.get("is_execute_tf", False)),
-            "consumption_dead_after": int(best_long.get("consumption_dead_after", 0) or 0),
-            "base_start_idx": best_long.get("base_start_idx"),
-            "legout_end_idx": best_long.get("legout_end_idx"),
-            "retest_count": int(best_long.get("retest_count", 0) or 0),
-            "overlap_ratio": float(best_long.get("overlap_ratio", 0.0)),
-            "htf_target_price": best_long.get("htf_target_price"),
-            "struct_stop_A": best_long.get("struct_stop_A"),
-            "struct_stop_E": best_long.get("struct_stop_E")
         }
         out["BUY_RRR"] = float(best_long.get("rr_ratio", 0.0))
         out["BUY_TIMESTAMPS"] = {
@@ -1145,24 +1047,11 @@ def format_calculate_setup_response(
         }
 
     best_short = _to_dict(result.get("best_setup_short"))
-    print("###############################################################################")
-    print(best_short)
-    print("###############################################################################")
     if best_short:
         out["SELL"] = {
             "entry_price": float(best_short["entry_price"]),
             "stop_loss": float(best_short["stop_price"]),
             "target_price": float(best_short["target_price"]),
-            "zone_signature": _stable_signature(best_short.get("zone_signature")),
-            "is_execute_tf": bool(best_short.get("is_execute_tf", False)),
-            "consumption_dead_after": int(best_short.get("consumption_dead_after", 0) or 0),
-            "base_start_idx": best_short.get("base_start_idx"),
-            "legout_end_idx": best_short.get("legout_end_idx"),
-            "retest_count": int(best_short.get("retest_count", 0) or 0),
-            "overlap_ratio": float(best_short.get("overlap_ratio", 0.0)),
-            "htf_target_price": best_short.get("htf_target_price"),
-            "struct_stop_A": best_short.get("struct_stop_A"),
-            "struct_stop_E": best_short.get("struct_stop_E"),
         }
         out["SELL_RRR"] = float(best_short.get("rr_ratio", 0.0))
         out["SELL_TIMESTAMPS"] = {
@@ -1172,55 +1061,26 @@ def format_calculate_setup_response(
         }
 
     zones_x = result.get("zones_X") or []
-    if is_cash == True:
-        time_list = getattr(stock_logic_config, f"TIME_FRAMES_{time_fr}")
-        csv_path_x = os.path.join(stock_data_dir_config.indian_stock_data_dir, 'latest_data_csv', f'{stock_name}_{time_list[-1]}.csv')
-    else:
-        list_attribute = f"FUTURE_TIME_FRAME_{time_fr}" if is_future == True else f"COMMODITY_TIME_FRAME_{time_fr}"
-        time_list = getattr(stock_logic_config, list_attribute)
-        data_dir = stock_data_dir_config.indian_stock_future_data_dir if is_future == True else stock_data_dir_config.indian_commodity_data
-        csv_path_x = os.path.join(data_dir, 'latest_data_csv', f'{stock_name}_{exp_num}_{time_list[-1]}.csv')
+    list_attribute = f"FUTURE_TIME_FRAME_{time_fr}" if is_future else f"COMMODITY_TIME_FRAME_{time_fr}"
+    time_list = getattr(stock_logic_config, list_attribute)
+    data_dir = stock_data_dir_config.indian_stock_future_data_dir if is_future else stock_data_dir_config.indian_commodity_data
+    csv_path_x = os.path.join(data_dir, 'latest_data_csv', f'{stock_name}_{exp_num}_{time_list[-1]}.csv')
     df, violation_df = load_preprocess_data(csv_path_x, last_d_time)
     out["ZONES_X"] = format_zone_ranges_with_setup(zones_x, df, True)
-
-    # --- Regime exposure for regime x TF position sizing (sizing_bridge) ---
-    # Pull E/A regime from the trend_context carried in `result`; expose as plain strings
-    # on the formatted dict so size_for_order() can look up the (E,A,TF) weight.
-    _tc = result.get("trend_context")
-    def _regime_str(v):
-        if v is None:
-            return ""
-        return v.value if hasattr(v, "value") else str(v)
-    out["e_regime"] = _regime_str(getattr(_tc, "regime_E", None)) if _tc is not None else ""
-    out["a_regime"] = _regime_str(getattr(_tc, "regime_A", None)) if _tc is not None else ""
-    # Strategy TF is the scan-level stack id, never the textual execute frame.
-    # It is mandatory for MCX's underlying × regime × TF eligibility lookup.
-    out["strategy_tf"] = time_fr
-    out["e1_session_boundary_count"] = int(result.get("e1_session_boundary_count", 0) or 0)
 
     return out
 
 
 
 
-def process_setup(tick: str, time_list, last_d_time):
-    try:
-        sdep = SDEnginePipeline()
-        result = sdep.run(tick, time_list, last_d_time)
-        return result
-    except Exception as e:
-        print(f"Error processing setup for {tick}: {e}")
-        logger.error(f"Error processing setup for {tick}: {e}", exc_info=True, stack_info=True)
-        return str(e)
-
-
 def process_setup_fc(tick: str, time_list, exp_num, last_d_time, is_future):
     try:
         sdep = SDEnginePipeline()
-        result = sdep.run(symbol=tick, time_list=time_list, last_d_time=last_d_time, exp_num=exp_num, is_future=is_future)
+        result = sdep.run(tick, time_list, last_d_time, exp_num, is_future)
         # print(result, "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
         return result
     except Exception as e:
         print(f"Error processing setup for {tick}: {e}")
         logger.error(f"Error processing setup for {tick}: {e}", exc_info=True, stack_info=True)
         return str(e)
+    

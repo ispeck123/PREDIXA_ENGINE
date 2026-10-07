@@ -1,6 +1,5 @@
 
 from typing import Optional, Tuple, Dict, List
-import math
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -88,38 +87,6 @@ class SetupPayload:
     htf_target_price: Optional[float] = None
     struct_stop_A: Optional[float] = None
     struct_stop_E: Optional[float] = None
-
-    # Forensic structural context emitted with the setup, while the Zone is live.
-    zone_proximal: Optional[float] = None
-    zone_distal: Optional[float] = None
-    entry_zone_width_pct: Optional[float] = None
-    nearest_resistance_between_entry_and_target: Optional[float] = None
-
-    # ── Zone-state persistence (freshness / consumption audit) ──────────────
-    # Persisted at emission so the order record carries them natively — no
-    # fragile post-hoc re-derivation (which repeatedly failed the enrichment
-    # / funnel / wet-run-log joins). These are the values the freshness gate
-    # already computed to qualify the setup.
-    retest_count: int = 0                       # zone retest count at emission
-    freshness_status: str = "UNKNOWN"           # FRESH / NOT_FRESH_ALLOWED_GDZ / (blocked never emits)
-    entry_tertile: Optional[int] = None         # 1 (proximal) .. 3 (distal)
-    penetration_pct: Optional[float] = None     # entry depth into the zone
-
-    # ── Stable zone identity (for orchestration-layer consumed-zone dedup) ───
-    # The re-fire bug: the stateless scan re-detects a zone fresh each run, so
-    # retest_count resets to 0 and the freshness gate can't see prior trades.
-    # Fix belongs in the order-aware orchestration layer, which needs a STABLE
-    # key to match "this setup's zone == a zone already traded". Price-rounded
-    # so minor re-computation drift still matches.
-    zone_signature: Optional[str] = None        # "SYMBOL:TF:proximal:distal" (rounded)
-    is_execute_tf: bool = True                   # dedup is Execute-TF-only
-    consumption_dead_after: int = 1              # trades before zone is dead:
-                                                 #   BZ/SZ/GSZ Execute = 1 (dead after first)
-                                                 #   GDZ Execute = 2 (OOS-validated: 1 retest OK)
-                                                 #   E/A any = 0 sentinel -> no trade-count dedup
-                                                 #             (engine distal-breach invalidation governs)
-    base_start_idx: Optional[int] = None         # first candle in the selected base
-    legout_end_idx: Optional[int] = None         # final candle in the selected leg-out
     
     # Context
     trend_regime: str = ""      # UP / SW / DN (E-TF resolved)
@@ -1176,11 +1143,9 @@ class HardGateChecker:
                 f"{zone.gap_wick_max_depth_pct:.0f}% depth)"
             )
         
-        # ── G4: Execution Zone FRESH (HARD) ───────────────────────────
-        # Execute TF must be fresh. GDZ tolerates 1 retest (OOS-validated);
-        # all other zone types 0. Consumption/retest tracked in update_retest.
-        if tf == TF.X and zone.retest_count > zone.execute_retest_limit:
-            return False, f"G4_NOT_FRESH (retests={zone.retest_count}, limit={zone.execute_retest_limit})"
+        # ── G4: Execution Zone fresh (SOFT) ───────────────────────────
+        if tf == TF.X and zone.retest_count > self.cfg.max_retest_execute:
+            _soft_warnings.append(f"G4_NOT_FRESH")
         
         # ── G8: Structure removal (SOFT) ──────────────────────────────
         if not zone.removes_structure:
@@ -2171,24 +2136,6 @@ class SetupExtractor:
         self.gate_checker = gate_checker
         self.scorer = WeightedZoneScorer(cfg)
 
-    @staticmethod
-    def _emitted_rr(entry: float, stop: float, target: float, is_buy: bool) -> float:
-        """Return RR from the exact three prices that will be emitted.
-
-        ``zone.rr_ratio`` is used while ranking zones and can be calculated
-        before a later target adjustment.  It must never be used as the value
-        sent to an order workflow unless it agrees with the emitted prices.
-        """
-        entry, stop, target = float(entry), float(stop), float(target)
-        if is_buy:
-            risk, reward = entry - stop, target - entry
-        else:
-            risk, reward = stop - entry, entry - target
-        if risk <= 0 or reward <= 0:
-            return 0.0
-        rr = reward / risk
-        return round(rr, 4) if math.isfinite(rr) else 0.0
-
     def _validate_setup_sanity(self, zone: Zone) -> bool:
         """BUG-36: Last-line defense against phantom/impossible setups."""
         if zone.entry:
@@ -2207,11 +2154,7 @@ class SetupExtractor:
         if zone.proximal == zone.distal:
             print("bs4.............................")
             return False
-        rr = self._emitted_rr(
-            zone.entry_price, zone.stop_price, zone.target_price, zone.is_buy_zone
-        )
-        # Keep the selected zone internally consistent with its E/S/T values.
-        zone.rr_ratio = rr
+        rr = zone.rr_ratio or 0.0
         if rr <= 0 or not (rr < float("inf")):
             print("bs5.............................")
             return False
@@ -2229,21 +2172,16 @@ class SetupExtractor:
             else trend_context.trade_type_short
         )
         
-        entry_price = zone.entry if zone.entry is not None else zone.proximal
-        stop_price = zone.stop_price if zone.stop_price is not None else zone.distal
-        target_price = zone.target_price if zone.target_price is not None else 0.0
-        emitted_rr = self._emitted_rr(entry_price, stop_price, target_price, zone.is_buy_zone)
-
         return SetupPayload(
             symbol=zone.symbol,
             zone_id=zone.zone_id,
             zone_type=zone.ztype.value if hasattr(zone.ztype, 'value') else str(zone.ztype),
             timeframe=zone.tf.value if hasattr(zone.tf, 'value') else str(zone.tf),
             side=side,
-            entry_price=entry_price,
-            stop_price=stop_price,
-            target_price=target_price,
-            rr_ratio=emitted_rr,
+            entry_price=zone.entry if zone.entry else zone.proximal,
+            stop_price=zone.stop_price if zone.stop_price else zone.distal,
+            target_price=zone.target_price if zone.target_price else 0.0,
+            rr_ratio=zone.rr_ratio if zone.rr_ratio else 0.0,
             target_mode=zone.target_mode,
             rank_key=(weighted_score,),  # Single weighted score replaces tuple
             zone_score_legacy=zone.final_score if zone.final_score else 0,
@@ -2261,21 +2199,6 @@ class SetupExtractor:
                 float(zone.htf_target_price)
                 if getattr(zone, "htf_target_price", None) is not None
                 else None
-            ),
-
-            zone_proximal=float(zone.proximal),
-            zone_distal=float(zone.distal),
-            entry_zone_width_pct=(
-                abs(float(zone.proximal) - float(zone.distal))
-                / float(zone.entry if zone.entry else zone.proximal) * 100.0
-                if (zone.entry if zone.entry else zone.proximal) else None
-            ),
-            entry_tertile=(
-                min(3, max(1, int(
-                    abs(float(zone.entry if zone.entry is not None else zone.proximal) - float(zone.proximal))
-                    / abs(float(zone.proximal) - float(zone.distal)) * 3
-                ) + 1))
-                if zone.proximal != zone.distal else None
             ),
 
             struct_stop_A=(
@@ -2304,34 +2227,6 @@ class SetupExtractor:
                     ) is not None
                     else None
                 )
-            ),
-            retest_count=int(getattr(zone, "retest_count", 0) or 0),
-            freshness_status=(
-                "FRESH" if (getattr(zone, "retest_count", 0) or 0) == 0
-                else ("NOT_FRESH_ALLOWED_GDZ"
-                      if zone.ztype == ZoneType.GDZ
-                          and (getattr(zone, "retest_count", 0) or 0) <= 1
-                      else "NOT_FRESH")
-            ),
-            penetration_pct=(
-                float(getattr(zone, "penetration_pct"))
-                if getattr(zone, "penetration_pct", None) is not None else None
-            ),
-            zone_signature=(
-                f"{getattr(zone, 'symbol', '') or ''}:"
-                f"{zone.tf.value if hasattr(zone.tf,'value') else zone.tf}:"
-                f"{round(float(zone.proximal),2)}:{round(float(zone.distal),2)}"
-            ),
-            is_execute_tf=(zone.tf == TF.X),
-            consumption_dead_after=(
-                0 if zone.tf != TF.X                       # E/A: no trade-count dedup (distal-breach governs)
-                else (2 if zone.ztype == ZoneType.GDZ       # GDZ Execute: 1 retest allowed (OOS-validated)
-                      else 1)                               # BZ/SZ/GSZ Execute: dead after first trade
-            ),
-            base_start_idx=getattr(zone, "base_start", None),
-            legout_end_idx=(
-                (zone.base_end + getattr(zone, "legout_count", 0))
-                if getattr(zone, "base_end", None) is not None else None
             ),
             trend_regime=(trend_context.regime_E.value
                           if hasattr(trend_context.regime_E, 'value')

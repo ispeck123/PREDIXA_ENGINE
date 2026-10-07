@@ -19,7 +19,6 @@ from datetime import timedelta
 from scripts.trend_engine import TrendEngine, MultiTimeframeTrendCalculator
 
 from scripts.models import TrendContext, Quadrant, ReversalPattern, PatternType, TF, ZoneType, ZoneState, TrendRegime, TradeType
-from scripts.mcx_session import mcx_e1_session_ids
 import os
 
 from shared.utils.logger import logger
@@ -232,7 +231,7 @@ class SDEnginePipeline:
         self.csv_path_X = os.path.join(data_dir, 'latest_data_csv', f'{tick}_{exp_num}_{time_list[-1]}.csv')    
         self.last_d_time = last_d_time
 
-    def get_candle_series_data(self, csv_path, last_d_time, *, e1_session_enforced: bool = False):
+    def get_candle_series_data(self, csv_path, last_d_time):
         print(csv_path, "ffffffffffffffffffffffffffffffffffffff")
         df, violation_df = load_preprocess_data(csv_path, last_d_time)
         cs = CandleSeries(
@@ -240,8 +239,7 @@ class SDEnginePipeline:
             h=df['high'].tolist(),
             l=df['low'].tolist(),
             c=df['close'].tolist(),
-            ts=df['unix_timestamp'].tolist(),
-            session_id=mcx_e1_session_ids(df['unix_timestamp'].tolist()) if e1_session_enforced else None,
+            ts=df['unix_timestamp'].tolist()
         )
         print("Candle series data loaded for setup engine", df.iloc[-1]['close'], csv_path)
         return cs
@@ -358,13 +356,9 @@ class SDEnginePipeline:
             self._set_timeframe_candle_series_future_and_commodity(time_list, symbol, last_d_time, exp_num, data_dir)
         else:
             self._set_timeframe_candle_series(time_list, symbol, last_d_time)
-        # E1 is exclusive to the MCX commodity path.  Futures and cash retain
-        # their original continuous-session detection semantics.
-        _e1 = is_future is False
-        cs_E = self.get_candle_series_data(self.csv_path_E, last_d_time, e1_session_enforced=_e1)
-        cs_A = self.get_candle_series_data(self.csv_path_A, last_d_time, e1_session_enforced=_e1)
-        cs_X = self.get_candle_series_data(self.csv_path_X, last_d_time, e1_session_enforced=_e1)
-        _e1_boundary_count = (len(set(cs_X.session_id)) - 1) if cs_X.session_id else 0
+        cs_E = self.get_candle_series_data(self.csv_path_E, last_d_time)
+        cs_A = self.get_candle_series_data(self.csv_path_A, last_d_time)
+        cs_X = self.get_candle_series_data(self.csv_path_X, last_d_time)
 
         current_cmp = float(self.get_cmp(self.csv_path_X, last_d_time))
         logger.info(f"cmp aquired....................{current_cmp}")
@@ -387,14 +381,6 @@ class SDEnginePipeline:
                     'gap_zones_E_count': 0, 'gap_zones_A_count': 0, 'gap_zones_X_count': 0,
                     'vol_regime_E': None, 'vol_regime_A': None, 'vol_regime_X': None,
                     'best_setup_long': None, 'best_setup_short': None, 'setup_cascade_log': [],
-                    # CMP is already available above.  Retain the normal
-                    # result contract even when a timeframe lacks enough
-                    # history, so callers can reject cleanly rather than
-                    # attempting float(None) in the formatter.
-                    'price_cmp': current_cmp,
-                    'entry_ts': cmp_t_stamp,
-                    'extend_ts': cmp_t_stamp + self.add_timestamp(),
-                    'e1_session_boundary_count': _e1_boundary_count,
                 }
         _data_warnings = []
         for _tf, _cs, _label in [(TF.E, cs_E, 'E'), (TF.A, cs_A, 'A'), (TF.X, cs_X, 'X')]:
@@ -409,8 +395,8 @@ class SDEnginePipeline:
         logger.info(f"Detecting regular zones for {symbol}")
         # zones_E = self.zone_detector.detect(symbol, TF.E, cs_E)
         # zones_A = self.zone_detector.detect(symbol, TF.A, cs_A)
-        result_E, all_zones_E = process_trend_zones(self.csv_path_E, TF.E, self.last_d_time, e1_session_enforced=_e1)
-        result_A, all_zones_A = process_trend_zones(self.csv_path_A, TF.A, self.last_d_time, e1_session_enforced=_e1)
+        result_E, all_zones_E = process_trend_zones(self.csv_path_E, TF.E, self.last_d_time)
+        result_A, all_zones_A = process_trend_zones(self.csv_path_A, TF.A, self.last_d_time)
         zones_E = result_E['BUY'] + result_E['SELL']
         zones_A = result_A['BUY'] + result_A['SELL']
         zones_X = self.zone_detector.detect(symbol, TF.X, cs_X)
@@ -629,8 +615,7 @@ class SDEnginePipeline:
         zones_X_processed, excluded = self.multi_zone.process_overlaps(zones_X_filtered, atr_X_val)
         self.multi_zone.find_consecutive_stack(zones_X_processed, atr_X_val)
 
-        zones_X_processed, all_zone_X = process_qualified_zones_setup(
-            self.csv_path_X, TF.X, self.last_d_time, e1_session_enforced=_e1)
+        zones_X_processed, all_zone_X = process_qualified_zones_setup(self.csv_path_X, TF.X, self.last_d_time)
         htf_zones = zones_E_filtered + zones_A_filtered
         # Qualify zones and calculate scores
         for zone in zones_X_processed:
@@ -1012,12 +997,7 @@ class SDEnginePipeline:
             'data_warnings': _data_warnings,
             'entry_ts': cmp_t_stamp,
             'extend_ts': cmp_t_stamp + self.add_timestamp(),
-            # ``current_cmp`` is obtained from the last valid execute-TF bar
-            # and is the value used for futures/commodity selection above.
-            # ``cs_X.c[-1]`` can be None on an incomplete source bar, so it
-            # must not be exposed as the scanner's CMP.
-            'price_cmp': current_cmp,
-            'e1_session_boundary_count': _e1_boundary_count,
+            'price_cmp': cmp
         }
 
 
@@ -1182,21 +1162,6 @@ def format_calculate_setup_response(
         csv_path_x = os.path.join(data_dir, 'latest_data_csv', f'{stock_name}_{exp_num}_{time_list[-1]}.csv')
     df, violation_df = load_preprocess_data(csv_path_x, last_d_time)
     out["ZONES_X"] = format_zone_ranges_with_setup(zones_x, df, True)
-
-    # --- Regime exposure for regime x TF position sizing (sizing_bridge) ---
-    # Pull E/A regime from the trend_context carried in `result`; expose as plain strings
-    # on the formatted dict so size_for_order() can look up the (E,A,TF) weight.
-    _tc = result.get("trend_context")
-    def _regime_str(v):
-        if v is None:
-            return ""
-        return v.value if hasattr(v, "value") else str(v)
-    out["e_regime"] = _regime_str(getattr(_tc, "regime_E", None)) if _tc is not None else ""
-    out["a_regime"] = _regime_str(getattr(_tc, "regime_A", None)) if _tc is not None else ""
-    # Strategy TF is the scan-level stack id, never the textual execute frame.
-    # It is mandatory for MCX's underlying × regime × TF eligibility lookup.
-    out["strategy_tf"] = time_fr
-    out["e1_session_boundary_count"] = int(result.get("e1_session_boundary_count", 0) or 0)
 
     return out
 
