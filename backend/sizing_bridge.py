@@ -77,7 +77,8 @@ def _regime_key(formatted: Dict[str, Any], time_frame):
 
 
 def size_for_order(formatted: Dict[str, Any], t_data: Dict[str, Any],
-                   time_frame: str, segment: str, lot_size: int = 1) -> Optional[int]:
+                   time_frame: str, segment: str, lot_size: int = 1,
+                   size_multiplier: float = 1.0) -> Optional[int]:
     """
     Return order quantity, or None if the setup must be SUPPRESSED.
 
@@ -122,6 +123,12 @@ def size_for_order(formatted: Dict[str, Any], t_data: Dict[str, Any],
 
     if WETRUN_FIXED_QTY:
         # Wet run: keep 1-share/1-lot for permitted cells; exclusion already applied above.
-        return lot_size if lot_size > 1 else 1
+        quantity = lot_size if lot_size > 1 else 1
+    else:
+        quantity = pos.qty
 
-    return pos.qty
+    try:
+        quantity = int(quantity * float(size_multiplier))
+    except (TypeError, ValueError):
+        return None
+    return quantity if quantity > 0 else None

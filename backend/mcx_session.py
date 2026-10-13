@@ -25,7 +25,10 @@ def mcx_e1_session_ids(timestamps) -> list[int] | None:
     for value in timestamps:
         try:
             if isinstance(value, (int, float)):
-                dt = datetime.fromtimestamp(value, tz=IST)
+                # FIX 1: unix_timestamp encodes IST-wall-clock as a UTC epoch; invert
+                # the SAME way (utc) to recover the true wall clock, else a +5:30
+                # double-shift makes the 18:00 bar look like 23:30 (false seam).
+                dt = datetime.utcfromtimestamp(value).replace(tzinfo=IST)
             else:
                 # pandas.Timestamp supports to_pydatetime; normal datetime is
                 # handled directly without introducing pandas into production.
@@ -41,8 +44,8 @@ def mcx_e1_session_ids(timestamps) -> list[int] | None:
     for previous, now in zip(values, values[1:]):
         seam = (
             previous.date() < now.date()
-            and previous.time() >= time(23, 30)
-            and now.time() <= time(9, 0)
+            and now.time() == time(9, 0)        # FIX 2: first bar of a new MCX session
+            and previous.time() >= time(13, 0)  # prev is an intraday afternoon/evening bar
         )
         if seam:
             current += 1

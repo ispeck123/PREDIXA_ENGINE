@@ -20,6 +20,7 @@ from shared.db.db_utils import (
 from shared.utils.logger import logger
 from scripts.setup_engine_new import process_setup, format_calculate_setup_response
 from scripts.sizing_bridge import size_for_order
+from scripts.tf_regime_gate_by_exchange import gate
 
 dbc = DBConnection()
 
@@ -426,6 +427,20 @@ class SetupScannerOrchestrator:
                             formatted["PROBABILITY"] = 0.0
                             formatted[formatted["TRADE_TYPE"]]["e_regime"] = formatted.get("e_regime", None)
                             formatted[formatted["TRADE_TYPE"]]["a_regime"] = formatted.get("a_regime", None)
+                            tier, size_mult, gate_reason = gate(
+                                "NSE_CASH", job.time_frame,
+                                formatted.get("e_regime"), formatted.get("a_regime"),
+                            )
+                            record["gate_tier"] = tier
+                            record["gate_reason"] = gate_reason
+                            formatted["gate_tier"] = tier
+                            formatted["gate_reason"] = gate_reason
+                            formatted["gate_size_multiplier"] = size_mult
+                            if size_mult == 0:
+                                record["suppressed"] = True
+                                record["suppression_reason"] = gate_reason
+                                logger.info("TF/regime gate suppressed %s", gate_reason)
+                                continue
 
                             suppress, reason = consumed_zone_suppression(
                                 formatted["BUY"],
@@ -439,7 +454,10 @@ class SetupScannerOrchestrator:
                             else:
                                 order_type = formatted['TRADE_TYPE']
                                 t_data = formatted[order_type]
-                                qty = size_for_order(formatted, t_data, str(job.time_frame), "NSE_CASH")
+                                qty = size_for_order(
+                                    formatted, t_data, str(job.time_frame), "NSE_CASH",
+                                    size_multiplier=size_mult,
+                                )
                                 if qty is None:
                                     formatted[formatted["TRADE_TYPE"]]["regime_tf_excluded "] = "yes"
                                     formatted[formatted["TRADE_TYPE"]]["order_pushed"] = ""

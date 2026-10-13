@@ -14,6 +14,7 @@ from scripts.models import Config as trade_config
 from scripts.models import Zone, CandleSeries
 from shared.config.settings import stock_data_dir_config, stock_logic_config
 from scripts.side_enablement_policy import SIDE_POLICY, Side, resolve_segment
+from scripts.tf_regime_gate_by_exchange import gate
 from dataclasses import asdict, is_dataclass
 from datetime import timedelta
 from scripts.trend_engine import TrendEngine, MultiTimeframeTrendCalculator
@@ -1197,6 +1198,18 @@ def format_calculate_setup_response(
     # It is mandatory for MCX's underlying × regime × TF eligibility lookup.
     out["strategy_tf"] = time_fr
     out["e1_session_boundary_count"] = int(result.get("e1_session_boundary_count", 0) or 0)
+
+    # This is the shared setup permission boundary used by cash, NSEFO and
+    # MCX scanners.  The formatter has all four inputs and is therefore the
+    # only place that can prevent a denied setup from escaping through a
+    # caller that does not have its own insertion guard.
+    exchange = "NSE_CASH" if is_cash else ("NSEFO" if is_future else "MCX")
+    tier, size_mult, gate_reason = gate(exchange, time_fr, out["e_regime"], out["a_regime"])
+    out.update(gate_tier=tier, gate_size_multiplier=size_mult, gate_reason=gate_reason)
+    if size_mult == 0:
+        for field in ("BUY", "BUY_RRR", "BUY_TIMESTAMPS", "SELL", "SELL_RRR", "SELL_TIMESTAMPS"):
+            out.pop(field, None)
+        out["gate_denied"] = True
 
     return out
 

@@ -362,11 +362,23 @@ class RiskTargetCalculator:
         self.cfg = cfg
     
     def get_zone_by_id(self, zones: List[Zone], zone_id: str) -> Optional[Zone]:
-        """Return the first Zone whose zone_id matches, else None."""
-        for z in zones:
-            if z.zone_id == zone_id:
-                return z
-        return None
+        """Return the first Zone whose zone_id matches, else None.
+
+        PERF (RCA 2026-10-08): the overlap/stop path calls this once per overlap
+        partner per zone; a linear scan over the full active-zone list made this
+        O(partners * zones) -> ~5.6e8 zone_id comparisons on a large E1-inflated
+        population. We memoise a {zone_id: zone} map for the given list (keyed by
+        list identity + length) and keep FIRST-match semantics via setdefault, so
+        results are identical to the linear scan but lookups are O(1).
+        """
+        cache = getattr(self, "_zbid_cache", None)
+        if cache is None or cache[0] is not zones or cache[1] != len(zones):
+            mapping = {}
+            for z in zones:
+                mapping.setdefault(z.zone_id, z)   # first match wins (== old loop)
+            cache = (zones, len(zones), mapping)
+            self._zbid_cache = cache
+        return cache[2].get(zone_id)
 
     def get_min_max_overlapping(self, overlapping_zones: list[Zone]) -> Tuple[Zone, Zone]:
         min_zone = min(overlapping_zones, key=lambda z: z.distal)

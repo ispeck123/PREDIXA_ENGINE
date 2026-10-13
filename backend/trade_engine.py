@@ -2395,17 +2395,30 @@ class ZoneQualifier:
         _in_violation = False  # Track episode state
         
         for i in range(start, end):
-            # E1: a zone belongs to the session in which it was formed.  A
-            # later MCX 09:00 gap-open cannot consume, invalidate, or retest it.
-            if not same_e1_session(cs, zone.created_idx, i):
+            # E1 lifecycle (option ii): a zone is invalidated/retested by genuine
+            # price action in ANY later session.  Gap zones keep their original
+            # session-scoped lifecycle; regular zones evaluate all later-session
+            # bars, excluding ONLY a pure overnight gap-through -- on a session-open
+            # bar a breach counts only if the bar actually traded at/through the
+            # level (the overnight void is not a real violation).
+            if _is_gap_x and not same_e1_session(cs, zone.created_idx, i):
                 continue
+            # E1 lifecycle (option b, gap-based): a regular zone is invalidated by a
+            # genuine later breach, but NOT by a pure gap-through.  At the first breach
+            # the prior bar had not breached, so a breaching bar whose ENTIRE range is
+            # beyond the level (buy: high < distal; sell: low > distal) can only have
+            # arrived by gapping across it without trading there -> do not invalidate.
+            # This is segment-agnostic (no session_id needed), so it protects BOTH the
+            # MCX overnight seam and the NSEFO 15:30->09:15 gap uniformly.
             violated_here = False
             if zone.is_buy_zone:
                 # v3.8.8 FIX: Gap zones check entry from PROXIMAL (into zone).
                 # Regular zones check breach of DISTAL (past zone).
                 # Gap softening measures depth from proximal toward distal.
                 _threshold = zone.proximal if _is_gap_x else zone.distal
-                if cs.l[i] < _threshold:
+                if cs.l[i] < _threshold and (
+                    _is_gap_x or cs.h[i] >= _threshold   # spare pure gap-through
+                ):
                     violated_here = True
                     if _is_gap_x:
                         depth = zone.proximal - cs.l[i]  # from proximal into zone
@@ -2417,7 +2430,9 @@ class ZoneQualifier:
                     _max_depth_pct = max(_max_depth_pct, depth_pct)
             else:
                 _threshold = zone.proximal if _is_gap_x else zone.distal
-                if cs.h[i] > _threshold:
+                if cs.h[i] > _threshold and (
+                    _is_gap_x or cs.l[i] <= _threshold   # spare pure gap-through
+                ):
                     violated_here = True
                     if _is_gap_x:
                         depth = cs.h[i] - zone.proximal
@@ -2475,45 +2490,15 @@ class ZoneQualifier:
             zone.gap_wick_touch_count = _touch_count
             zone.gap_wick_max_depth_pct = _max_depth_pct
         
-        # v3.8.9 PDC-1: Deep penetration degradation for REGULAR (non-gap) X-TF zones.
-        # If wick penetrates >65% from proximal toward distal (but doesn't reach
-        # distal), the zone is heavily consumed → RED/invalidated.
-        # SCOPED TO X-TF ONLY: E/A zones are structural context — their
-        # violation is only at distal (institutional orders persist across
-        # months/weeks despite retests). X-TF zones are execution zones
-        # where deep penetration consumes the order block.
-        # Example: ZINCMINI BZ 363.80/361.15: wick at 362.00 = 68% penetration.
-        if not _is_gap_x and not zone.invalidated and zone.tf == TF.X:
-            _reg_max_depth = 0.0
-            _reg_touch_count = 0
-            _reg_in_episode = False
-            zone_h = zone.zone_height if zone.zone_height > 0 else 1
-            for i in range(start, end):
-                _entered = False
-                if zone.is_buy_zone and cs.l[i] < zone.proximal:
-                    _entered = True
-                    depth = zone.proximal - cs.l[i]
-                    depth_pct = (depth / zone_h) * 100
-                    _reg_max_depth = max(_reg_max_depth, depth_pct)
-                elif zone.is_sell_zone and cs.h[i] > zone.proximal:
-                    _entered = True
-                    depth = cs.h[i] - zone.proximal
-                    depth_pct = (depth / zone_h) * 100
-                    _reg_max_depth = max(_reg_max_depth, depth_pct)
-                
-                if _entered and not _reg_in_episode:
-                    _reg_touch_count += 1
-                    _reg_in_episode = True
-                elif not _entered:
-                    _reg_in_episode = False
-            
-            if _reg_max_depth > 65:
-                zone.violation = ViolationType.TRUE_BREAK
-                zone.invalidated = True
-                zone.state = ZoneState.RED
-                zone.block_reason = f"DEEP_PENETRATION ({_reg_max_depth:.0f}% consumed)"
-                return
-        
+        # PDC-1 REMOVED (supersedes v3.8.9): the regular (non-gap) X-TF
+        # '>65% proximal-penetration' DEEP_PENETRATION block was deleted.
+        # Regular BZ/SZ tradeability = freshness (retest_count==0 via
+        # update_retest + EXECUTE_NOT_FRESH); death = distal breach
+        # (non-gap branch in the loop above). Graded penetration is a
+        # gap-zone concept only; on a regular zone it contradicted
+        # 'fresh = zero penetration' and let the zone's own leg-out, or a
+        # reversing wick that HELD distal, permanently invalidate it.
+
         zone.violation = ViolationType.NONE
         
         # Compute penetration % for E/A timeframes (for penalty scoring)
@@ -2530,8 +2515,13 @@ class ZoneQualifier:
         if start >= cs.n:
             return None
 
+        _is_gap_x = (zone.ztype in (ZoneType.GDZ, ZoneType.GSZ) and zone.tf == TF.X)
         for i in range(start, cs.n):
-            if not same_e1_session(cs, zone.created_idx, i):
+            # E1 lifecycle (option ii): regular zones accrue retests across later
+            # sessions (a touch requires the bar's range to overlap the zone, so a
+            # pure overnight gap-through cannot create a false touch).  Gap zones
+            # keep their original session-scoped retest lifecycle.
+            if _is_gap_x and not same_e1_session(cs, zone.created_idx, i):
                 continue
             low_i = cs.l[i]
             high_i = cs.h[i]

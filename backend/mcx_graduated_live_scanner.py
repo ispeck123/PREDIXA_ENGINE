@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from scripts.mcx_policy import mcx_disposition
+from scripts.tf_regime_gate_by_exchange import gate
 from scripts.setup_engine_new import format_calculate_setup_response, process_setup_fc
 from scripts.scanner_fc import build_commodity_expiry_map
 from shared.config.settings import stock_logic_config
@@ -67,6 +68,11 @@ def classify_mcx_setup(formatted: dict, job: MCXScanJob) -> dict:
         "e1_session_boundary_count": formatted.get("e1_session_boundary_count", 0),
         "setup": formatted,
     }
+    tier, size_mult, gate_reason = gate(
+        "MCX", job.strategy_tf, formatted.get("e_regime"), formatted.get("a_regime"))
+    record.update(gate_tier=tier, gate_size_multiplier=size_mult, gate_reason=gate_reason)
+    if size_mult == 0:
+        return record | {"status": "TF_REGIME_GATE_DENIED"}
     buy = formatted.get("BUY")
     if not isinstance(buy, dict):
         return record | {"status": "NO_BUY_SETUP"}

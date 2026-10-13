@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 from shared.db.dbconn import DBConnection
 from scripts.setup_engine_new import process_setup_fc, format_calculate_setup_response
+from scripts.tf_regime_gate_by_exchange import gate
 from scripts.side_enablement_policy import SIDE_POLICY, Side, resolve_segment
 from shared.db.db_model import FuturesMaster, TradeSignal
 from concurrent.futures import ThreadPoolExecutor
@@ -372,7 +373,19 @@ class SetupScannerOrchestrator_FC:
                             record["status"] = "OK"
                             record["setup"] = formatted
                             ok += 1
+                            gate_exchange = "NSEFO" if job.is_future else "MCX"
+                            tier, size_mult, gate_reason = gate(
+                                gate_exchange, job.time_frame,
+                                formatted.get("e_regime"), formatted.get("a_regime"),
+                            )
+                            record.update(gate_tier=tier, gate_size_multiplier=size_mult,
+                                          gate_reason=gate_reason)
+                            formatted.update(gate_tier=tier, gate_size_multiplier=size_mult,
+                                             gate_reason=gate_reason)
                             if 'BUY' in formatted and formatted['BUY_RRR'] >= 2.1:
+                                if size_mult == 0:
+                                    record.update(status="GATE_DENIED", gate_reason=gate_reason)
+                                    continue
                                 formatted['TRADE_TYPE'] = 'BUY'
                                 formatted['PREDICTION'] = "NA"
                                 formatted['PROBABILITY'] = 0.0
@@ -383,6 +396,9 @@ class SetupScannerOrchestrator_FC:
                             if ('SELL' in formatted
                                     and formatted.get('SELL_RRR', 0) >= 2.1
                                     and SIDE_POLICY.is_enabled(resolve_segment(is_future=job.is_future), Side.SHORT)):
+                                if size_mult == 0:
+                                    record.update(status="GATE_DENIED", gate_reason=gate_reason)
+                                    continue
                                 formatted['TRADE_TYPE'] = 'SELL'
                                 formatted['PREDICTION'] = "NA"
                                 formatted['PROBABILITY'] = 0.0

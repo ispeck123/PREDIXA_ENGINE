@@ -16,6 +16,7 @@ from shared.db.db_model import Future_Order, FuturesMaster, OMSOrderBucketFuture
 from shared.config.settings import stock_logic_config
 from scripts.graduated_live_config import FUTURES_LOT_SIZES, FUTURES_TIER0_LOTS
 from scripts.setup_engine_new import format_calculate_setup_response, process_setup_fc
+from scripts.tf_regime_gate_by_exchange import gate
 
 
 EXCHANGE_ID_NSEFO = 11
@@ -306,6 +307,14 @@ def classify_formatted_result(
         record["rejection_reason"] = "FORMATTED_RESULT_NOT_DICT"
         return record, None
 
+    tier, size_mult, gate_reason = gate(
+        "NSEFO", job.timeframe_id, formatted.get("e_regime"), formatted.get("a_regime"))
+    record.update(gate_tier=tier, gate_size_multiplier=size_mult, gate_reason=gate_reason)
+    if size_mult == 0:
+        record["scan_status"] = "GATE_DENIED"
+        record["rejection_reason"] = gate_reason
+        return record, None
+
     buy = formatted.get("BUY")
     if not buy:
         record["scan_status"] = "NO_SETUP"
@@ -365,6 +374,9 @@ def classify_formatted_result(
         },
         "signal_timestamp": timestamps.get("entry_price_timestamp"),
         "PRICE_CMP": formatted.get("PRICE_CMP"),
+        "gate_tier": tier,
+        "gate_size_multiplier": size_mult,
+        "gate_reason": gate_reason,
         "setup_result": formatted,
     }
     return record, candidate
